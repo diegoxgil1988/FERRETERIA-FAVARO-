@@ -1750,20 +1750,41 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
             <span id="presup-subtotal">$0,00</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
-            <span style="color:var(--muted);">Descuento</span>
+            <span style="color:var(--muted);">Desc. efectivo</span>
             <div style="display:flex;align-items:center;gap:6px;">
               <input id="presup-desc" type="number" min="0" max="100" value="0" oninput="calcPresupTotal()"
                 style="width:54px;background:var(--s3);border:1.5px solid var(--border2);border-radius:5px;padding:4px 6px;color:var(--text);font-size:12px;text-align:center;">
               <span style="color:var(--muted);font-size:11px;">%</span>
             </div>
           </div>
-          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
-            <span style="color:var(--muted);">Descuento $</span>
-            <span id="presup-desc-amt" style="color:var(--red);">-$0,00</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;margin-top:4px;">
-            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;">TOTAL</span>
-            <span id="presup-total" style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--acc);">$0,00</span>
+
+          <!-- Hidden fields for compat -->
+          <span id="presup-desc-amt" style="display:none;">-$0,00</span>
+          <span id="presup-total" style="display:none;">$0,00</span>
+
+          <!-- 3 bloques de precio -->
+          <div style="margin-top:4px;display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(34,197,94,.08);border:1.5px solid var(--green);border-radius:8px;padding:9px 12px;">
+              <div>
+                <div style="font-size:11px;font-weight:800;color:var(--green);">💵 Efectivo · Transf. · Débito</div>
+                <div id="presup-ahorro-txt" style="font-size:9px;color:var(--green);margin-top:2px;display:none;"></div>
+              </div>
+              <span id="presup-total-ef" style="font-size:16px;font-weight:900;color:var(--green);">$0,00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(245,158,11,.08);border:1.5px solid var(--acc);border-radius:8px;padding:9px 12px;">
+              <div>
+                <div style="font-size:11px;font-weight:800;color:var(--acc);">💳 Tarjeta crédito — 1 pago</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:2px;">Sin interés en 1 cuota</div>
+              </div>
+              <span id="presup-total-cr1" style="font-size:16px;font-weight:900;color:var(--acc);">$0,00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(59,130,246,.08);border:1.5px solid var(--blue);border-radius:8px;padding:9px 12px;">
+              <div>
+                <div style="font-size:11px;font-weight:800;color:var(--blue);">💳 Tarjeta crédito — cuotas</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:2px;">Consultar cuotas disponibles</div>
+              </div>
+              <span id="presup-total-cr" style="font-size:16px;font-weight:900;color:var(--blue);">$0,00</span>
+            </div>
           </div>
         </div>
         <div style="margin-top:12px;">
@@ -6604,33 +6625,31 @@ function initPresup() {
 }
 
 function searchPresupProducts() {
-  clearTimeout(presupSearchTimeout);
-  presupSearchTimeout = setTimeout(function() {
-    var q = document.getElementById('presup-search').value.trim().toLowerCase();
-    var resultsEl = document.getElementById('presup-results');
-    if (q.length < 2) { resultsEl.style.display = 'none'; return; }
-    var filtered = products.filter(function(p) {
-      return (p.nombre && p.nombre.toLowerCase().includes(q)) ||
-             (p.cod_interno && p.cod_interno.toLowerCase().includes(q)) ||
-             (p.cod_proveedor && p.cod_proveedor.toLowerCase().includes(q)) ||
-             (p.proveedor && p.proveedor.toLowerCase().includes(q)) ||
-             (p.marca && p.marca.toLowerCase().includes(q));
-    }).slice(0, 12);
-    if (!filtered.length) {
-      resultsEl.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:12px;text-align:center;">Sin resultados</div>';
-    } else {
-      resultsEl.innerHTML = filtered.map(function(p, i) {
-        var precio = p.precio ? ('$' + p.precio.toLocaleString('es-AR', {minimumFractionDigits:2})) : 'Sin precio';
-        return '<div class="presup-result-row" onclick="addPresupItem(' + p.id + ')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;" onmouseover="this.style.background=\'var(--s3)\'" onmouseout="this.style.background=\'\'">'+
-          '<div><div style="font-size:13px;color:var(--text);font-weight:600;">' + (p.nombre||'') + '</div>' +
-          '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + (p.proveedor||'') + (p.cod_interno ? ' · ' + p.cod_interno : '') + '</div></div>' +
-          '<div style="font-size:13px;font-weight:700;color:var(--acc);white-space:nowrap;margin-left:12px;">' + precio + '</div>' +
-          '</div>';
-      }).join('');
-    }
-    resultsEl.style.display = 'block';
-    presupSelectedIdx = -1;
-  }, 150);
+  var q = document.getElementById('presup-search').value.trim().toLowerCase();
+  var resultsEl = document.getElementById('presup-results');
+  if (!q || q.length < 1) { resultsEl.style.display = 'none'; return; }
+
+  // Token search — cada palabra debe estar en el nombre
+  var tokens = q.split(/\s+/).filter(Boolean);
+  var filtered = products.filter(function(p) {
+    var hay = ((p.nombre||'') + ' ' + (p.cod_interno||'') + ' ' + (p.cod_proveedor||'') + ' ' + (p.proveedor||'') + ' ' + (p.marca||'')).toLowerCase();
+    return tokens.every(function(t){ return hay.includes(t); });
+  });
+
+  if (!filtered.length) {
+    resultsEl.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:12px;text-align:center;">Sin resultados para "' + q + '"</div>';
+  } else {
+    resultsEl.innerHTML = filtered.map(function(p) {
+      var precio = p.precio ? ('$' + p.precio.toLocaleString('es-AR', {minimumFractionDigits:2})) : 'Sin precio';
+      return '<div class="presup-result-row" onclick="addPresupItem(' + p.id + ')" style="padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;" onmouseover="this.style.background=\'var(--s3)\'" onmouseout="this.style.background=\'\'">'+
+        '<div style="flex:1;min-width:0;"><div style="font-size:12px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.nombre||'') + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px;">' + (p.proveedor||'') + (p.cod_interno ? ' · ' + p.cod_interno : '') + '</div></div>' +
+        '<div style="font-size:13px;font-weight:700;color:var(--acc);white-space:nowrap;margin-left:12px;">' + precio + '</div>' +
+        '</div>';
+    }).join('');
+  }
+  resultsEl.style.display = 'block';
+  presupSelectedIdx = -1;
 }
 
 function showPresupResults() {
@@ -6724,11 +6743,42 @@ function calcPresupTotal() {
   var sub = presupItems.reduce(function(s, x) { return s + x.precio * x.qty; }, 0);
   var desc = parseFloat(document.getElementById('presup-desc').value) || 0;
   var descAmt = sub * desc / 100;
-  var total = sub - descAmt;
+  var totalEf = sub - descAmt;
   var fmt = function(n) { return '$' + n.toLocaleString('es-AR', {minimumFractionDigits:2}); };
+
+  // Update subtotal + hidden fields for compat
   document.getElementById('presup-subtotal').textContent = fmt(sub);
   document.getElementById('presup-desc-amt').textContent = '-' + fmt(descAmt);
-  document.getElementById('presup-total').textContent = fmt(total);
+  document.getElementById('presup-total').textContent = fmt(totalEf);
+
+  // Get recargos from pagosConfig
+  var recCr1 = 0, recCrN = 0;
+  if (pagosConfig && pagosConfig.credito) {
+    var cuotas = pagosConfig.credito.cuotas || [];
+    var c1 = cuotas.find(function(c){ return c.n===1; });
+    var cN = cuotas.slice().sort(function(a,b){ return b.n-a.n; })[0];
+    recCr1 = c1 ? (parseFloat(c1.r)||0) : (parseFloat(pagosConfig.credito.recargo)||0);
+    recCrN = cN ? (parseFloat(cN.r)||0) : recCr1;
+  }
+  var totalCr1 = sub * (1 + recCr1/100);
+  var totalCrN = sub * (1 + recCrN/100);
+
+  // Update 3 blocks
+  var efEl = document.getElementById('presup-total-ef');
+  var cr1El = document.getElementById('presup-total-cr1');
+  var crEl = document.getElementById('presup-total-cr');
+  var ahorroEl = document.getElementById('presup-ahorro-txt');
+  if (efEl) efEl.textContent = fmt(totalEf);
+  if (cr1El) cr1El.textContent = fmt(totalCr1);
+  if (crEl) crEl.textContent = fmt(totalCrN);
+  if (ahorroEl) {
+    if (desc > 0 && sub > 0) {
+      ahorroEl.textContent = 'Ahorrás ' + fmt(descAmt) + ' (' + desc + '% off)';
+      ahorroEl.style.display = 'block';
+    } else {
+      ahorroEl.style.display = 'none';
+    }
+  }
 }
 
 function clearPresup() {
