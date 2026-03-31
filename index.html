@@ -7097,7 +7097,10 @@ function printPresup() {
   var num = document.getElementById('presup-num').value;
   var acc = (presupConfig && presupConfig.color) ? presupConfig.color : (getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#f59e0b');
 
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Presupuesto N° ' + num + '</title>' +
+  var _presupCliente = (document.getElementById('presup-cliente')||{value:''}).value.trim().replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g,'').replace(/\s+/g,'-').slice(0,20)||'cliente';
+  var _presupTs = (function(){ var d=new Date(); return d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0'); })();
+  var _presupTitle = 'PRES-' + num + '_' + _presupCliente + '_' + _presupTs;
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + _presupTitle + '</title>' +
     '<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;padding:20px;}' +
     'tbody tr:nth-child(even){background:#fafafa;}' +
     '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style>' +
@@ -9381,7 +9384,7 @@ function carrTicket() {
   }).join('');
   var acc=getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()||'#f59e0b';
   var bizNombre=(appearConfig&&appearConfig.bizName)?appearConfig.bizName:'Ferretería Favaro';
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ticket</title>'+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>TICKET-' + (carritoCliSel?carritoCliSel.nombre.replace(/[^a-zA-Z0-9]/g,'-').slice(0,20):'mostrador') + '_' + (function(){ var d=new Date(); return d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0'); })() + '</title>'+
     '<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a2e;padding:20px;max-width:320px;margin:0 auto;}'+
     'h2{font-size:16px;font-weight:800;}table{width:100%;border-collapse:collapse;}.tot{font-size:16px;font-weight:800;color:'+acc+';}</style></head><body>'+
     '<div style="text-align:center;border-bottom:2px solid '+acc+';padding-bottom:10px;margin-bottom:12px;">'+
@@ -10166,7 +10169,9 @@ function histImprimirTicket(v){
   var bizNombre=(appearConfig&&appearConfig.bizName)?appearConfig.bizName:'Ferretería Favaro';
   var cfg=pagosConfig[v.medio]||{ico:'💰',label:v.medio||'—'};
   var rows=(v.items||[]).map(function(item){ return '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">'+item.nombre+'<br><span style="font-size:10px;color:#888;">x'+item.qty+(item.desc>0?' -'+item.desc+'%':'')+'</span></td><td style="padding:5px 8px;text-align:right;border-bottom:1px solid #eee;font-weight:700;">$'+formatNum((function(){var _p=item.precioEditado!==undefined?item.precioEditado:item.precio;return _p*item.qty-Math.round(_p*item.qty*item.desc/100);})())+'</td></tr>'; }).join('');
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:13px;padding:16px;max-width:320px;margin:0 auto;}table{width:100%;border-collapse:collapse;}.tot{font-size:16px;font-weight:800;color:#f59e0b;}</style></head><body>'+
+  var _ticketTs = (function(){ var d=new Date(); return d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0'); })();
+  var _ticketCli = (v.cliente&&v.cliente!=='Consumidor Final')?v.cliente.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g,'').replace(/\s+/g,'-').slice(0,20):'mostrador';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>TICKET-' + _ticketCli + '_' + _ticketTs + '</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:13px;padding:16px;max-width:320px;margin:0 auto;}table{width:100%;border-collapse:collapse;}.tot{font-size:16px;font-weight:800;color:#f59e0b;}</style></head><body>'+
     '<div style="text-align:center;border-bottom:2px solid #f59e0b;padding-bottom:10px;margin-bottom:12px;"><h2 style="font-size:16px;font-weight:800;">'+bizNombre+'</h2><div style="font-size:11px;color:#666;">'+v.fecha+' '+v.hora+'</div>'+(v.cliente&&v.cliente!=='Consumidor Final'?'<div style="font-size:12px;font-weight:700;margin-top:3px;">'+v.cliente+'</div>':'')+'</div>'+
     '<table>'+rows+'</table>'+
     '<div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:3px solid #f59e0b;"><span class="tot">TOTAL</span><span class="tot">$'+formatNum(v.total||0)+'</span></div>'+
@@ -11034,7 +11039,9 @@ function remImprimir(id){
   var thead=r.mostrarPrecios?'<th style="background:#f5f5f5;padding:7px 8px;text-align:left;">Producto</th><th style="background:#f5f5f5;padding:7px 8px;text-align:center;">Cant.</th><th style="background:#f5f5f5;padding:7px 8px;text-align:right;">Precio unit.</th><th style="background:#f5f5f5;padding:7px 8px;text-align:right;">Subtotal</th>':
     '<th style="background:#f5f5f5;padding:7px 8px;text-align:left;">Producto</th><th style="background:#f5f5f5;padding:7px 8px;text-align:center;">Cantidad</th>';
   var total=r.items.reduce(function(s,i){ return s+i.precio*i.qty; },0);
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+r.numero+'</title>'+
+  var _remTs = (function(){ var d=new Date(); return d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0'); })();
+  var _remCli = (r.cliente||'').replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g,'').replace(/\s+/g,'-').slice(0,20)||'cliente';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>REM-' + (r.numero||'') + '_' + _remCli + '_' + _remTs + '</title>'+
     '<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:12px;padding:20px;}table{width:100%;border-collapse:collapse;}</style></head><body>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #f59e0b;padding-bottom:10px;margin-bottom:14px;">'+
       '<div><h1 style="font-size:18px;font-weight:800;">'+bizNombre+'</h1></div>'+
