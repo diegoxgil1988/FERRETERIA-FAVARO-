@@ -776,7 +776,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div style="position:relative;width:100%;max-width:700px;margin:0 auto;" id="global-srch-wrap">
     <input id="global-srch-q" type="text" autocomplete="off"
       placeholder="Buscá productos, clientes, proveedores..."
-      oninput="globalSearch(this.value)"
+      oninput="_db('glob',function(){globalSearch(document.getElementById('global-search-input').value||document.querySelector('[id*=global]')||''  );},80)"
       style="width:100%;background:var(--s2);border:1.5px solid var(--border2);border-radius:28px;padding:10px 56px 10px 22px;font-size:13px;color:var(--text);font-family:'Mulish',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s;box-sizing:border-box;">
     <button onclick="var q=document.getElementById('global-srch-q');if(q&&q.value.trim())globalSearch(q.value);else q&&q.focus();"
       style="position:absolute;right:5px;top:50%;transform:translateY(-50%);width:38px;height:38px;background:var(--acc);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;color:#000;transition:background .15s;">🔍</button>
@@ -1955,7 +1955,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     <!-- LISTA IZQUIERDA -->
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 120px);">
       <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px;">
-        <input id="prov-sidebar-search" placeholder="Buscar proveedor..." oninput="provSidebarFilter(this.value)"
+        <input id="prov-sidebar-search" placeholder="Buscar proveedor..." oninput="_db('provs',function(){provSidebarFilter(document.getElementById('prov-sidebar-search').value);})"
           style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:12px;box-sizing:border-box;">
         <button onclick="provAbrirModal(null)" style="width:100%;background:var(--acc);border:none;border-radius:6px;padding:8px;color:#000;font-size:11px;font-weight:800;cursor:pointer;">+ Nuevo proveedor</button>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
@@ -1974,7 +1974,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     <div style="position:relative;margin-bottom:10px;" id="prov-swrap">
       <input id="prov-srch" type="text" autocomplete="off"
         placeholder="Buscá un proveedor por nombre o CUIT..."
-        oninput="provBuscar(this.value)"
+        oninput="_db('provb',function(){provBuscar(document.getElementById('prov-search').value);})"
         style="width:100%;background:var(--s2);border:2px solid var(--border);border-radius:50px;padding:14px 52px 14px 22px;font-size:14px;color:var(--text);transition:border-color .2s;font-family:'Mulish',sans-serif;box-sizing:border-box;">
       <span style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;color:var(--muted);">🔍</span>
       <div id="prov-drop" style="display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--s2);border:1.5px solid var(--acc);border-radius:14px;z-index:200;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.6);"></div>
@@ -2137,7 +2137,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div style="display:grid;grid-template-columns:260px 1fr;gap:16px;height:calc(100vh - 62px);padding:20px 24px;box-sizing:border-box;">
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 120px);">
       <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px;">
-        <input id="cli-search" placeholder="Buscar cliente..." oninput="filterClientes(this.value)"
+        <input id="cli-search" placeholder="Buscar cliente..." oninput="_db('clis',function(){filterClientes(document.getElementById('cli-search').value);})"
           style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:12px;box-sizing:border-box;">
         <button onclick="openClienteModal(null)" style="width:100%;background:var(--acc);border:none;border-radius:6px;padding:8px;color:#000;font-size:11px;font-weight:800;cursor:pointer;">+ Nuevo cliente</button>
       </div>
@@ -2187,7 +2187,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div style="max-width:720px;margin:0 auto;">
     <div style="position:relative;" id="ped-swrap">
       <input id="ped-srch" type="text" placeholder="Buscar producto para agregar al pedido..." autocomplete="off"
-        oninput="pedBuscar(this.value)" onfocus="if(this.value.trim())pedMostrarDrop()"
+        oninput="_db('ped',function(){pedBuscar(document.getElementById('ped-search').value);})" onfocus="if(this.value.trim())pedMostrarDrop()"
         style="width:100%;background:var(--s2);border:2px solid var(--border);border-radius:50px;padding:14px 52px 14px 22px;font-size:14px;color:var(--text);transition:border-color .2s;font-family:'Mulish',sans-serif;">
       <span style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;color:var(--muted);">🔍</span>
       <div id="ped-drop" style="display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--s2);border:1.5px solid var(--acc);border-radius:14px;z-index:200;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.6);"></div>
@@ -2235,7 +2235,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div style="display:grid;grid-template-columns:270px 1fr;gap:16px;height:calc(100vh - 62px);padding:20px 24px;box-sizing:border-box;">
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;">
       <div style="padding:12px 14px;border-bottom:1px solid var(--border);">
-        <input id="cta-search" placeholder="Buscar proveedor..." oninput="ctaFilter(this.value)"
+        <input id="cta-search" placeholder="Buscar proveedor..." oninput="_db('ctap',function(){ctaFilter(document.getElementById('cta-search').value);})"
           style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:12px;">
       </div>
       <div id="cta-prov-list" style="overflow-y:auto;flex:1;"></div>
@@ -2343,7 +2343,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     <select id="hist-filtro-medio" onchange="histRender()" style="background:var(--s2);border:1.5px solid var(--border2);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;">
       <option value="">Todos los medios</option>
     </select>
-    <input id="hist-q" placeholder="Buscar cliente..." oninput="histRender()" style="background:var(--s2);border:1.5px solid var(--border2);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;max-width:160px;">
+    <input id="hist-q" placeholder="Buscar cliente..." oninput="_db('hist',function(){histRender();})" style="background:var(--s2);border:1.5px solid var(--border2);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;max-width:160px;">
     <button onclick="histExportar()" style="margin-left:auto;background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:7px 14px;color:var(--text);font-size:11px;font-weight:700;cursor:pointer;">↓ Exportar</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;" id="hist-kpis"></div>
@@ -2371,7 +2371,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div style="display:grid;grid-template-columns:240px 1fr;gap:16px;height:calc(100vh - 62px);padding:20px 24px;box-sizing:border-box;">
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;">
       <div style="padding:10px 12px;border-bottom:1px solid var(--border);">
-        <input id="ctacli-q" placeholder="Buscar cliente..." oninput="ctaCliFilter(this.value)" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:12px;box-sizing:border-box;">
+        <input id="ctacli-q" placeholder="Buscar cliente..." oninput="_db('ctac',function(){ctaCliFilter(document.getElementById('ctacli-q').value);})" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:12px;box-sizing:border-box;">
       </div>
       <div id="ctacli-list" style="overflow-y:auto;flex:1;"></div>
       <div id="ctacli-footer" style="padding:9px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);">0 clientes</div>
@@ -2395,7 +2395,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div style="display:grid;grid-template-columns:260px 1fr;gap:16px;height:calc(100vh - 62px);padding:20px 24px;box-sizing:border-box;">
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;">
       <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px;">
-        <input id="rem-q" placeholder="Buscar remito o cliente..." oninput="remFilter(this.value)" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:12px;box-sizing:border-box;">
+        <input id="rem-q" placeholder="Buscar remito o cliente..." oninput="_db('rem',function(){remFilter(document.getElementById('rem-q').value);})" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:12px;box-sizing:border-box;">
         <button onclick="remNuevo()" style="width:100%;background:var(--acc);border:none;border-radius:6px;padding:8px;color:#000;font-size:11px;font-weight:800;cursor:pointer;">+ Nuevo remito</button>
       </div>
       <div id="rem-list" style="overflow-y:auto;flex:1;"></div>
@@ -13099,6 +13099,13 @@ function genId() { return ++_idCounter; }
 
 
 /* -- Busqueda catalogo con debounce y tokens -- */
+/* ─── DEBOUNCE UNIVERSAL ─── */
+var _dbTimers = {};
+function _db(key, fn, ms) {
+  clearTimeout(_dbTimers[key]);
+  _dbTimers[key] = setTimeout(fn, ms || 100);
+}
+
 var _catSearchTimer = null;
 function catSearchDebounce() {
   clearTimeout(_catSearchTimer);
