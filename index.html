@@ -1976,7 +1976,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
         placeholder="Buscá un proveedor por nombre o CUIT..."
         oninput="_db('provb',function(){provBuscar(document.getElementById('prov-search').value);})"
         style="width:100%;background:var(--s2);border:2px solid var(--border);border-radius:50px;padding:14px 52px 14px 22px;font-size:14px;color:var(--text);transition:border-color .2s;font-family:'Mulish',sans-serif;box-sizing:border-box;">
-      <span style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;color:var(--muted);">🔍</span>
+      <span onclick="var v=document.getElementById('ped-srch').value.trim();if(v)pedBuscar(v);else document.getElementById('ped-srch').focus();" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:17px;cursor:pointer;color:var(--acc);">🔍</span>
       <div id="prov-drop" style="display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--s2);border:1.5px solid var(--acc);border-radius:14px;z-index:200;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.6);"></div>
     </div>
 
@@ -2189,7 +2189,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       <input id="ped-srch" type="text" placeholder="Buscar producto para agregar al pedido..." autocomplete="off"
         oninput="_db('ped',function(){pedBuscar(document.getElementById('ped-srch').value);})" onfocus="if(this.value.trim())pedMostrarDrop()"
         style="width:100%;background:var(--s2);border:2px solid var(--border);border-radius:50px;padding:14px 52px 14px 22px;font-size:14px;color:var(--text);transition:border-color .2s;font-family:'Mulish',sans-serif;">
-      <span style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;color:var(--muted);">🔍</span>
+      <span onclick="var v=document.getElementById('ped-srch').value.trim();if(v)pedBuscar(v);else document.getElementById('ped-srch').focus();" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:17px;cursor:pointer;color:var(--acc);">🔍</span>
       <div id="ped-drop" style="display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--s2);border:1.5px solid var(--acc);border-radius:14px;z-index:200;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.6);"></div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;">
@@ -7354,12 +7354,12 @@ function pedFillFiltro() {
 function pedBuscar(q) {
   q = (q||'').trim().toLowerCase();
   if (!q) { pedOcultarDrop(); return; }
+  var tokens = q.split(/\s+/).filter(Boolean);
   var res = products.filter(function(p){
-    return p.nombre && (p.nombre.toLowerCase().includes(q) ||
-      (p.cod_interno||'').toLowerCase().includes(q) ||
-      (p.cod_proveedor||'').toLowerCase().includes(q) ||
-      (p.proveedor||'').toLowerCase().includes(q));
-  }).slice(0, 8);
+    if (!p.nombre) return false;
+    var h = [p.nombre, p.cod_interno||'', p.cod_proveedor||'', p.proveedor||'', p.marca||''].join(' ').toLowerCase();
+    return tokens.every(function(t){ return h.includes(t); });
+  }).slice(0, 40);
   if (!res.length) { pedOcultarDrop(); return; }
   var d = document.getElementById('ped-drop');
   d.innerHTML = res.map(function(p) {
@@ -7405,10 +7405,10 @@ function pedDq(e, id, delta) {
 }
 
 function pedAgregar(id) {
-  var p = products.find(function(x){ return x.id === id; });
+  var p = products.find(function(x){ return String(x.id) === String(id); });
   if (!p) return;
   var qty = parseInt(pedDropQtys[id]) || 1;
-  var ex = pedItems.find(function(x){ return x.id === id; });
+  var ex = pedItems.find(function(x){ return String(x.id) === String(id); });
   if (ex) { ex.qty += qty; }
   else { pedItems.unshift({ id:p.id, nombre:p.nombre, cod:p.cod_interno||p.cod_proveedor||'', proveedor:p.proveedor||'', unidad:p.unidad||'', qty:qty, llegado:false, sel:false }); }
   delete pedDropQtys[id];
@@ -7434,10 +7434,24 @@ function pedRenderLista() {
     if (vacia) vacia.style.display='none';
     if (hdr) hdr.style.display='flex';
   }
-  lista.innerHTML = filtered.map(function(item) {
+  // Group by proveedor
+  var grupos = {};
+  var sinProv = [];
+  filtered.forEach(function(item) {
+    var prov = item.proveedor || '';
+    if (prov) {
+      if (!grupos[prov]) grupos[prov] = [];
+      grupos[prov].push(item);
+    } else {
+      sinProv.push(item);
+    }
+  });
+  var provOrden = Object.keys(grupos).sort();
+  if (sinProv.length) provOrden.push('');
+
+  function renderItem(item) {
     var ri = pedItems.indexOf(item);
     var selBorder = item.sel ? 'var(--acc)' : 'var(--border)';
-    var selBg = item.sel ? 'rgba(245,158,11,.04)' : 'transparent';
     var chkBg = item.sel ? 'var(--acc)' : 'var(--s3)';
     var chkBorder = item.sel ? 'var(--acc)' : 'var(--border2)';
     var llegadoStyle = item.llegado ? 'opacity:.45;' : '';
@@ -7445,12 +7459,11 @@ function pedRenderLista() {
     var llegadoBtn = !item.llegado
       ? '<button data-marcar="'+ri+'" style="border:none;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:700;background:rgba(34,197,94,.12);color:var(--green);cursor:pointer;flex-shrink:0;">✓ Llegó</button>'
       : '<button data-marcar="'+ri+'" style="border:none;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:700;background:rgba(245,158,11,.12);color:var(--acc);cursor:pointer;flex-shrink:0;">↩ Deshacer</button>';
-    var provPill = item.proveedor ? '<span style="background:rgba(59,130,246,.15);color:#60a5fa;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;">'+item.proveedor+'</span>' : '';
     return '<div data-ri="'+ri+'" style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid '+selBorder+';border-radius:10px;padding:10px 14px;'+llegadoStyle+'">' +
       '<div data-chk="'+ri+'" style="width:18px;height:18px;border-radius:4px;border:1.5px solid '+chkBorder+';background:'+chkBg+';flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;">'+(item.sel?'<span style="font-size:11px;color:#000;font-weight:900;">✓</span>':'')+'</div>' +
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:13px;font-weight:700;'+nameDecor+'">'+item.nombre+'</div>' +
-        '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+provPill+' '+item.cod+'</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+item.cod+'</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' +
         '<button data-qm="'+ri+'" style="width:27px;height:27px;border-radius:6px;border:1.5px solid var(--border2);background:var(--s3);color:var(--text);font-size:15px;font-weight:800;cursor:pointer;">−</button>' +
@@ -7460,6 +7473,18 @@ function pedRenderLista() {
       llegadoBtn +
       '<button data-del="'+ri+'" style="width:26px;height:26px;border:none;border-radius:6px;background:transparent;color:var(--muted);font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>' +
     '</div>';
+  }
+
+  lista.innerHTML = provOrden.map(function(prov) {
+    var items = prov ? grupos[prov] : sinProv;
+    var pendProv = items.filter(function(i){ return !i.llegado; }).length;
+    var headerProv = prov
+      ? '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px 6px;margin-top:10px;">' +
+          '<div style="font-size:11px;font-weight:800;color:#60a5fa;letter-spacing:.5px;">📦 ' + prov.toUpperCase() + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);">' + pendProv + ' pendiente' + (pendProv!==1?'s':'') + ' · ' + items.length + ' total</div>' +
+        '</div>'
+      : '<div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.5px;padding:8px 4px 6px;margin-top:10px;">SIN PROVEEDOR</div>';
+    return headerProv + items.map(renderItem).join('');
   }).join('');
 
   // Attach events
