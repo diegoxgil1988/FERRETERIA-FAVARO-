@@ -13069,21 +13069,30 @@ function revAplicarImportacion(){
     var dec=revDecisiones[conf.id]||'usar_0';
     if(dec==='ignorar'){ ignorados+=conf.filas.length; return; }
     if(dec==='ambos'){
-      // "Productos distintos": cada fila es un producto diferente
-      // Buscar cada uno por cod_interno o nombre+proveedor antes de crear nuevo
+      // "Productos distintos": buscar cada fila por múltiples criterios antes de crear nuevo
       conf.filas.forEach(function(f){
         var imp2=Object.assign({},f.imp);
         var exAmbos=null;
-        // Try by cod_interno first
-        if(imp2.cod_interno) exAmbos=products.find(function(p){return (p.cod_interno||'').toLowerCase()===(imp2.cod_interno||'').toLowerCase() && !yaActualizados.has(p.id);});
-        // Try by nombre+proveedor
+        // 1. Por cod_interno
+        if(!exAmbos && imp2.cod_interno)
+          exAmbos=products.find(function(p){return (p.cod_interno||'').toLowerCase()===(imp2.cod_interno||'').toLowerCase() && !yaActualizados.has(p.id);});
+        // 2. Por cod_proveedor + proveedor (ANTES de borrarlo)
+        if(!exAmbos && imp2.cod_proveedor && imp2.proveedor)
+          exAmbos=products.find(function(p){return (p.cod_proveedor||'').toLowerCase()===(imp2.cod_proveedor||'').toLowerCase() && (p.proveedor||'').toLowerCase()===(imp2.proveedor||'').toLowerCase() && !yaActualizados.has(p.id);});
+        // 3. Por nombre exacto + proveedor
         if(!exAmbos){
           var nNorm=(imp2.nombre||'').toLowerCase().trim();
           var pNorm=(imp2.proveedor||'').toLowerCase().trim();
           if(nNorm) exAmbos=products.find(function(p){return (p.nombre||'').toLowerCase().trim()===nNorm && (p.proveedor||'').toLowerCase().trim()===pNorm && !yaActualizados.has(p.id);});
         }
-        if(exAmbos) actualizarExistente(exAmbos, imp2);
-        else { if(conf.tipo==='ci_dup') imp2.cod_interno=''; else if(conf.tipo==='cp_dup') imp2.cod_proveedor=''; agregarNuevo(imp2); }
+        if(exAmbos) {
+          actualizarExistente(exAmbos, imp2);
+        } else {
+          // Realmente es nuevo - quitar el código duplicado antes de crear
+          if(conf.tipo==='ci_dup') imp2.cod_interno='';
+          else if(conf.tipo==='cp_dup' || conf.tipo==='cpv_dup') imp2.cod_proveedor='';
+          agregarNuevo(imp2);
+        }
       });
       return;
     }
