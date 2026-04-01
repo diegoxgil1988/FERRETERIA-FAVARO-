@@ -15036,7 +15036,7 @@ function ccConfirmar() {
   ccItems.forEach(function(item) {
     if (item.isNew) {
       // Create new product
-      var precio = item.costoNuevo > 0 ? Math.round(item.costoNuevo/(1-item.margen/100)) : 0;
+      var precio = item.costoNuevo > 0 ? Math.round(item.costoNuevo*(1+item.margen/100)) : 0;
       // Auto-generate cod_interno if empty
       var codInt = item.cod_interno;
       if (!codInt && ccProv) {
@@ -15067,7 +15067,7 @@ function ccConfirmar() {
       if (idx >= 0) {
         var old = products[idx];
         var hist = [...(old.historial||[])];
-        var precioNuevo = item.costoNuevo > 0 ? Math.round(item.costoNuevo/(1-item.margen/100)) : old.precio;
+        var precioNuevo = item.costoNuevo > 0 ? Math.round(item.costoNuevo*(1+item.margen/100)) : old.precio;
         if (item.costoNuevo !== old.costo || precioNuevo !== old.precio) {
           hist.push({ fecha:today, precio_ant:old.precio, precio_nuevo:precioNuevo, margen_nuevo:item.margen, nota:'Recepción compra' });
         }
@@ -15101,7 +15101,15 @@ function ccConfirmar() {
     id: String(genId()),
     fecha: today, tipo: 'compra',
     descripcion: nroFact ? 'Factura '+nroFact : 'Carrito de compras',
-    monto: -Math.abs(total)
+    monto: -Math.abs(total),
+    items: ccItems.map(function(it){
+      return {
+        nombre: it.nombre,
+        qty: it.qty,
+        precio: it.costoNuevo || it.costo || 0,
+        cod: it.cod_interno || it.cod_proveedor || ''
+      };
+    })
   };
   if (ppActivo && !esContado) {
     movCompra.desc_pct = ppPorc;
