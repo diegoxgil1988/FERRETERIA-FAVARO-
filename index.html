@@ -4198,7 +4198,19 @@ function persist() {
   }, 600);
 }
 
+function _sanitizeProductIds() {
+  // Ensure no float IDs reach Supabase
+  products.forEach(function(p) {
+    if (typeof p.id === 'number' && !Number.isInteger(p.id)) {
+      p.id = Math.floor(p.id);
+    } else if (typeof p.id === 'string' && p.id.includes('.')) {
+      p.id = Math.floor(parseFloat(p.id));
+    }
+  });
+}
+
 function _syncToCloud() {
+  _sanitizeProductIds();
   if (!sbUser) return Promise.reject(new Error('Sin sesion'));
   var rows = products.map(function(p) { return {
     id: p.id, user_id: sbUser.id,
@@ -13158,8 +13170,8 @@ function revExportarReporte(){
   notify('✓ Reporte exportado','ok');
 }
 
-var _idCounter = Date.now();
-function genId() { return ++_idCounter; }
+var _idCounter = Math.floor(Date.now());
+function genId() { return Math.floor(++_idCounter); }
 
 
 /* -- Busqueda catalogo con debounce y tokens -- */
@@ -15039,7 +15051,7 @@ function ccConfirmar() {
         codInt = pref+'-'+String(maxN+1).padStart(5,'0');
       }
       var newP = {
-        id: Date.now() + Math.random(),
+        id: genId(),
         nombre: item.nombre, costo: item.costoNuevo, margen: item.margen, precio: precio,
         cod_interno: codInt, cod_proveedor: item.cod_proveedor,
         proveedor: ccProv, marca: item.marca||'', categoria: item.categoria||'',
