@@ -13034,7 +13034,20 @@ function revAplicarImportacion(){
     updated++;
   }
 
-  function agregarNuevo(imp){ imp.id=genId(); products.push(imp); added++; }
+  function agregarNuevo(imp){
+    // Safety check: avoid duplicates by name+proveedor even if codes are missing
+    var nombreNorm = (imp.nombre||'').toLowerCase().trim();
+    var provNorm   = (imp.proveedor||'').toLowerCase().trim();
+    if(nombreNorm){
+      var dupByName = products.find(function(p){
+        return (p.nombre||'').toLowerCase().trim()===nombreNorm &&
+               (p.proveedor||'').toLowerCase().trim()===provNorm &&
+               !yaActualizados.has(p.id);
+      });
+      if(dupByName){ actualizarExistente(dupByName, imp); return; }
+    }
+    imp.id=genId(); products.push(imp); added++;
+  }
 
   // Aplicar items sin conflicto
   revNoConflicto.forEach(function(item){
@@ -13043,7 +13056,12 @@ function revAplicarImportacion(){
     var existing=null;
     if(ci) existing=products.find(function(p){return (p.cod_interno||'').toLowerCase()===ci;});
     if(!existing&&cp&&pv) existing=products.find(function(p){return (p.cod_proveedor||'').toLowerCase()===cp&&(p.proveedor||'').toLowerCase()===pv;});
-    if(existing) actualizarExistente(existing,imp); else agregarNuevo(imp);
+    if(existing) { actualizarExistente(existing,imp); }
+    else {
+      // Also try matching by cod_interno alone (without proveedor) as fallback
+      if(!existing && ci) existing = products.find(function(p){ return (p.cod_interno||'').toLowerCase()===ci && !yaActualizados.has(p.id); });
+      if(existing) actualizarExistente(existing, imp); else agregarNuevo(imp);
+    }
   });
 
   // Aplicar decisiones de conflictos
@@ -13051,12 +13069,21 @@ function revAplicarImportacion(){
     var dec=revDecisiones[conf.id]||'usar_0';
     if(dec==='ignorar'){ ignorados+=conf.filas.length; return; }
     if(dec==='ambos'){
-      // Conservar todos: quitar el código que causó el duplicado y crear como nuevos
+      // "Productos distintos": cada fila es un producto diferente
+      // Buscar cada uno por cod_interno o nombre+proveedor antes de crear nuevo
       conf.filas.forEach(function(f){
         var imp2=Object.assign({},f.imp);
-        if(conf.tipo==='ci_dup') imp2.cod_interno='';
-        else if(conf.tipo==='cp_dup') imp2.cod_proveedor='';
-        agregarNuevo(imp2);
+        var exAmbos=null;
+        // Try by cod_interno first
+        if(imp2.cod_interno) exAmbos=products.find(function(p){return (p.cod_interno||'').toLowerCase()===(imp2.cod_interno||'').toLowerCase() && !yaActualizados.has(p.id);});
+        // Try by nombre+proveedor
+        if(!exAmbos){
+          var nNorm=(imp2.nombre||'').toLowerCase().trim();
+          var pNorm=(imp2.proveedor||'').toLowerCase().trim();
+          if(nNorm) exAmbos=products.find(function(p){return (p.nombre||'').toLowerCase().trim()===nNorm && (p.proveedor||'').toLowerCase().trim()===pNorm && !yaActualizados.has(p.id);});
+        }
+        if(exAmbos) actualizarExistente(exAmbos, imp2);
+        else { if(conf.tipo==='ci_dup') imp2.cod_interno=''; else if(conf.tipo==='cp_dup') imp2.cod_proveedor=''; agregarNuevo(imp2); }
       });
       return;
     }
@@ -13073,11 +13100,14 @@ function revAplicarImportacion(){
         }
         if(ex) actualizarExistente(ex,f.imp); else agregarNuevo(f.imp);
       } else {
-        // Las demás filas: crear como nuevos sin el código duplicado
+        // Las demás filas: buscar por nombre+proveedor antes de crear nuevo
         var imp2=Object.assign({},f.imp);
-        if(conf.tipo==='ci_dup') imp2.cod_interno='';
-        else if(conf.tipo==='cp_dup') imp2.cod_proveedor='';
-        agregarNuevo(imp2);
+        var exElse=null;
+        var nNorm2=(imp2.nombre||'').toLowerCase().trim();
+        var pNorm2=(imp2.proveedor||'').toLowerCase().trim();
+        if(nNorm2) exElse=products.find(function(p){return (p.nombre||'').toLowerCase().trim()===nNorm2 && (p.proveedor||'').toLowerCase().trim()===pNorm2 && !yaActualizados.has(p.id);});
+        if(exElse) actualizarExistente(exElse, imp2);
+        else { if(conf.tipo==='ci_dup') imp2.cod_interno=''; else if(conf.tipo==='cp_dup') imp2.cod_proveedor=''; agregarNuevo(imp2); }
       }
     });
   });
