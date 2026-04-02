@@ -7704,7 +7704,7 @@ function ctaSelect(prov) {
         '<div><div style="font-size:12px;font-weight:600;">' + (m.descripcion||'') + '</div>' + descHTML + '</div>' +
         '<div style="font-size:13px;font-weight:800;color:' + (isCompra?'var(--red)':'var(--green)') + ';">' + (isCompra?'-':'+') + '$' + Math.abs(m.monto).toLocaleString('es-AR') + '</div>' +
         '<span style="background:' + (isCompra?'rgba(239,68,68,.12)':'rgba(34,197,94,.12)') + ';color:' + (isCompra?'var(--red)':'var(--green)') + ';font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-align:center;">' + (isCompra?'COMPRA':'PAGO') + '</span>' +
-        '<button onclick="verDetalleMov(\'prov\',' + "'" + '+encodeURIComponent(prov)+' + "'" + ',' + movIdx + ')" title="Ver detalle" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:11px;padding:3px 5px;color:' + (tieneItemsProv?'var(--acc)':'var(--muted)') + ';">'+  (tieneItemsProv?'📋':'·') + '</button>' +
+        '<button data-detprov="'+encodeURIComponent(prov)+'" data-detidx="'+movIdx+'" title="Ver detalle" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:11px;padding:3px 5px;color:'+(tieneItemsProv?'var(--acc)':'var(--muted)')+';">'+(tieneItemsProv?'📋':'·')+'</button>' +
         '<button onclick="ctaEliminarMov(decodeURIComponent(\'' + encodeURIComponent(prov) + '\'),' + movIdx + ')" title="Eliminar" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px;">🗑</button>' +
       '</div>' +
     '</div>';
@@ -7744,6 +7744,13 @@ function ctaSelect(prov) {
   if (pagoBtn) pagoBtn.addEventListener('click', function(){ openPagoModal(prov); });
   var factBtn = document.getElementById('cta-fact-btn');
   if (factBtn) factBtn.addEventListener('click', function(){ openFacturaModal(prov); });
+
+  // Bind detalle buttons
+  detail.querySelectorAll('[data-detprov]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      verDetalleMov('prov', decodeURIComponent(btn.getAttribute('data-detprov')), parseInt(btn.getAttribute('data-detidx')));
+    });
+  });
 }
 
 
