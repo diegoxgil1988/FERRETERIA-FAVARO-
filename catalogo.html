@@ -506,7 +506,8 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
       <div class="hor-title">Horarios de atención</div>
       <div class="hor-row"><span class="hor-dia">Lunes a Viernes</span><span class="hor-hora" id="hor-sem">8:00 – 20:00 <span class="hor-tag">Abierto</span></span></div>
       <div class="hor-row"><span class="hor-dia">Sábados</span><span class="hor-hora" id="hor-sab">8:00 – 13:00</span></div>
-      <div class="hor-row"><span class="hor-dia">Domingos y Feriados</span><span class="hor-hora cerr">Cerrado</span></div>
+      <div class="hor-row"><span class="hor-dia">Domingos</span><span class="hor-hora cerr" id="hor-dom">Cerrado</span></div>
+      <div class="hor-row"><span class="hor-dia">Feriados</span><span class="hor-hora cerr" id="hor-fer">Cerrado</span></div>
     </div>
   </div>
 </main>
@@ -668,6 +669,11 @@ async function init(){
       if(neg.email) document.getElementById('cont-email').textContent=neg.email;
       if(neg.h_semana){document.getElementById('neg-hsem').textContent='Lun–Vie '+neg.h_semana;document.getElementById('hor-sem').innerHTML=neg.h_semana+' <span class="hor-tag">Abierto</span>';}
       if(neg.h_sabado){document.getElementById('neg-hsab').textContent='Sáb '+neg.h_sabado;document.getElementById('hor-sab').textContent=neg.h_sabado;}
+      if(neg.h_domingo){const d=document.getElementById('hor-dom');if(d)d.textContent=neg.h_domingo;}
+      if(neg.h_feriado){const f=document.getElementById('hor-fer');if(f)f.textContent=neg.h_feriado;}
+      // Strip textos
+      const stx=tx||{};
+      if(stx.strip_cuotas){const el=document.getElementById('strip-txt1');if(el)el.textContent=stx.strip_cuotas;}
       if(neg.descripcion) document.getElementById('footerDesc').textContent=neg.descripcion;
       
       // Textos

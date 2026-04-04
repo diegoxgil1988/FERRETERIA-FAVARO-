@@ -400,10 +400,10 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:
           <div class="es" id="sec-strip">
             <button class="edit-btn" onclick="editSec('strip',this)">✏ Editar</button>
             <div class="c-strip" id="v-strip" style="background:#111">
-              <div class="c-si"><strong id="v-strip-cuotas">12 cuotas sin interés</strong>Visa · Master · Naranja</div>
-              <div class="c-si"><strong>Envíos</strong>Córdoba Capital</div>
-              <div class="c-si"><strong id="v-strip-hs">Lun–Vie 8–20hs</strong><span id="v-strip-hsab">Sáb 8–13hs</span></div>
-              <div class="c-si"><strong>Efectivo</strong>10% OFF</div>
+              <div class="c-si"><strong id="v-strip-cuotas">12 cuotas sin interés</strong><span id="v-strip-cuotas-sub">Visa · Master · Naranja</span></div>
+              <div class="c-si"><strong id="v-strip-envios">Envíos a domicilio</strong><span id="v-strip-envios-sub">Córdoba Capital</span></div>
+              <div class="c-si"><strong id="v-strip-hs">Lun–Vie 8–20hs</strong> · <span id="v-strip-hsab">Sáb 8–13hs</span></div>
+              <div class="c-si"><strong id="v-strip-efec">Efectivo 10% OFF</strong><span id="v-strip-efec-sub">Transferencia 5% OFF</span></div>
             </div>
           </div>
 
@@ -570,6 +570,14 @@ function aplicarCFG(){
   if(n.direccion) setTxt('v-dir',n.direccion);
   if(n.h_semana){setTxt('v-hsem','Lun–Vie '+n.h_semana);setTxt('v-strip-hs','Lun–Vie '+n.h_semana);setTxt('v-h1',n.h_semana);}
   if(n.h_sabado){setTxt('v-strip-hsab','Sáb '+n.h_sabado);setTxt('v-h2',n.h_sabado);}
+  // Strip textos
+  const stx=CFG.textos||{};
+  if(stx.strip_cuotas) setTxt('v-strip-cuotas',stx.strip_cuotas);
+  if(stx.strip_cuotas_sub) setTxt('v-strip-cuotas-sub',stx.strip_cuotas_sub);
+  if(stx.strip_envios) setTxt('v-strip-envios',stx.strip_envios);
+  if(stx.strip_envios_sub) setTxt('v-strip-envios-sub',stx.strip_envios_sub);
+  if(stx.strip_efec) setTxt('v-strip-efec',stx.strip_efec);
+  if(stx.strip_efec_sub) setTxt('v-strip-efec-sub',stx.strip_efec_sub);
   // Hero
   if(h.foto) s('v-hero-bg').style.backgroundImage=`url('${h.foto}')`;
   if(h.tag) setTxt('v-hero-tag',h.tag);
@@ -859,7 +867,10 @@ function editSec(sec,btn){
       <div class="f-sec">Horarios</div>
       <div class="f-field"><div class="f-label">Lunes a Viernes</div><input class="f-input" id="neg-h1" value="${n.h_semana||''}" placeholder="8:00 – 20:00" oninput="setTxt('v-h1',this.value);setTxt('v-strip-hs','Lun–Vie '+this.value);setTxt('v-hsem','Lun–Vie '+this.value)"></div>
       <div class="f-field"><div class="f-label">Sábados</div><input class="f-input" id="neg-h2" value="${n.h_sabado||''}" placeholder="8:00 – 13:00" oninput="setTxt('v-h2',this.value);setTxt('v-strip-hsab','Sáb '+this.value)"></div>
-      <div class="f-field"><div class="f-label">Descripción (footer)</div><textarea class="f-textarea" id="neg-desc">${n.descripcion||''}</textarea></div>`);
+      <div class="f-field"><div class="f-label">Domingos</div><input class="f-input" id="neg-h3" value="${n.h_domingo||'Cerrado'}" placeholder="Cerrado"></div>
+      <div class="f-field"><div class="f-label">Feriados</div><input class="f-input" id="neg-h4" value="${n.h_feriado||'Cerrado'}" placeholder="Cerrado"></div>
+      <div class="f-sec">Descripción</div>
+      <div class="f-field"><textarea class="f-textarea" id="neg-desc">${n.descripcion||''}</textarea></div>`);
   }
 
   else if(sec==='hero'){
@@ -899,16 +910,28 @@ function editSec(sec,btn){
   }
 
   else if(sec==='fin'){
-    setHead('Financiación — Tarjetas');
-    const tarjHTML=(CFG.tarjetas||[]).map((t,i)=>`
+    setHead('Financiación — Tarjetas y cuotas');
+    // Tarjetas por defecto si no hay ninguna
+    if(!CFG.tarjetas||!CFG.tarjetas.length){
+      CFG.tarjetas=[
+        {nom:'Visa',sub:'Débito y Crédito',txt:'VISA',color:'linear-gradient(135deg,#1a1f71,#1565c0)',cuotas:'12x',label:'s/i',descuento:false},
+        {nom:'Mastercard',sub:'Débito y Crédito',txt:'MC',color:'linear-gradient(135deg,#eb001b,#f79e1b)',cuotas:'12x',label:'s/i',descuento:false},
+        {nom:'Naranja X',sub:'Crédito',txt:'NRJ',color:'linear-gradient(135deg,#ff6600,#ff3300)',cuotas:'6x',label:'s/i',descuento:false},
+        {nom:'Efectivo',sub:'Precio especial',txt:'EFC',color:'#1a1a1a',cuotas:'10%',label:'OFF',descuento:true},
+        {nom:'MODO / Transferencia',sub:'Descuento',txt:'MODO',color:'linear-gradient(135deg,#00bcd4,#0097a7)',cuotas:'5%',label:'OFF',descuento:true},
+      ];
+    }
+    const tarjHTML=CFG.tarjetas.map((t,i)=>`
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f9f6f2;border-radius:6px;margin-bottom:6px">
-        <div style="width:36px;height:22px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
+        <div style="width:40px;height:24px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
         <span style="font-size:12px;font-weight:500;color:#111;flex:1">${t.nom}</span>
-        <input style="width:80px;padding:5px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:12px;font-weight:700;color:#e8750a;text-align:center;outline:none" value="${t.cuotas} ${t.label||''}" oninput="updTarj(${i},this.value)">
+        <input style="width:80px;padding:5px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:12px;font-weight:700;color:${t.descuento?'#22c55e':'#e8750a'};text-align:center;outline:none" value="${t.cuotas}${t.label?' '+t.label:''}" oninput="updTarj(${i},this.value)">
       </div>`).join('');
     setPanelContent(`
-      <div class="f-sec" style="margin-top:0">Medios de pago</div>
-      ${tarjHTML||'<div class="f-info">No hay tarjetas configuradas. Guardar desde el admin primero.</div>'}
+      <div class="f-sec" style="margin-top:0">Medios de pago <span style="font-size:9px;color:#aaa;font-weight:400">(editá cuotas o descuentos)</span></div>
+      ${tarjHTML}
+      <div class="f-sec">Cuotas destacadas en el catálogo</div>
+      <div class="f-field"><div class="f-label">Máximas cuotas sin interés</div><input class="f-input" id="fin-maxcuotas" value="${Math.max(...CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n)),0)||12}" oninput="setTxt('v-maxcuota',this.value+'x')"></div>
       <div class="f-sec">Nota legal</div>
       <div class="f-field"><textarea class="f-textarea" id="fin-nota">${fi.nota||''}</textarea></div>`);
   }
@@ -934,7 +957,9 @@ function editSec(sec,btn){
       <div class="f-field"><div class="f-label">Email</div><input class="f-input" id="cont-email" value="${n.email||''}"></div>
       <div class="f-sec">Horarios</div>
       <div class="f-field"><div class="f-label">Lunes a Viernes</div><input class="f-input" id="cont-h1" value="${n.h_semana||''}" oninput="setTxt('v-h1',this.value)"></div>
-      <div class="f-field"><div class="f-label">Sábados</div><input class="f-input" id="cont-h2" value="${n.h_sabado||''}" oninput="setTxt('v-h2',this.value)"></div>`);
+      <div class="f-field"><div class="f-label">Sábados</div><input class="f-input" id="cont-h2" value="${n.h_sabado||''}" oninput="setTxt('v-h2',this.value)"></div>
+      <div class="f-field"><div class="f-label">Domingos</div><input class="f-input" id="cont-h3" value="${n.h_domingo||'Cerrado'}"></div>
+      <div class="f-field"><div class="f-label">Feriados</div><input class="f-input" id="cont-h4" value="${n.h_feriado||'Cerrado'}"></div>`);
   }
 }
 
@@ -950,6 +975,8 @@ function updTarj(i,val){
   CFG.tarjetas[i].label=p.slice(1).join(' ')||'';
   const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
   if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
+  // Guardar directamente al cambiar tarjeta
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
   markUnsaved();
 }
 
@@ -979,7 +1006,10 @@ function openTab(tab){
   ['pp-edit','pp-gallery','pp-hist','pp-promos','pp-banners','pp-cats'].forEach(id=>{const el=s(id);if(el)el.style.display='none';});
   const el=s('pp-'+tab);if(el)el.style.display='block';
   s('panelTitle').textContent={promos:'Promos — Carrusel',banners:'Banners',cats:'Categorías',gallery:'Galería de fotos',hist:'Historial'}[tab]||tab;
-  s('btnGuardar').style.display='none';
+  // Mostrar guardar solo para secciones con datos que guardar
+  const tabConGuardar=['promos','banners','cats'];
+  s('btnGuardar').style.display=tabConGuardar.includes(tab)?'block':'none';
+  if(tabConGuardar.includes(tab)) secActiva=tab;
   if(tab==='promos')renderPromosList();
   if(tab==='banners')renderBannersList();
   if(tab==='cats')renderCatsList();
@@ -1057,22 +1087,29 @@ async function guardarSeccion(){
   try{
     let hist='';
     if(secActiva==='negocio'){
-      const neg={logo:gv('neg-logo-inp'),nombre:gv('neg-nombre'),telefono:gv('neg-tel'),whatsapp:gv('neg-wa').replace(/\D/g,''),direccion:gv('neg-dir'),email:gv('neg-email'),h_semana:gv('neg-h1'),h_sabado:gv('neg-h2'),descripcion:gv('neg-desc')};
+      const neg={logo:gv('neg-logo-inp'),nombre:gv('neg-nombre'),telefono:gv('neg-tel'),whatsapp:gv('neg-wa').replace(/\D/g,''),direccion:gv('neg-dir'),email:gv('neg-email'),h_semana:gv('neg-h1'),h_sabado:gv('neg-h2'),h_domingo:gv('neg-h3'),h_feriado:gv('neg-h4'),descripcion:gv('neg-desc')};
       CFG.negocio={...CFG.negocio,...neg};await guardarClave('catalogo_negocio',CFG.negocio);hist='Negocio actualizado';
     }else if(secActiva==='hero'){
       const h={foto:gv('hero-foto'),tag:gv('hero-tag'),t1:gv('hero-t1'),t2:gv('hero-t2'),t3:gv('hero-em'),sub:gv('hero-sub'),btn1:gv('hero-btn'),prods_titulo:gv('prods-title')||CFG.hero.prods_titulo};
       CFG.hero={...CFG.hero,...h};await guardarClave('catalogo_hero',CFG.hero);hist='Hero actualizado';
     }else if(secActiva==='strip'){
-      await guardarClave('catalogo_hero',CFG.hero);hist='Strip actualizado';
+      const stripTx={strip_cuotas:gv('strip-cuotas'),strip_cuotas_sub:gv('strip-cuotas-sub'),strip_envios:gv('strip-envios'),strip_envios_sub:gv('strip-envios-sub'),strip_efec:gv('strip-efec'),strip_efec_sub:gv('strip-efec-sub')};
+      CFG.textos={...CFG.textos,...stripTx};await guardarClave('catalogo_textos',CFG.textos);hist='Strip actualizado';
     }else if(secActiva==='prods'){
       CFG.hero.prods_titulo=gv('prods-title');await guardarClave('catalogo_hero',CFG.hero);hist='Título productos actualizado';
     }else if(secActiva==='fin'){
       await guardarClave('catalogo_tarjetas',CFG.tarjetas);
       CFG.financia={...CFG.financia,nota:gv('fin-nota')};await guardarClave('catalogo_financia',CFG.financia);hist='Financiación actualizada';
+    }else if(secActiva==='promos'){
+      await guardarClave('catalogo_promos',CFG.promos);hist='Promos guardadas';
+    }else if(secActiva==='banners'){
+      await guardarClave('catalogo_banners',CFG.banners);hist='Banners guardados';
+    }else if(secActiva==='cats'){
+      await guardarClave('catalogo_categorias',CFG.categorias);hist='Categorías guardadas';
     }else if(secActiva==='marcas'){
       CFG.marcas=gv('marcas-txt');await guardarClave('catalogo_marcas',CFG.marcas);hist='Marcas actualizadas';
     }else if(secActiva==='cont'){
-      const neg={...CFG.negocio,direccion:gv('cont-dir'),telefono:gv('cont-tel'),whatsapp:gv('cont-wa').replace(/\D/g,''),email:gv('cont-email'),h_semana:gv('cont-h1'),h_sabado:gv('cont-h2')};
+      const neg={...CFG.negocio,direccion:gv('cont-dir'),telefono:gv('cont-tel'),whatsapp:gv('cont-wa').replace(/\D/g,''),email:gv('cont-email'),h_semana:gv('cont-h1'),h_sabado:gv('cont-h2'),h_domingo:gv('cont-h3'),h_feriado:gv('cont-h4')};
       CFG.negocio=neg;await guardarClave('catalogo_negocio',neg);hist='Contacto actualizado';
     }
     // Guardar colores
