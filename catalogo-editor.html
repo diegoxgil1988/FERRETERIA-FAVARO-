@@ -3,222 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editor Catálogo — Favaro</title>
+<title>Editor Catálogo v2 — Favaro</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --ac:#e8750a;--ac2:#c45e00;--acd:#fff4ed;
-  --dk:#111827;--gr:#f9fafb;--gr2:#f3f4f6;--gr3:#e5e7eb;
-  --tx:#111827;--tx2:#4b5563;--tx3:#9ca3af;--wh:#fff;
-  --brd:#e5e0d8;--brd2:#d1cbc2;
-  --panel:300px;
-}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif}
+html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:14px}
 
 /* ── LOGIN ── */
-#loginWrap{position:fixed;inset:0;z-index:9999;background:var(--dk);display:flex;align-items:center;justify-content:center;padding:20px}
-.lbox{background:#1f2937;border:1px solid #374151;border-radius:14px;padding:40px;width:100%;max-width:380px;text-align:center}
-.llogo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
-.llogo img{height:40px;object-fit:contain;border-radius:3px}
-.llogo-txt{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px}
-.llogo-txt span{color:var(--ac)}
-.lsub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px}
-.ll{display:block;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.5);margin-bottom:5px;margin-top:14px}
-.li{width:100%;padding:10px 14px;border:1.5px solid #374151;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;color:#fff;outline:none;background:#111827;transition:border-color .2s}
-.li:focus{border-color:var(--ac)}
-.lbtn{width:100%;background:var(--ac);color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px;transition:background .15s}
-.lbtn:hover{background:var(--ac2)}
+#loginWrap{position:fixed;inset:0;z-index:9999;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:20px}
+.lbox{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:40px;width:100%;max-width:380px;text-align:center}
+.llogo{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+.llogo span{color:#e8750a}
+.lsub{font-size:12px;color:#64748b;margin-bottom:28px}
+.ll{display:block;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#64748b;margin-bottom:5px;margin-top:14px}
+.li{width:100%;padding:10px 14px;border:1.5px solid #334155;border-radius:8px;font-family:inherit;font-size:14px;color:#fff;outline:none;background:#0f172a;transition:border-color .2s}
+.li:focus{border-color:#e8750a}
+.lbtn{width:100%;background:#e8750a;color:#fff;border:none;border-radius:8px;padding:13px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}
 .lerr{font-size:12px;color:#f87171;margin-top:8px;min-height:16px}
 
-/* ── LAYOUT ── */
+/* ── APP ── */
 #app{display:none;height:100%;flex-direction:column}
 
 /* TOPBAR */
-.topbar{background:var(--dk);color:#fff;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:50px;flex-shrink:0;z-index:200}
-.tb-left{display:flex;align-items:center;gap:10px}
-.tb-logo img{height:26px;object-fit:contain;border-radius:3px}
-.tb-name{font-size:15px;font-weight:700;letter-spacing:-.3px}
-.tb-name span{color:var(--ac)}
-.tb-badge{font-size:10px;color:rgba(255,255,255,.3);margin-left:6px}
-.tb-right{display:flex;align-items:center;gap:8px}
-.tb-link{font-size:12px;color:rgba(255,255,255,.5);text-decoration:none;padding:5px 10px;border-radius:5px;transition:all .15s}
+.tb{background:#111;color:#fff;padding:0 14px;display:flex;align-items:center;justify-content:space-between;height:48px;flex-shrink:0;z-index:200}
+.tb-l{display:flex;align-items:center;gap:8px}
+.tb-logo{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.tb-logo span{color:#e8750a}
+.tb-badge{font-size:10px;color:rgba(255,255,255,.3);background:rgba(255,255,255,.07);padding:2px 8px;border-radius:4px}
+.tb-r{display:flex;align-items:center;gap:6px}
+.tb-link{font-size:11px;color:rgba(255,255,255,.5);text-decoration:none;padding:5px 10px;border-radius:5px;transition:all .15s}
 .tb-link:hover{color:#fff;background:rgba(255,255,255,.08)}
-.tb-out{background:none;border:1px solid rgba(255,255,255,.15);border-radius:5px;color:rgba(255,255,255,.5);padding:5px 12px;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
+.tb-out{background:none;border:1px solid rgba(255,255,255,.15);border-radius:5px;color:rgba(255,255,255,.5);padding:5px 12px;font-family:inherit;font-size:11px;cursor:pointer}
 .tb-out:hover{color:#fff;border-color:rgba(255,255,255,.4)}
 
-/* EDITOR LAYOUT */
-.editor{display:flex;flex:1;overflow:hidden;height:calc(100% - 50px)}
+/* SUBTOOLBAR */
+.stb{background:#1a2332;padding:0 12px;display:flex;align-items:center;gap:4px;height:38px;flex-shrink:0;border-bottom:1px solid #2d3f55}
+.stb-sep{width:1px;height:20px;background:rgba(255,255,255,.1);margin:0 3px}
+.stb-btn{display:flex;align-items:center;gap:4px;background:none;border:none;color:rgba(255,255,255,.45);padding:5px 9px;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.stb-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.stb-btn.on{background:rgba(232,117,10,.2);color:#e8750a}
+.dev-grp{display:flex;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.dev-btn{padding:4px 12px;font-size:11px;color:rgba(255,255,255,.4);cursor:pointer;border:none;background:none;font-family:inherit;transition:all .15s}
+.dev-btn.on{background:#e8750a;color:#fff}
+.as-indicator{font-size:10px;color:rgba(255,255,255,.3);margin-left:auto;display:flex;align-items:center;gap:5px}
+.as-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;transition:background .3s}
 
-/* PANEL IZQUIERDO */
-.panel{width:var(--panel);background:var(--wh);border-right:1px solid var(--brd);display:flex;flex-direction:column;flex-shrink:0;height:100%}
-.panel-top{padding:12px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;flex-shrink:0}
-.panel-icon{font-size:16px}
-.panel-title{font-size:13px;font-weight:600;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.panel-save{background:var(--ac);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0;display:none;transition:background .15s}
-.panel-save:hover{background:var(--ac2)}
-.panel-save:disabled{opacity:.5;cursor:not-allowed}
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* PANEL */
+.panel{width:290px;background:#fff;border-right:1px solid #e5e0d8;display:flex;flex-direction:column;flex-shrink:0;height:100%}
+.panel-tabs{display:flex;border-bottom:1px solid #e5e0d8;background:#f9f6f2;flex-shrink:0}
+.ptab{flex:1;padding:8px 4px;font-size:11px;font-weight:500;color:#888;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-family:inherit;transition:all .15s}
+.ptab.on{color:#e8750a;border-bottom-color:#e8750a;background:#fff}
+.panel-head{padding:10px 14px;border-bottom:1px solid #e5e0d8;display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:44px}
+.panel-head-title{font-size:12px;font-weight:600;color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-guardar{background:#e8750a;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:none;flex-shrink:0;transition:all .15s}
+.btn-guardar:hover{background:#c45e00}
+.btn-guardar:disabled{opacity:.5;cursor:not-allowed}
 .panel-body{flex:1;overflow-y:auto;padding:14px}
-.panel-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--tx3);font-size:13px;text-align:center;gap:10px;line-height:1.7;padding:20px}
-.panel-empty svg{opacity:.25}
+.panel-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#bbb;font-size:12px;text-align:center;gap:10px;line-height:1.7;padding:20px}
 
-/* FORM ELEMENTS */
-.f-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--tx3);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--gr3)}
+/* FORM */
+.f-sec{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#aaa;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid #f0e9e0}
 .f-sec:first-child{margin-top:0}
-.f-field{margin-bottom:12px}
-.f-label{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
-.f-input{width:100%;padding:8px 10px;border:1.5px solid var(--brd2);border-radius:7px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;background:var(--wh)}
-.f-input:focus{border-color:var(--ac)}
-.f-textarea{width:100%;padding:8px 10px;border:1.5px solid var(--brd2);border-radius:7px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--tx);outline:none;transition:border-color .2s;background:var(--wh);resize:vertical;min-height:72px;line-height:1.5}
-.f-textarea:focus{border-color:var(--ac)}
-.f-hint{font-size:10px;color:var(--tx3);margin-top:3px}
-.f-info{background:var(--gr2);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--tx2);line-height:1.6;border-left:3px solid var(--ac)}
-.f-color-row{display:flex;align-items:center;gap:8px}
-.f-cdot{width:30px;height:30px;border-radius:6px;border:1.5px solid var(--brd2);position:relative;overflow:hidden;cursor:pointer;flex-shrink:0}
-.f-cdot input{position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);opacity:0;cursor:pointer}
-.f-cval{font-size:12px;font-family:monospace;color:var(--tx2)}
-.f-img-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.f-img-prev{width:80px;height:52px;border-radius:6px;object-fit:cover;border:1px solid var(--brd);background:var(--gr2);flex-shrink:0}
-.f-upload-btn{display:inline-flex;align-items:center;gap:5px;background:var(--gr2);border:1.5px solid var(--brd2);border-radius:6px;padding:5px 10px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .15s}
-.f-upload-btn:hover{border-color:var(--ac);color:var(--ac)}
-.f-upload-btn input{display:none}
-.f-uploading{font-size:11px;color:var(--ac)}
-.f-promo-item{background:var(--gr2);border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid var(--gr3)}
-.f-tarj-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--gr2);border-radius:7px;margin-bottom:6px}
-.f-tarj-ico{width:36px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0}
-.f-tarj-nom{font-size:12px;font-weight:500;color:var(--tx);flex:1}
-.f-tarj-input{width:80px;padding:5px 8px;border:1.5px solid var(--brd2);border-radius:5px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--ac);text-align:center;outline:none}
-.f-tarj-input:focus{border-color:var(--ac)}
+.f-field{margin-bottom:10px}
+.f-label{display:block;font-size:10px;font-weight:600;color:#666;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.f-input{width:100%;padding:7px 9px;border:1.5px solid #e0d8cf;border-radius:6px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff}
+.f-input:focus{border-color:#e8750a}
+.f-textarea{width:100%;padding:7px 9px;border:1.5px solid #e0d8cf;border-radius:6px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff;resize:vertical;min-height:64px;line-height:1.5}
+.f-textarea:focus{border-color:#e8750a}
+.f-hint{font-size:10px;color:#aaa;margin-top:3px}
+.f-info{background:#f9f6f2;border-radius:6px;padding:9px 11px;font-size:11px;color:#666;line-height:1.6;border-left:3px solid #e8750a}
+.f-color-row{display:flex;align-items:center;gap:7px}
+.f-cdot{width:28px;height:28px;border-radius:5px;border:1.5px solid #e0d8cf;position:relative;overflow:hidden;cursor:pointer;flex-shrink:0}
+.f-cdot input{position:absolute;inset:-3px;width:calc(100%+6px);height:calc(100%+6px);opacity:0;cursor:pointer}
+.f-cval{font-size:11px;font-family:monospace;color:#777;flex:1}
+.f-img-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-bottom:6px}
+.f-img-prev{width:80px;height:52px;border-radius:5px;border:1px solid #e0d8cf;background:#f3f4f6;object-fit:cover;flex-shrink:0}
+.f-img-prev-bg{width:80px;height:52px;border-radius:5px;border:1px solid #e0d8cf;background:#f3f4f6;background-size:cover;background-position:center;flex-shrink:0}
+.f-upload{display:inline-flex;align-items:center;gap:5px;background:#f9f6f2;border:1.5px solid #e0d8cf;border-radius:5px;padding:5px 9px;font-family:inherit;font-size:11px;color:#666;cursor:pointer;transition:all .15s}
+.f-upload:hover{border-color:#e8750a;color:#e8750a}
+.f-upload input{display:none}
+.uploading-txt{font-size:10px;color:#e8750a;display:none}
+
+/* GALLERY */
+.gal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.gal-item{aspect-ratio:1;border-radius:5px;background:#f3f4f6;overflow:hidden;cursor:pointer;border:2px solid transparent;position:relative;transition:border-color .15s}
+.gal-item:hover{border-color:#e8750a}
+.gal-item img{width:100%;height:100%;object-fit:cover}
+.gal-item-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);font-size:7px;color:#fff;padding:2px 4px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gal-upload{aspect-ratio:1;border-radius:5px;border:1.5px dashed #d1ccc4;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:#aaa;gap:3px;transition:all .15s}
+.gal-upload:hover{border-color:#e8750a;color:#e8750a}
+.gal-upload input{display:none}
+.gal-empty{text-align:center;padding:20px;font-size:11px;color:#bbb}
+
+/* SORT LIST */
+.sort-list{display:flex;flex-direction:column;gap:6px}
+.sort-item{display:flex;align-items:center;gap:7px;background:#f9f6f2;border:1px solid #e5e0d8;border-radius:7px;padding:8px 9px;cursor:grab;user-select:none}
+.sort-item.drag-over{border-color:#e8750a;background:#fff4ed}
+.sort-item.dragging{opacity:.4}
+.sort-handle{color:#ccc;font-size:15px;cursor:grab;flex-shrink:0}
+.sort-thumb{width:36px;height:26px;border-radius:3px;background:#e5e0d8;flex-shrink:0;overflow:hidden}
+.sort-thumb img{width:100%;height:100%;object-fit:cover}
+.sort-info{flex:1;min-width:0}
+.sort-name{font-size:11px;font-weight:600;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sort-meta{font-size:9px;color:#aaa;margin-top:1px}
+.sort-toggle{width:30px;height:17px;border-radius:9px;background:#ddd;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0;border:none}
+.sort-toggle.on{background:#e8750a}
+.sort-toggle::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sort-toggle.on::after{transform:translateX(13px)}
+.sort-edit{background:none;border:1px solid #e0d8cf;border-radius:4px;color:#999;padding:3px 6px;font-size:10px;cursor:pointer;font-family:inherit;flex-shrink:0}
+.sort-edit:hover{border-color:#e8750a;color:#e8750a}
+.sort-del{background:none;border:none;color:#ddd;cursor:pointer;font-size:14px;flex-shrink:0}
+.sort-del:hover{color:#ef4444}
+.sort-add{width:100%;background:#fff;border:1.5px dashed #d1ccc4;border-radius:6px;padding:8px;font-family:inherit;font-size:11px;color:#aaa;cursor:pointer;margin-top:6px;transition:all .15s}
+.sort-add:hover{border-color:#e8750a;color:#e8750a}
+
+/* HISTORIAL */
+.hist-item{display:flex;gap:8px;padding:9px 0;border-bottom:1px solid #f0e9e0}
+.hist-item:last-child{border-bottom:none}
+.hist-item.undone{opacity:.35;text-decoration:line-through}
+.hist-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.hist-what{font-size:11px;font-weight:500;color:#111}
+.hist-when{font-size:10px;color:#aaa;margin-top:1px}
+.hist-undo{font-size:10px;color:#e8750a;cursor:pointer;border:none;background:none;font-family:inherit;padding:0;font-weight:600;flex-shrink:0}
 
 /* PREVIEW */
-.preview{flex:1;overflow-y:auto;background:#f4ede4;position:relative}
-.prev-toolbar{background:#111;padding:7px 12px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:100}
-.ptb-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.ptb-url{flex:1;background:rgba(255,255,255,.1);border-radius:4px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,.5);font-family:monospace}
-.ptb-refresh{background:rgba(255,255,255,.1);border:none;border-radius:4px;color:rgba(255,255,255,.6);padding:4px 8px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif}
-.ptb-refresh:hover{background:rgba(255,255,255,.2);color:#fff}
+.preview{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#d4cfc8}
+.prev-bar{background:#e8e3db;border-bottom:1px solid #d4cfc8;padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.prev-dots{display:flex;gap:4px}
+.prev-dot{width:9px;height:9px;border-radius:50%}
+.prev-url{flex:1;background:#fff;border:1px solid #d4cfc8;border-radius:4px;padding:3px 9px;font-size:10px;color:#aaa;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prev-reload{background:none;border:none;color:#999;cursor:pointer;font-size:13px;padding:0 4px}
+.prev-wrap{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:12px;transition:all .3s}
+.prev-wrap.mobile{padding:12px 40px}
+.prev-frame{width:100%;height:100%;overflow-y:auto;background:#f4ede4;border-radius:6px;transition:all .3s}
+.prev-frame.mobile{max-width:390px;border-radius:20px;border:8px solid #1f2937;box-shadow:0 0 0 2px #374151,0 20px 60px rgba(0,0,0,.3)}
 
 /* SECCIONES EDITABLES */
-.es{position:relative;transition:outline .15s}
-.es:hover{outline:2px solid rgba(232,117,10,.3);outline-offset:0}
-.es.active{outline:2px solid var(--ac);outline-offset:0}
-.edit-btn{position:absolute;top:8px;right:8px;background:var(--ac);color:#fff;border:none;border-radius:5px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;opacity:0;transition:opacity .15s;z-index:50;font-family:'Outfit',sans-serif;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.es{position:relative}
+.es:hover{outline:2px solid rgba(232,117,10,.3)}
+.es.active{outline:2px solid #e8750a}
+.edit-btn{position:absolute;top:7px;right:7px;background:#e8750a;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;opacity:0;transition:opacity .15s;z-index:50;font-family:inherit}
 .es:hover .edit-btn,.edit-btn.on{opacity:1}
 
-/* ═══ CATÁLOGO ESTILOS ═══ */
-.c-topbar{background:#111;color:rgba(255,255,255,.55);font-size:10px;text-align:center;padding:7px 12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.c-topbar strong{color:#c9a84c}
-.c-nav{background:#fff;border-bottom:2px solid #ede3d8;padding:0 14px;display:flex;align-items:center;justify-content:space-between;height:54px}
-.c-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
-.c-logo img{height:36px;object-fit:contain}
-.c-logo-txt{font-size:18px;font-weight:800;color:#111;letter-spacing:-.5px}
-.c-logo-txt span{color:#e8750a}
-.c-nav-wa{background:#e8750a;color:#fff;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px}
-.c-hero{min-height:280px;display:flex;align-items:flex-end;position:relative;overflow:hidden}
+/* CATÁLOGO MINI EN PREVIEW */
+.c-tb{background:#111;padding:6px 12px;font-size:9px;color:rgba(255,255,255,.5);text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.c-nav{background:#fff;border-bottom:2px solid #ede3d8;padding:0 12px;display:flex;align-items:center;justify-content:space-between;height:46px}
+.c-logo{font-size:18px;font-weight:800;letter-spacing:-.5px}
+.c-nwa{font-size:10px;font-weight:700;padding:6px 12px;border-radius:5px;color:#fff}
+.c-hero{min-height:200px;display:flex;align-items:flex-end;position:relative;overflow:hidden}
 .c-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:background-image .4s}
-.c-hero-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,16,8,.15) 0%,rgba(17,16,8,.82) 100%)}
-.c-hero-content{position:relative;z-index:2;padding:20px 20px 32px;width:100%}
-.c-hero-tag{display:inline-block;color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:3px;margin-bottom:10px}
-.c-hero-title{font-size:28px;font-weight:800;color:#fff;line-height:.95;letter-spacing:-1px;margin-bottom:8px}
-.c-hero-sub{font-size:12px;color:rgba(255,255,255,.65);margin-bottom:14px;max-width:280px;line-height:1.5}
-.c-hero-btn{display:inline-block;color:#fff;font-size:11px;font-weight:700;padding:9px 18px;border-radius:6px;text-decoration:none}
-.c-strip{overflow-x:auto;scrollbar-width:none}
-.c-strip::-webkit-scrollbar{display:none}
-.c-strip-inner{display:flex;min-width:max-content;padding:0 12px}
-.c-si{display:flex;align-items:center;gap:7px;padding:11px 18px;border-right:1px solid rgba(255,255,255,.08);font-size:11px;color:rgba(255,255,255,.6);flex-shrink:0}
-.c-si strong{color:#fff;display:block;font-size:12px}
-.c-si svg{flex-shrink:0}
-
-/* PROMOS */
-.c-promos-bg{padding:20px 0 16px}
-.c-promos-inner{padding:0 14px}
-.c-psec-tag{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
-.c-psec-title{font-size:20px;font-weight:800;line-height:.95;letter-spacing:-.5px;margin-bottom:14px}
-.c-pscroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
-.c-pscroll::-webkit-scrollbar{display:none}
-.c-pcard{flex-shrink:0;width:180px;height:108px;border-radius:10px;overflow:hidden;position:relative}
-.c-pov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px}
-.c-pbadge{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-bottom:6px;display:inline-block;align-self:flex-start;color:#fff}
-.c-ptitle{font-size:14px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.3px;margin-bottom:3px}
-.c-pdesc{font-size:10px;color:rgba(255,255,255,.7);line-height:1.3}
-
-/* CATS */
-.c-cats-section{padding:20px 14px}
-.c-sec-tag{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#e8750a;margin-bottom:4px}
-.c-sec-title{font-size:20px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:12px}
-.c-cats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.c-cat{border-radius:8px;overflow:hidden;position:relative;aspect-ratio:4/3;cursor:pointer}
+.c-hero-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,16,8,.1),rgba(17,16,8,.82))}
+.c-hero-c{position:relative;z-index:2;padding:14px 14px 18px}
+.c-htag{display:inline-block;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:2px;margin-bottom:7px;color:#fff}
+.c-htitle{font-size:22px;font-weight:800;color:#fff;line-height:.95;letter-spacing:-.5px;margin-bottom:5px}
+.c-hsub{font-size:10px;color:rgba(255,255,255,.65);margin-bottom:10px;line-height:1.4}
+.c-hbtn{display:inline-block;color:#fff;font-size:10px;font-weight:700;padding:7px 14px;border-radius:5px}
+.c-strip{display:flex;overflow:hidden;padding:0 12px}
+.c-si{display:flex;align-items:center;gap:6px;padding:8px 14px;border-right:1px solid rgba(255,255,255,.1);font-size:9px;color:rgba(255,255,255,.6);flex-shrink:0}
+.c-si strong{color:#fff;display:block}
+.c-promos-outer{padding:16px 12px}
+.c-ptag{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.c-ptitle{font-size:18px;font-weight:800;line-height:.95;letter-spacing:-.5px;margin-bottom:12px}
+.c-pscroll{display:flex;gap:10px;overflow:hidden}
+.c-pc{flex-shrink:0;width:160px;height:100px;border-radius:8px;overflow:hidden;position:relative}
+.c-pov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent)}
+.c-pb{font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:4px;display:inline-block;color:#fff;align-self:flex-start}
+.c-pt{font-size:13px;font-weight:800;color:#fff;line-height:1}
+.c-cats-s{padding:14px 12px}
+.c-csec{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.c-ctitle{font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px}
+.c-cats-g{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.c-cat{border-radius:7px;overflow:hidden;position:relative;aspect-ratio:4/3}
 .c-cat:first-child{grid-column:1/-1;aspect-ratio:16/7}
-.c-cat-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .4s}
-.c-cat:hover .c-cat-bg{transform:scale(1.05)}
-.c-cat-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0%,transparent 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:12px}
-.c-cat-cnt{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
-.c-cat-name{font-size:16px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.3px}
-.c-cat:first-child .c-cat-name{font-size:22px}
-
-/* BANNER */
-.c-banner{height:150px;position:relative;overflow:hidden;display:flex;align-items:center;cursor:pointer}
-.c-banner-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:background-image .3s}
-.c-banner-ov{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.82) 40%,rgba(0,0,0,.2))}
-.c-banner-c{position:relative;z-index:2;padding:0 20px}
-.c-btag{display:inline-block;color:#fff;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:2px;margin-bottom:6px}
-.c-btitle{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:4px;line-height:1}
-.c-bsub{font-size:11px;color:rgba(255,255,255,.7);margin-bottom:10px}
-.c-bbtn{display:inline-block;background:#fff;color:#111;font-size:10px;font-weight:700;padding:6px 14px;border-radius:5px;text-decoration:none}
-
-/* PRODS */
-.c-prods-section{background:var(--gr);padding:20px 14px}
-.c-search{width:100%;background:#fff;border:1.5px solid var(--gr3);border-radius:7px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--tx);outline:none;margin-bottom:12px}
-.c-prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.c-prod{background:#fff;border:1px solid var(--gr3);border-radius:9px;overflow:hidden}
-.c-prod-img{aspect-ratio:1;background:var(--gr2);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden}
-.c-prod-img img{width:100%;height:100%;object-fit:cover}
-.c-prod-body{padding:10px}
-.c-prod-cat{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#e8750a;margin-bottom:3px}
-.c-prod-name{font-size:12px;font-weight:700;color:#111;line-height:1.2;margin-bottom:3px}
-.c-prod-marca{font-size:10px;color:#9ca3af;margin-bottom:6px}
-.c-prod-price{font-size:16px;font-weight:800;color:#111;line-height:1}
-.c-prod-cuotas{font-size:10px;color:#4b5563;margin-top:2px;margin-bottom:7px}
-.c-prod-wa{background:#22c55e;color:#fff;font-size:10px;font-weight:700;padding:7px;border-radius:5px;border:none;width:100%;cursor:pointer;font-family:'Outfit',sans-serif}
-
-/* FIN */
-.c-fin-section{padding:20px 14px}
-.c-fin-title{font-size:22px;font-weight:800;line-height:.9;letter-spacing:-.5px;margin-bottom:14px}
-.c-cuotas-row{display:flex;gap:8px;margin-bottom:16px}
-.c-cuota{flex:1;border-radius:8px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.1)}
-.c-cuota-num{font-size:22px;font-weight:800;line-height:1}
-.c-cuota-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
-.c-cuota-sub{font-size:10px;margin-top:3px}
-.c-tarj-list{display:flex;flex-direction:column;gap:8px}
-.c-trow{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px}
-.c-tname{display:flex;align-items:center;gap:8px;font-size:12px}
-.c-tico{width:36px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0}
-.c-tcuotas{font-size:14px;font-weight:700}
-
-/* MARCAS */
-.c-marcas-section{background:#fff;padding:20px 14px;border-top:1px solid var(--gr3);border-bottom:1px solid var(--gr3)}
-.c-marcas-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;text-align:center;margin-bottom:14px}
-.c-marcas-row{display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:center}
-.c-marca{font-size:16px;font-weight:800;color:#e5e7eb;letter-spacing:-.3px}
-
-/* CONTACTO */
-.c-cont-section{padding:20px 14px}
-.c-cont-title{font-size:22px;font-weight:800;line-height:.9;letter-spacing:-.5px;margin-bottom:16px}
-.c-ci{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
-.c-ci-ico{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.c-ci-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.8px}
-.c-ci-val{font-size:13px;font-weight:500;margin-top:2px}
-.c-wa-big{display:flex;align-items:center;gap:10px;background:#22c55e;color:#fff;padding:14px 18px;border-radius:9px;font-size:14px;font-weight:700;text-decoration:none;margin-top:14px}
-.c-footer-section{background:#080806;padding:20px 14px;text-align:center}
-.c-flogo{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px}
-.c-flogo span{color:#e8750a}
-.c-fsub{font-size:10px;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.c-cat-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.c-cat-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72),transparent 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
+.c-cat-name{font-size:12px;font-weight:800;color:#fff}
+.c-cat:first-child .c-cat-name{font-size:16px}
+.c-banner{height:130px;position:relative;overflow:hidden;display:flex;align-items:center}
+.c-bbg{position:absolute;inset:0;background-size:cover;background-position:center;transition:background-image .3s}
+.c-bov{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.82) 40%,rgba(0,0,0,.2))}
+.c-bc{position:relative;z-index:2;padding:0 16px}
+.c-btag{display:inline-block;font-size:7px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-bottom:5px;color:#fff}
+.c-btitle{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1;margin-bottom:3px}
+.c-bsub{font-size:10px;color:rgba(255,255,255,.7)}
+.c-prods-s{background:#f3f4f6;padding:14px 12px}
+.c-prod-g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.c-prod{background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
+.c-pimg{height:70px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:28px}
+.c-pbody{padding:8px}
+.c-pcat{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.c-pname{font-size:11px;font-weight:700;color:#111;line-height:1.2}
+.c-pprice{font-size:15px;font-weight:800;color:#111;margin-top:4px}
+.c-pwa{font-size:9px;font-weight:700;padding:5px;border-radius:4px;border:none;width:100%;margin-top:6px;color:#fff;cursor:pointer;font-family:inherit}
+.c-fin-s{padding:14px 12px}
+.c-fin-title{font-size:18px;font-weight:800;line-height:.9;letter-spacing:-.5px;margin-bottom:10px}
+.c-cuotas{display:flex;gap:6px}
+.c-cuota{flex:1;border-radius:7px;padding:8px;text-align:center;border:1px solid rgba(255,255,255,.1)}
+.c-cnum{font-size:18px;font-weight:800;line-height:1}
+.c-clbl{font-size:7px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.c-cont-s{padding:14px 12px}
+.c-cont-title{font-size:18px;font-weight:800;line-height:.9;letter-spacing:-.5px;margin-bottom:12px}
+.c-ci{display:flex;gap:8px;margin-bottom:9px;align-items:flex-start}
+.c-ci-ico{width:30px;height:30px;border-radius:6px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.c-ci-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.5px}
+.c-ci-val{font-size:11px;font-weight:500;margin-top:1px}
 
 /* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:#166534;color:#dcfce7;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:9999;display:flex;align-items:center;gap:8px}
+.toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:9999;display:flex;align-items:center;gap:8px}
 .toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{background:#166534;color:#dcfce7}
 .toast.err{background:#991b1b;color:#fee2e2}
+.toast.info{background:#1e3a5f;color:#bfdbfe}
 </style>
 </head>
 <body>
@@ -226,671 +225,941 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif}
 <!-- LOGIN -->
 <div id="loginWrap">
   <div class="lbox">
-    <div class="llogo">
-      <img src="https://egrsravspwpjstxiyvfk.supabase.co/storage/v1/object/public/catalogo-assets/LOGO%20FERRE%20-%20copia.bmp" onerror="this.style.display='none'" alt="">
-      <div class="llogo-txt">FAVARO<span>.</span></div>
-    </div>
-    <div class="lsub">Editor visual del catálogo</div>
+    <div class="llogo">FAVARO<span>.</span></div>
+    <div class="lsub">Editor visual del catálogo v2</div>
     <label class="ll">Email</label>
     <input class="li" type="email" id="lemail" value="diegoxgil@gmail.com">
     <label class="ll">Contraseña</label>
     <input class="li" type="password" id="lpass" onkeydown="if(event.key==='Enter')login()">
-    <button class="lbtn" onclick="login()">Ingresar al editor</button>
+    <button class="lbtn" onclick="login()">Ingresar</button>
     <div class="lerr" id="lerr"></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none;flex-direction:column;height:100%">
+<div id="app">
 
   <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="tb-left">
-      <div class="tb-logo"><img src="https://egrsravspwpjstxiyvfk.supabase.co/storage/v1/object/public/catalogo-assets/LOGO%20FERRE%20-%20copia.bmp" onerror="this.style.display='none'" alt=""></div>
-      <span class="tb-name">FAVARO<span>.</span></span>
-      <span class="tb-badge">Editor visual</span>
+  <div class="tb">
+    <div class="tb-l">
+      <div class="tb-logo">FAVARO<span>.</span></div>
+      <div class="tb-badge">Editor v2</div>
     </div>
-    <div class="tb-right">
-      <a class="tb-link" href="catalogo.html" target="_blank">Ver catálogo público →</a>
+    <div class="tb-r">
+      <a class="tb-link" href="catalogo.html" target="_blank">Ver catálogo →</a>
       <button class="tb-out" onclick="logout()">Salir</button>
     </div>
   </div>
 
-  <!-- EDITOR -->
-  <div class="editor">
+  <!-- SUBTOOLBAR -->
+  <div class="stb">
+    <div class="dev-grp">
+      <button class="dev-btn on" onclick="setDevice('desktop',this)">🖥 Desktop</button>
+      <button class="dev-btn" onclick="setDevice('mobile',this)">📱 Mobile</button>
+    </div>
+    <div class="stb-sep"></div>
+    <button class="stb-btn" onclick="openTab('promos')">🔥 Promos</button>
+    <button class="stb-btn" onclick="openTab('banners')">🏷 Banners</button>
+    <button class="stb-btn" onclick="openTab('cats')">📂 Categorías</button>
+    <button class="stb-btn" onclick="openTab('gallery')">🖼 Galería</button>
+    <div class="stb-sep"></div>
+    <button class="stb-btn" onclick="openTab('hist')">↩ Historial</button>
+    <div class="as-indicator"><div class="as-dot" id="asDot"></div><span id="asLabel">Guardado</span></div>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="layout">
 
     <!-- PANEL -->
     <div class="panel">
-      <div class="panel-top">
-        <span class="panel-icon">✏️</span>
-        <span class="panel-title" id="panelTitle">Hacé click en ✏ Editar</span>
-        <button class="panel-save" id="btnSave" onclick="guardarSeccion()">Guardar</button>
+      <div class="panel-tabs">
+        <button class="ptab on" id="ptab-edit" onclick="switchPTab('edit',this)">✏ Editar</button>
+        <button class="ptab" id="ptab-gallery" onclick="switchPTab('gallery',this)">🖼 Fotos</button>
+        <button class="ptab" id="ptab-hist" onclick="switchPTab('hist',this)">↩ Historial</button>
+      </div>
+      <div class="panel-head">
+        <span class="panel-head-title" id="panelTitle">Hacé click en ✏ Editar</span>
+        <button class="btn-guardar" id="btnGuardar" onclick="guardarSeccion()">Guardar</button>
       </div>
       <div class="panel-body" id="panelBody">
-        <div class="panel-empty">
-          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-          Pasá el mouse sobre cualquier sección del catálogo y hacé click en <strong>✏ Editar</strong>.<br><br>Los cambios se ven en tiempo real.
-        </div>
-      </div>
-    </div>
 
-    <!-- PREVIEW -->
-    <div class="preview" id="preview">
-      <div class="prev-toolbar">
-        <div class="ptb-dot" style="background:#ef4444"></div>
-        <div class="ptb-dot" style="background:#f59e0b"></div>
-        <div class="ptb-dot" style="background:#22c55e"></div>
-        <div class="ptb-url" id="ptbUrl">ferreteria-favaro.vercel.app/catalogo.html</div>
-        <button class="ptb-refresh" onclick="recargarPreview()">↻ Recargar</button>
-      </div>
-
-      <!-- TOPBAR CAT -->
-      <div class="es" id="sec-negocio">
-        <button class="edit-btn" onclick="editSec('negocio',this)">✏ Editar negocio</button>
-        <div class="c-topbar" id="v-topbar">🟢 Abierto ahora · Lun–Sáb <strong id="v-hsem">8:00–20:00</strong> · 📦 Envíos Córdoba Capital</div>
-        <div class="c-nav">
-          <a href="#" class="c-logo">
-            <img id="v-logo" src="https://egrsravspwpjstxiyvfk.supabase.co/storage/v1/object/public/catalogo-assets/LOGO%20FERRE%20-%20copia.bmp" onerror="this.style.display='none'" alt="" style="height:36px;object-fit:contain">
-            <span class="c-logo-txt" id="v-logotext">FAVARO<span style="color:#e8750a">.</span></span>
-          </a>
-          <a href="#" class="c-nav-wa">Pedir por WA</a>
-        </div>
-      </div>
-
-      <!-- HERO -->
-      <div class="es" id="sec-hero">
-        <button class="edit-btn" onclick="editSec('hero',this)">✏ Editar hero</button>
-        <div class="c-hero">
-          <div class="c-hero-bg" id="v-hero-bg" style="background-image:url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&q=75')"></div>
-          <div class="c-hero-ov"></div>
-          <div class="c-hero-content">
-            <div class="c-hero-tag" id="v-hero-tag" style="background:#e8750a">Catálogo 2025 · Córdoba</div>
-            <div class="c-hero-title" id="v-hero-title">TODO LO QUE TU OBRA <span id="v-hero-em" style="color:#e8750a">NECESITA</span></div>
-            <div class="c-hero-sub" id="v-hero-sub">Herramientas, pinturas y materiales con la garantía de años de confianza.</div>
-            <a href="#" class="c-hero-btn" id="v-hero-btn" style="background:#e8750a">Ver catálogo</a>
+        <!-- EDIT PANEL -->
+        <div id="pp-edit">
+          <div class="panel-empty">
+            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            Pasá el mouse sobre cualquier<br>sección del catálogo<br>y hacé click en <strong>✏ Editar</strong>
+          </div>
+          <div style="height:24px"></div>
+          <div class="f-sec">Colores globales</div>
+          <div class="f-field"><div class="f-label">Color principal (botones, acentos)</div><div class="f-color-row"><div class="f-cdot" id="cd-ac" style="background:#e8750a"><input type="color" value="#e8750a" oninput="liveColor('--ac',this.value,'cd-ac','cv-ac');markUnsaved()"></div><span class="f-cval" id="cv-ac">#e8750a</span></div></div>
+          <div class="f-field"><div class="f-label">Color fondo general</div><div class="f-color-row"><div class="f-cdot" id="cd-fondo" style="background:#f9f6f2"><input type="color" value="#f9f6f2" oninput="liveColor('--fondo',this.value,'cd-fondo','cv-fondo');markUnsaved()"></div><span class="f-cval" id="cv-fondo">#f9f6f2</span></div></div>
+          <div class="f-field"><div class="f-label">Color oscuro (nav, footer)</div><div class="f-color-row"><div class="f-cdot" id="cd-dk" style="background:#111827"><input type="color" value="#111827" oninput="liveColor('--dk',this.value,'cd-dk','cv-dk');markUnsaved()"></div><span class="f-cval" id="cv-dk">#111827</span></div></div>
+          <div class="f-field"><div class="f-label">Botón WhatsApp</div><div class="f-color-row"><div class="f-cdot" id="cd-wa" style="background:#22c55e"><input type="color" value="#22c55e" oninput="liveColor('--btn-wa-bg',this.value,'cd-wa','cv-wa');markUnsaved()"></div><span class="f-cval" id="cv-wa">#22c55e</span></div></div>
+          <div class="f-field"><div class="f-label">Fondo promos</div><div class="f-color-row"><div class="f-cdot" id="cd-promos" style="background:#1e1b14"><input type="color" value="#1e1b14" oninput="liveColor('--promos-bg',this.value,'cd-promos','cv-promos');markUnsaved()"></div><span class="f-cval" id="cv-promos">#1e1b14</span></div></div>
+          <div class="f-field"><div class="f-label">Fondo financiación</div><div class="f-color-row"><div class="f-cdot" id="cd-fin" style="background:#111827"><input type="color" value="#111827" oninput="liveColor('--fin-bg',this.value,'cd-fin','cv-fin');markUnsaved()"></div><span class="f-cval" id="cv-fin">#111827</span></div></div>
+          <div class="f-field"><div class="f-label">Acento financiación (cuotas)</div><div class="f-color-row"><div class="f-cdot" id="cd-finacc" style="background:#c9a84c"><input type="color" value="#c9a84c" oninput="liveColor('--fin-accent',this.value,'cd-finacc','cv-finacc');markUnsaved()"></div><span class="f-cval" id="cv-finacc">#c9a84c</span></div></div>
+          <div class="f-field"><div class="f-label">Tag del banner</div><div class="f-color-row"><div class="f-cdot" id="cd-bantag" style="background:#dc2626"><input type="color" value="#dc2626" oninput="liveColor('--banner-tag-bg',this.value,'cd-bantag','cv-bantag');markUnsaved()"></div><span class="f-cval" id="cv-bantag">#dc2626</span></div></div>
+          <div class="f-sec">Tipografía</div>
+          <div class="f-field">
+            <div class="f-label">Fuente de títulos</div>
+            <select class="f-input" id="sel-font" onchange="liveFont(this.value);markUnsaved()">
+              <option value="Outfit">Outfit (actual)</option>
+              <option value="Big Shoulders Display">Big Shoulders Display</option>
+              <option value="Barlow Condensed">Barlow Condensed</option>
+              <option value="Montserrat">Montserrat</option>
+            </select>
           </div>
         </div>
-      </div>
 
-      <!-- STRIP -->
-      <div class="es" id="sec-strip">
-        <button class="edit-btn" onclick="editSec('strip',this)">✏ Editar strip</button>
-        <div class="c-strip" style="background:#111">
-          <div class="c-strip-inner" id="v-strip">
-            <div class="c-si"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><div><strong>12 cuotas sin interés</strong>Visa · Master · Naranja</div></div>
-            <div class="c-si"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg><div><strong>Envíos a domicilio</strong>Córdoba Capital</div></div>
-            <div class="c-si"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><div><strong id="v-strip-hs">Lun–Vie 8–20hs</strong><span id="v-strip-hsab">Sáb 8–13hs</span></div></div>
-            <div class="c-si"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><div><strong>Efectivo 10% OFF</strong>Transferencia 5% OFF</div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PROMOS -->
-      <div class="es" id="sec-promos">
-        <button class="edit-btn" onclick="editSec('promos',this)">✏ Editar promos</button>
-        <div class="c-promos-bg" style="background:#1e1b12">
-          <div class="c-promos-inner">
-            <div class="c-psec-tag" style="color:#c9a84c">Este mes</div>
-            <div class="c-psec-title" style="color:#fff">PROMOCIONES</div>
-            <div class="c-pscroll" id="v-promos">
-              <div class="c-pcard"><div style="position:absolute;inset:0;background:linear-gradient(135deg,#1e3a5f,#0f1f35)"></div><div class="c-pov" style="background:linear-gradient(to top,rgba(0,0,0,.9),transparent)"><span class="c-pbadge" style="background:#e8750a">🔥 Promo</span><div class="c-ptitle">BOSCH 20% OFF</div><div class="c-pdesc">En toda la línea</div></div></div>
-              <div class="c-pcard"><div style="position:absolute;inset:0;background:linear-gradient(135deg,#3d1a00,#1a0a00)"></div><div class="c-pov" style="background:linear-gradient(to top,rgba(0,0,0,.9),transparent)"><span class="c-pbadge" style="background:#c9a84c">⭐ Oferta</span><div class="c-ptitle">ALBA 2da lata 50%</div><div class="c-pdesc">Todo el mes</div></div></div>
-              <div class="c-pcard"><div style="position:absolute;inset:0;background:linear-gradient(135deg,#0f2b1a,#061309)"></div><div class="c-pov" style="background:linear-gradient(to top,rgba(0,0,0,.9),transparent)"><span class="c-pbadge" style="background:#22c55e">💳 Cuotas</span><div class="c-ptitle">12 CUOTAS S/I</div><div class="c-pdesc">Visa · Master · Naranja</div></div></div>
+        <!-- GALLERY PANEL -->
+        <div id="pp-gallery" style="display:none">
+          <div class="f-sec" style="margin-top:0">Fotos subidas al bucket</div>
+          <div class="gal-grid" id="galGrid">
+            <div class="gal-upload" onclick="document.getElementById('gal-upload-input').click()">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Subir foto
+              <input type="file" id="gal-upload-input" accept="image/*" style="display:none" onchange="uploadGallery(this)">
             </div>
           </div>
+          <div style="font-size:10px;color:#aaa;text-align:center;margin-top:10px" id="galHint">Click en una foto para copiar su URL</div>
         </div>
-      </div>
 
-      <!-- CATS -->
-      <div class="es" id="sec-cats">
-        <button class="edit-btn" onclick="editSec('cats',this)">✏ Editar categorías</button>
-        <div class="c-cats-section" style="background:#f4ede4">
-          <div class="c-sec-tag">Departamentos</div>
-          <div class="c-sec-title">EXPLORÁ POR RUBRO</div>
-          <div class="c-cats-grid" id="v-cats-grid">
-            <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&q=70')"></div><div class="c-cat-ov"><div class="c-cat-cnt">+85 productos</div><div class="c-cat-name">HERRAMIENTAS</div></div></div>
-            <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&q=70')"></div><div class="c-cat-ov"><div class="c-cat-cnt">+40 productos</div><div class="c-cat-name">PINTURAS</div></div></div>
-            <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=70')"></div><div class="c-cat-ov"><div class="c-cat-cnt">+60 productos</div><div class="c-cat-name">ELECTRICIDAD</div></div></div>
-            <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=70')"></div><div class="c-cat-ov"><div class="c-cat-cnt">+35 productos</div><div class="c-cat-name">PLOMERÍA</div></div></div>
+        <!-- HIST PANEL -->
+        <div id="pp-hist" style="display:none">
+          <div class="f-sec" style="margin-top:0">Cambios recientes</div>
+          <div id="histList"><div class="panel-empty" style="height:80px">Sin cambios aún</div></div>
+        </div>
+
+        <!-- PROMOS PANEL -->
+        <div id="pp-promos" style="display:none">
+          <div class="f-sec" style="margin-top:0">Arrastrá para reordenar · Toggle para activar</div>
+          <div class="sort-list" id="promosList"></div>
+          <button class="sort-add" onclick="agregarPromo()">+ Agregar promo</button>
+        </div>
+
+        <!-- BANNERS PANEL -->
+        <div id="pp-banners" style="display:none">
+          <div class="f-sec" style="margin-top:0">Solo el primero activo se muestra</div>
+          <div class="sort-list" id="bannersList"></div>
+          <button class="sort-add" onclick="agregarBanner()">+ Agregar banner</button>
+        </div>
+
+        <!-- CATS PANEL -->
+        <div id="pp-cats" style="display:none">
+          <div class="f-sec" style="margin-top:0">Arrastrá para reordenar · Toggle para mostrar</div>
+          <div class="sort-list" id="catsList"></div>
+          <button class="sort-add" onclick="agregarCat()">+ Agregar categoría</button>
+        </div>
+
+      </div><!-- /panel-body -->
+    </div><!-- /panel -->
+
+    <!-- PREVIEW -->
+    <div class="preview">
+      <div class="prev-bar">
+        <div class="prev-dots">
+          <div class="prev-dot" style="background:#ef4444"></div>
+          <div class="prev-dot" style="background:#f59e0b"></div>
+          <div class="prev-dot" style="background:#22c55e"></div>
+        </div>
+        <div class="prev-url">ferreteria-favaro.vercel.app/catalogo.html</div>
+        <button class="prev-reload" onclick="reloadPreview()" title="Recargar preview">↻</button>
+      </div>
+      <div class="prev-wrap" id="prevWrap">
+        <div class="prev-frame" id="prevFrame">
+
+          <!-- NEGOCIO -->
+          <div class="es" id="sec-negocio">
+            <button class="edit-btn" onclick="editSec('negocio',this)">✏ Editar</button>
+            <div class="c-tb" id="v-topbar">🟢 Abierto · <span id="v-hsem">Lun–Vie 8–20hs</span> · 📦 Envíos Córdoba</div>
+            <div class="c-nav">
+              <div class="c-logo" id="v-logo">
+                <img id="v-logo-img" src="" style="height:28px;object-fit:contain;display:none" alt="">
+                <span id="v-logo-txt" style="color:#111">FAVARO<span style="color:#e8750a">.</span></span>
+              </div>
+              <div class="c-nwa" id="v-nav-wa" style="background:#22c55e">Pedir por WA</div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- BANNER -->
-      <div class="es" id="sec-banner">
-        <button class="edit-btn" onclick="editSec('banner',this)">✏ Editar banner</button>
-        <div class="c-banner">
-          <div class="c-banner-bg" id="v-banner-bg" style="background-image:url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=70')"></div>
-          <div class="c-banner-ov"></div>
-          <div class="c-banner-c">
-            <div class="c-btag" id="v-btag" style="background:#dc2626">Oferta limitada</div>
-            <div class="c-btitle" id="v-btitle">LIQUIDACIÓN FIN DE TEMPORADA</div>
-            <div class="c-bsub" id="v-bsub">Hasta 30% OFF en herramientas seleccionadas</div>
-            <a href="#" class="c-bbtn" id="v-bbtn">Consultar por WhatsApp →</a>
+          <!-- HERO -->
+          <div class="es" id="sec-hero">
+            <button class="edit-btn" onclick="editSec('hero',this)">✏ Editar</button>
+            <div class="c-hero">
+              <div class="c-hero-bg" id="v-hero-bg" style="background-image:url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&q=70')"></div>
+              <div class="c-hero-ov"></div>
+              <div class="c-hero-c">
+                <div class="c-htag" id="v-hero-tag" style="background:#e8750a">Catálogo 2025 · Córdoba</div>
+                <div class="c-htitle" id="v-hero-title">TODO LO QUE TU OBRA <span id="v-hero-em" style="color:#e8750a">NECESITA</span></div>
+                <div class="c-hsub" id="v-hero-sub">Herramientas, pinturas y materiales de calidad.</div>
+                <div class="c-hbtn" id="v-hero-btn" style="background:#e8750a">Ver catálogo →</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- PRODUCTOS -->
-      <div class="es" id="sec-prods">
-        <button class="edit-btn" onclick="editSec('prods',this)">✏ Ver productos</button>
-        <div class="c-prods-section">
-          <div class="c-sec-tag">Catálogo completo</div>
-          <div class="c-sec-title" id="v-prods-title">TODOS LOS PRODUCTOS</div>
-          <input class="c-search" placeholder="Buscar productos, marcas..." disabled>
-          <div class="c-prod-grid" id="v-prods-grid">
-            <div class="c-prod"><div class="c-prod-img">🔧</div><div class="c-prod-body"><div class="c-prod-cat">Herramientas</div><div class="c-prod-name">Taladro Percutor 13mm</div><div class="c-prod-marca">Bosch</div><div class="c-prod-price">$68.000</div><div class="c-prod-cuotas"><strong style="color:#e8750a">12x</strong> $5.666 s/i</div><button class="c-prod-wa">Consultar por WhatsApp</button></div></div>
-            <div class="c-prod"><div class="c-prod-img">🎨</div><div class="c-prod-body"><div class="c-prod-cat">Pinturas</div><div class="c-prod-name">Látex Interior 10L</div><div class="c-prod-marca">Alba</div><div class="c-prod-price">$24.500</div><div class="c-prod-cuotas"><strong style="color:#e8750a">12x</strong> $2.041 s/i</div><button class="c-prod-wa">Consultar por WhatsApp</button></div></div>
-            <div class="c-prod"><div class="c-prod-img">⚡</div><div class="c-prod-body"><div class="c-prod-cat">Electricidad</div><div class="c-prod-name">Cable 2.5mm x100m</div><div class="c-prod-marca">Prysmian</div><div class="c-prod-price">$18.900</div><div class="c-prod-cuotas"><strong style="color:#e8750a">12x</strong> $1.575 s/i</div><button class="c-prod-wa">Consultar por WhatsApp</button></div></div>
-            <div class="c-prod"><div class="c-prod-img">🔩</div><div class="c-prod-body"><div class="c-prod-cat">Plomería</div><div class="c-prod-name">Llave de Paso 1/2"</div><div class="c-prod-marca">FV</div><div class="c-prod-price">$3.400</div><div class="c-prod-cuotas"><strong style="color:#e8750a">12x</strong> $283 s/i</div><button class="c-prod-wa">Consultar por WhatsApp</button></div></div>
+          <!-- STRIP -->
+          <div class="es" id="sec-strip">
+            <button class="edit-btn" onclick="editSec('strip',this)">✏ Editar</button>
+            <div class="c-strip" id="v-strip" style="background:#111">
+              <div class="c-si"><strong id="v-strip-cuotas">12 cuotas sin interés</strong>Visa · Master · Naranja</div>
+              <div class="c-si"><strong>Envíos</strong>Córdoba Capital</div>
+              <div class="c-si"><strong id="v-strip-hs">Lun–Vie 8–20hs</strong><span id="v-strip-hsab">Sáb 8–13hs</span></div>
+              <div class="c-si"><strong>Efectivo</strong>10% OFF</div>
+            </div>
           </div>
-          <div style="text-align:center;padding:12px;font-size:11px;color:#9ca3af">Los productos se cargan automáticamente desde tu sistema</div>
-        </div>
-      </div>
 
-      <!-- FINANCIACIÓN -->
-      <div class="es" id="sec-fin">
-        <button class="edit-btn" onclick="editSec('fin',this)">✏ Editar financiación</button>
-        <div class="c-fin-section" style="background:#111">
-          <div class="c-fin-title" style="color:#fff">FINANCIÁ TU <span id="v-fin-em" style="color:#c9a84c">COMPRA</span></div>
-          <div class="c-cuotas-row" id="v-cuotas">
-            <div class="c-cuota" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)"><div class="c-cuota-num" style="color:#c9a84c">3x</div><div class="c-cuota-lbl" style="color:rgba(255,255,255,.4)">cuotas</div><div class="c-cuota-sub" style="color:rgba(255,255,255,.6)">sin interés</div></div>
-            <div class="c-cuota" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)"><div class="c-cuota-num" style="color:#c9a84c">6x</div><div class="c-cuota-lbl" style="color:rgba(255,255,255,.4)">cuotas</div><div class="c-cuota-sub" style="color:rgba(255,255,255,.6)">sin interés</div></div>
-            <div class="c-cuota" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)"><div class="c-cuota-num" style="color:#c9a84c" id="v-maxcuota">12x</div><div class="c-cuota-lbl" style="color:rgba(255,255,255,.4)">cuotas</div><div class="c-cuota-sub" style="color:rgba(255,255,255,.6)">sin interés</div></div>
+          <!-- PROMOS -->
+          <div class="es" id="sec-promos">
+            <button class="edit-btn" onclick="openTab('promos')">✏ Editar</button>
+            <div class="c-promos-outer" id="v-promos-outer" style="background:#1e1b14">
+              <div style="padding:0 12px">
+                <div class="c-ptag" id="v-promos-tag" style="color:#c9a84c">Este mes</div>
+                <div class="c-ptitle" id="v-promos-title" style="color:#fff">PROMOCIONES</div>
+                <div class="c-pscroll" id="v-promos-scroll"></div>
+              </div>
+            </div>
           </div>
-          <div class="c-tarj-list" id="v-tarj-list">
-            <div class="c-trow" style="background:rgba(255,255,255,.06)"><div class="c-tname" style="color:rgba(255,255,255,.8)"><div class="c-tico" style="background:linear-gradient(135deg,#1a1f71,#1565c0)">VISA</div>Visa</div><div class="c-tcuotas" style="color:#c9a84c">12x s/i</div></div>
-            <div class="c-trow" style="background:rgba(255,255,255,.06)"><div class="c-tname" style="color:rgba(255,255,255,.8)"><div class="c-tico" style="background:linear-gradient(135deg,#eb001b,#f79e1b)">MC</div>Mastercard</div><div class="c-tcuotas" style="color:#c9a84c">12x s/i</div></div>
-            <div class="c-trow" style="background:rgba(255,255,255,.06)"><div class="c-tname" style="color:rgba(255,255,255,.8)"><div class="c-tico" style="background:linear-gradient(135deg,#ff6600,#ff3300)">NRJ</div>Naranja X</div><div class="c-tcuotas" style="color:#c9a84c">6x s/i</div></div>
-            <div class="c-trow" style="background:rgba(255,255,255,.06)"><div class="c-tname" style="color:rgba(255,255,255,.8)"><div class="c-tico" style="background:#1a1a1a">EFC</div>Efectivo</div><div class="c-tcuotas" style="color:#22c55e">10% OFF</div></div>
-            <div class="c-trow" style="background:rgba(255,255,255,.06)"><div class="c-tname" style="color:rgba(255,255,255,.8)"><div class="c-tico" style="background:linear-gradient(135deg,#00bcd4,#0097a7)">MODO</div>MODO / Transf.</div><div class="c-tcuotas" style="color:#22c55e">5% OFF</div></div>
+
+          <!-- CATS -->
+          <div class="es" id="sec-cats">
+            <button class="edit-btn" onclick="openTab('cats')">✏ Editar</button>
+            <div class="c-cats-s" style="background:#f4ede4">
+              <div class="c-csec" style="color:#e8750a">Departamentos</div>
+              <div class="c-ctitle" style="color:#111">EXPLORÁ POR RUBRO</div>
+              <div class="c-cats-g" id="v-cats-grid">
+                <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=300&q=60')"></div><div class="c-cat-ov"><div class="c-cat-name">HERRAMIENTAS</div></div></div>
+                <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=200&q=60')"></div><div class="c-cat-ov"><div class="c-cat-name">PINTURAS</div></div></div>
+                <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&q=60')"></div><div class="c-cat-ov"><div class="c-cat-name">ELECTRICIDAD</div></div></div>
+                <div class="c-cat"><div class="c-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=60')"></div><div class="c-cat-ov"><div class="c-cat-name">PLOMERÍA</div></div></div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- MARCAS -->
-      <div class="es" id="sec-marcas">
-        <button class="edit-btn" onclick="editSec('marcas',this)">✏ Editar marcas</button>
-        <div class="c-marcas-section">
-          <div class="c-marcas-label">Marcas que trabajamos</div>
-          <div class="c-marcas-row" id="v-marcas-row">
-            <span class="c-marca">BOSCH</span><span class="c-marca">STANLEY</span><span class="c-marca">NORTON</span><span class="c-marca">ALBA</span><span class="c-marca">SINTEPLAST</span><span class="c-marca">FV</span><span class="c-marca">3M</span>
+          <!-- BANNER -->
+          <div class="es" id="sec-banner">
+            <button class="edit-btn" onclick="openTab('banners')">✏ Editar</button>
+            <div class="c-banner">
+              <div class="c-bbg" id="v-banner-bg" style="background-image:url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=60')"></div>
+              <div class="c-bov"></div>
+              <div class="c-bc">
+                <div class="c-btag" id="v-btag" style="background:#dc2626">Oferta limitada</div>
+                <div class="c-btitle" id="v-btitle">LIQUIDACIÓN FIN DE TEMPORADA</div>
+                <div class="c-bsub" id="v-bsub">Hasta 30% OFF en herramientas</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- CONTACTO -->
-      <div class="es" id="sec-cont">
-        <button class="edit-btn" onclick="editSec('cont',this)">✏ Editar contacto</button>
-        <div class="c-cont-section" style="background:#111">
-          <div class="c-cont-title" style="color:#fff">ENCONTRANOS Y <span style="color:#e8750a">HABLANOS</span></div>
-          <div class="c-ci"><div class="c-ci-ico" style="background:rgba(255,255,255,.07);color:#e8750a"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg></div><div><div class="c-ci-lbl" style="color:rgba(255,255,255,.4)">Dirección</div><div class="c-ci-val" id="v-dir" style="color:rgba(255,255,255,.85)">Av. Colón 1234, Córdoba Capital</div></div></div>
-          <div class="c-ci"><div class="c-ci-ico" style="background:rgba(255,255,255,.07);color:#e8750a"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div><div><div class="c-ci-lbl" style="color:rgba(255,255,255,.4)">WhatsApp</div><div class="c-ci-val" id="v-tel" style="color:rgba(255,255,255,.85)">351-XXX-XXXX</div></div></div>
-          <div class="c-ci"><div class="c-ci-ico" style="background:rgba(255,255,255,.07);color:#e8750a"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><div class="c-ci-lbl" style="color:rgba(255,255,255,.4)">Horarios</div><div class="c-ci-val" style="color:rgba(255,255,255,.85)">Lun–Vie <span id="v-h1">8:00–20:00</span> · Sáb <span id="v-h2">8:00–13:00</span></div></div></div>
-          <a href="#" class="c-wa-big">📱 Escribinos al WhatsApp</a>
-        </div>
-      </div>
+          <!-- PRODS -->
+          <div class="es" id="sec-prods">
+            <button class="edit-btn" onclick="editSec('prods',this)">✏ Editar</button>
+            <div class="c-prods-s">
+              <div class="c-csec" style="color:#e8750a">Catálogo completo</div>
+              <div class="c-ctitle" id="v-prods-title" style="color:#111">TODOS LOS PRODUCTOS</div>
+              <div class="c-prod-g">
+                <div class="c-prod"><div class="c-pimg">🔧</div><div class="c-pbody"><div class="c-pcat" style="color:#e8750a">Herramientas</div><div class="c-pname">Taladro Percutor 13mm</div><div class="c-pprice">$68.000</div><button class="c-pwa" style="background:#22c55e">Consultar WA</button></div></div>
+                <div class="c-prod"><div class="c-pimg">🎨</div><div class="c-pbody"><div class="c-pcat" style="color:#e8750a">Pinturas</div><div class="c-pname">Látex Interior 10L</div><div class="c-pprice">$24.500</div><button class="c-pwa" style="background:#22c55e">Consultar WA</button></div></div>
+              </div>
+              <div style="text-align:center;padding:10px;font-size:10px;color:#9ca3af">Los productos vienen del sistema automáticamente</div>
+            </div>
+          </div>
 
-      <!-- FOOTER -->
-      <div class="es" id="sec-footer">
-        <button class="edit-btn" onclick="editSec('footer',this)">✏ Editar footer</button>
-        <div class="c-footer-section">
-          <div class="c-flogo" id="v-flogo">FAVARO<span>.</span></div>
-          <div class="c-fsub" id="v-fsub">Ferretería · Córdoba · Desde 2005</div>
-        </div>
-      </div>
+          <!-- FIN -->
+          <div class="es" id="sec-fin">
+            <button class="edit-btn" onclick="editSec('fin',this)">✏ Editar</button>
+            <div class="c-fin-s" id="v-fin-sec" style="background:#111827">
+              <div class="c-fin-title" style="color:#fff">FINANCIÁ TU <span id="v-fin-em" style="color:#c9a84c">COMPRA</span></div>
+              <div class="c-cuotas" id="v-cuotas">
+                <div class="c-cuota" style="background:rgba(255,255,255,.07)"><div class="c-cnum" style="color:#c9a84c">3x</div><div class="c-clbl" style="color:rgba(255,255,255,.4)">sin interés</div></div>
+                <div class="c-cuota" style="background:rgba(255,255,255,.07)"><div class="c-cnum" style="color:#c9a84c">6x</div><div class="c-clbl" style="color:rgba(255,255,255,.4)">sin interés</div></div>
+                <div class="c-cuota" style="background:rgba(255,255,255,.07)"><div class="c-cnum" id="v-maxcuota" style="color:#c9a84c">12x</div><div class="c-clbl" style="color:rgba(255,255,255,.4)">sin interés</div></div>
+              </div>
+            </div>
+          </div>
 
+          <!-- MARCAS -->
+          <div class="es" id="sec-marcas">
+            <button class="edit-btn" onclick="editSec('marcas',this)">✏ Editar</button>
+            <div style="background:#fff;padding:16px 12px;border-top:1px solid #e5e7eb">
+              <div style="font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;text-align:center;margin-bottom:12px">Marcas que trabajamos</div>
+              <div id="v-marcas" style="display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center"></div>
+            </div>
+          </div>
+
+          <!-- CONTACTO -->
+          <div class="es" id="sec-cont">
+            <button class="edit-btn" onclick="editSec('cont',this)">✏ Editar</button>
+            <div class="c-cont-s" id="v-cont-sec" style="background:#111827">
+              <div class="c-cont-title" style="color:#fff">ENCONTRANOS Y <span style="color:#e8750a">HABLANOS</span></div>
+              <div class="c-ci"><div class="c-ci-ico">📍</div><div><div class="c-ci-lbl" style="color:rgba(255,255,255,.4)">Dirección</div><div class="c-ci-val" id="v-dir" style="color:rgba(255,255,255,.8)">Av. Colón 1234, Córdoba</div></div></div>
+              <div class="c-ci"><div class="c-ci-ico">📱</div><div><div class="c-ci-lbl" style="color:rgba(255,255,255,.4)">WhatsApp</div><div class="c-ci-val" id="v-tel" style="color:rgba(255,255,255,.8)">351-XXX-XXXX</div></div></div>
+              <div class="c-ci"><div class="c-ci-ico">🕐</div><div><div class="c-ci-lbl" style="color:rgba(255,255,255,.4)">Horarios</div><div class="c-ci-val" style="color:rgba(255,255,255,.8)">Lun–Vie <span id="v-h1">8:00–20:00</span> · Sáb <span id="v-h2">8:00–13:00</span></div></div></div>
+            </div>
+          </div>
+
+        </div><!-- /prev-frame -->
+      </div><!-- /prev-wrap -->
     </div><!-- /preview -->
-  </div><!-- /editor -->
+
+  </div><!-- /layout -->
 </div><!-- /app -->
 
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPA_URL='https://egrsravspwpjstxiyvfk.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVncnNyYXZzcHdwanN0eGl5dmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDk4NDEsImV4cCI6MjA4ODIyNTg0MX0.5EyeVVNnnD93aEym1ADClzQyVf8N3NFydnruyHvwrds';
+// ══ SUPABASE ══
+const SURL='https://egrsravspwpjstxiyvfk.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVncnNyYXZzcHdwanN0eGl5dmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDk4NDEsImV4cCI6MjA4ODIyNTg0MX0.5EyeVVNnnD93aEym1ADClzQyVf8N3NFydnruyHvwrds';
 const BUCKET='catalogo-assets';
-const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+const db=window.supabase.createClient(SURL,SKEY);
+
 let UID=null;
+let CFG={negocio:{},apariencia:{},hero:{},slides:[],banners:[],promos:[],categorias:[],tarjetas:[],marcas:'',textos:{},financia:{}};
 let secActiva=null;
 let btnActivo=null;
-let CFG={};
+let historial=[];
+let saveTimer=null;
+let galImgs=[];
 
-// ── LOGIN ──
+// ══ AUTH ══
 async function login(){
-  const email=document.getElementById('lemail').value.trim();
-  const pass=document.getElementById('lpass').value;
-  const {data,error}=await db.auth.signInWithPassword({email,password:pass});
+  const {data,error}=await db.auth.signInWithPassword({email:document.getElementById('lemail').value.trim(),password:document.getElementById('lpass').value});
   if(error){document.getElementById('lerr').textContent='Email o contraseña incorrectos';return;}
   UID=data.user.id;
   document.getElementById('loginWrap').style.display='none';
-  const app=document.getElementById('app');
-  app.style.display='flex';
-  await loadConfig();
+  document.getElementById('app').style.display='flex';
+  await cargarTodo();
 }
 async function logout(){await db.auth.signOut();location.reload();}
-db.auth.getSession().then(({data})=>{
-  if(data?.session?.user){
-    UID=data.session.user.id;
-    document.getElementById('loginWrap').style.display='none';
-    const app=document.getElementById('app');
-    app.style.display='flex';
-    loadConfig();
-  }
-});
+db.auth.getSession().then(({data})=>{if(data?.session?.user){UID=data.session.user.id;document.getElementById('loginWrap').style.display='none';document.getElementById('app').style.display='flex';cargarTodo();}});
 
-// ── CARGAR CONFIG ──
-async function loadConfig(){
+// ══ LOAD CONFIG ══
+async function cargarTodo(){
   const {data:rows}=await db.from('user_config').select('key,value').eq('user_id',UID);
   if(!rows)return;
   const get=k=>{const r=rows.find(x=>x.key===k);if(!r)return null;try{return JSON.parse(r.value);}catch(e){return r.value;}};
-  CFG={
-    negocio: get('catalogo_negocio')||{},
-    apariencia: get('catalogo_apariencia')||{},
-    hero: get('catalogo_hero')||{},
-    slides: get('catalogo_slides')||[],
-    banners: get('catalogo_banners')||[],
-    promos: get('catalogo_promos')||[],
-    categorias: get('catalogo_categorias')||[],
-    tarjetas: get('catalogo_tarjetas')||[],
-    marcas: get('catalogo_marcas')||'',
-    textos: get('catalogo_textos')||{},
-    financia: get('catalogo_financia')||{},
-  };
-  aplicarConfig();
+  CFG.negocio=get('catalogo_negocio')||{};
+  CFG.apariencia=get('catalogo_apariencia')||{};
+  CFG.hero=get('catalogo_hero')||{};
+  CFG.slides=get('catalogo_slides')||[];
+  CFG.banners=get('catalogo_banners')||[];
+  CFG.promos=get('catalogo_promos')||[];
+  CFG.categorias=get('catalogo_categorias')||[];
+  CFG.tarjetas=get('catalogo_tarjetas')||[];
+  CFG.marcas=get('catalogo_marcas')||'';
+  CFG.textos=get('catalogo_textos')||{};
+  CFG.financia=get('catalogo_financia')||{};
+  aplicarCFG();
+  cargarGaleria();
 }
 
-function aplicarConfig(){
-  const n=CFG.negocio;
-  if(n.logo){document.getElementById('v-logo').src=n.logo;}
-  if(n.nombre){document.getElementById('v-logotext').innerHTML=n.nombre.toUpperCase()+'<span style="color:#e8750a">.</span>';}
-  if(n.telefono) document.getElementById('v-tel').textContent=n.telefono;
-  if(n.direccion) document.getElementById('v-dir').textContent=n.direccion;
-  if(n.h_semana){document.getElementById('v-h1').textContent=n.h_semana;document.getElementById('v-strip-hs').textContent='Lun–Vie '+n.h_semana;}
-  if(n.h_sabado){document.getElementById('v-h2').textContent=n.h_sabado;document.getElementById('v-strip-hsab').textContent='Sáb '+n.h_sabado;}
-
-  const h=CFG.hero;
-  if(h.foto) document.getElementById('v-hero-bg').style.backgroundImage=`url('${h.foto}')`;
-  if(h.t1||h.t2||h.t3) document.getElementById('v-hero-title').innerHTML=`${h.t1||'TODO LO QUE'} ${h.t2||'TU OBRA'} <span id="v-hero-em" style="color:#e8750a">${h.t3||'NECESITA'}</span>`;
-  if(h.sub) document.getElementById('v-hero-sub').textContent=h.sub;
-  if(h.btn1) document.getElementById('v-hero-btn').textContent=h.btn1;
-  if(h.tag) document.getElementById('v-hero-tag').textContent=h.tag;
-
-  const b=CFG.banners&&CFG.banners[0];
-  if(b){
-    if(b.foto) document.getElementById('v-banner-bg').style.backgroundImage=`url('${b.foto}')`;
-    if(b.tag) document.getElementById('v-btag').textContent=b.tag;
-    if(b.titulo) document.getElementById('v-btitle').textContent=b.titulo;
-    if(b.sub) document.getElementById('v-bsub').textContent=b.sub;
-    if(b.btn) document.getElementById('v-bbtn').textContent=b.btn+' →';
-  }
-
-  if(CFG.marcas){
-    const lista=typeof CFG.marcas==='string'?CFG.marcas.split(',').map(m=>m.trim()):CFG.marcas;
-    document.getElementById('v-marcas-row').innerHTML=lista.map(m=>`<span class="c-marca">${m}</span>`).join('');
-  }
-
-  if(CFG.promos&&CFG.promos.length){
-    document.getElementById('v-promos').innerHTML=CFG.promos.map(p=>`
-      <div class="c-pcard">
-        <div style="position:absolute;inset:0;background:${p.color}"></div>
-        <div class="c-pov" style="background:linear-gradient(to top,rgba(0,0,0,.9),transparent)">
-          <span class="c-pbadge" style="background:${p.badge_color||'#e8750a'}">${p.badge}</span>
-          <div class="c-ptitle">${p.titulo}</div>
-          <div class="c-pdesc">${p.desc||''}</div>
-        </div>
-      </div>`).join('');
-  }
-
-  if(CFG.categorias&&CFG.categorias.length){
-    document.getElementById('v-cats-grid').innerHTML=CFG.categorias.filter(c=>c.activo!==false).map((c,i)=>`
-      <div class="c-cat" ${i===0?'style="grid-column:1/-1;aspect-ratio:16/7"':''}>
-        <div class="c-cat-bg" style="background-image:url('${c.foto||''}')"></div>
-        <div class="c-cat-ov">
-          <div class="c-cat-cnt">+${c.cantidad||0} productos</div>
-          <div class="c-cat-name">${c.nombre}</div>
-        </div>
-      </div>`).join('');
-  }
-
-  if(CFG.tarjetas&&CFG.tarjetas.length){
-    document.getElementById('v-tarj-list').innerHTML=CFG.tarjetas.map(t=>`
-      <div class="c-trow" style="background:rgba(255,255,255,.06)">
-        <div class="c-tname" style="color:rgba(255,255,255,.8)">
-          <div class="c-tico" style="background:${t.color}">${t.txt}</div>${t.nom}
-        </div>
-        <div class="c-tcuotas" style="color:${t.descuento?'#22c55e':'#c9a84c'}">${t.cuotas} ${t.label||''}</div>
-      </div>`).join('');
-    const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
-    if(nums.length) document.getElementById('v-maxcuota').textContent=Math.max(...nums)+'x';
-  }
-
-  const tx=CFG.textos;
-  if(tx.footer) document.getElementById('v-fsub').textContent=tx.footer;
+function aplicarCFG(){
+  const n=CFG.negocio;const h=CFG.hero;const ap=CFG.apariencia;
+  // Colores
+  if(ap.color_principal){liveColor('--ac',ap.color_principal,'cd-ac','cv-ac');}
+  if(ap.color_fondo){liveColor('--fondo',ap.color_fondo,'cd-fondo','cv-fondo');}
+  if(ap.color_oscuro){liveColor('--dk',ap.color_oscuro,'cd-dk','cv-dk');}
+  if(ap.btn_wa_bg){liveColor('--btn-wa-bg',ap.btn_wa_bg,'cd-wa','cv-wa');}
+  if(ap.promos_bg){liveColor('--promos-bg',ap.promos_bg,'cd-promos','cv-promos');}
+  if(ap.fin_bg){liveColor('--fin-bg',ap.fin_bg,'cd-fin','cv-fin');}
+  if(ap.fin_accent){liveColor('--fin-accent',ap.fin_accent,'cd-finacc','cv-finacc');}
+  if(ap.banner_tag_bg){liveColor('--banner-tag-bg',ap.banner_tag_bg,'cd-bantag','cv-bantag');}
+  if(ap.tipografia){const s=document.getElementById('sel-font');if(s)s.value=ap.tipografia;}
+  // Negocio
+  if(n.logo){const i=document.getElementById('v-logo-img');if(i){i.src=n.logo;i.style.display='block';}}
+  if(n.nombre){setEl('v-logo-txt',n.nombre.toUpperCase()+'<span style="color:#e8750a">.</span>');}
+  if(n.telefono) setTxt('v-tel',n.telefono);
+  if(n.direccion) setTxt('v-dir',n.direccion);
+  if(n.h_semana){setTxt('v-hsem','Lun–Vie '+n.h_semana);setTxt('v-strip-hs','Lun–Vie '+n.h_semana);setTxt('v-h1',n.h_semana);}
+  if(n.h_sabado){setTxt('v-strip-hsab','Sáb '+n.h_sabado);setTxt('v-h2',n.h_sabado);}
+  // Hero
+  if(h.foto) s('v-hero-bg').style.backgroundImage=`url('${h.foto}')`;
+  if(h.tag) setTxt('v-hero-tag',h.tag);
+  if(h.t1||h.t2||h.t3) setEl('v-hero-title',`${h.t1||'TODO LO QUE'} ${h.t2||'TU OBRA'} <span id="v-hero-em" style="color:#e8750a">${h.t3||'NECESITA'}</span>`);
+  if(h.sub) setTxt('v-hero-sub',h.sub);
+  if(h.btn1) setTxt('v-hero-btn',h.btn1+' →');
+  // Promos
+  renderPromos();
+  // Banners
+  renderBannerActivo();
+  // Cats
+  renderCats();
+  // Marcas
+  renderMarcas();
+  // Tarjetas
+  if(CFG.tarjetas&&CFG.tarjetas.length){const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');}
+  // Fondo promos, fin, cont
+  const po=s('v-promos-outer');if(po&&CFG.apariencia.promos_bg)po.style.background=CFG.apariencia.promos_bg;
+  const fs=s('v-fin-sec');if(fs&&CFG.apariencia.fin_bg)fs.style.background=CFG.apariencia.fin_bg;
+  const cs=s('v-cont-sec');if(cs&&CFG.apariencia.color_oscuro)cs.style.background=CFG.apariencia.color_oscuro;
 }
 
-// ── UPSERT ──
-async function upsert(key,value){
-  const val=JSON.stringify(value);
-  const {data:ex}=await db.from('user_config').select('user_id').eq('user_id',UID).eq('key',key).maybeSingle();
-  if(ex){await db.from('user_config').update({value:val}).eq('user_id',UID).eq('key',key);}
-  else{await db.from('user_config').insert({user_id:UID,key,value:val});}
+// ══ HELPERS ══
+function s(id){return document.getElementById(id);}
+function setTxt(id,txt){const el=s(id);if(el)el.textContent=txt;}
+function setEl(id,html){const el=s(id);if(el)el.innerHTML=html;}
+function fmt(n){return'$'+Number(n).toLocaleString('es-AR',{minimumFractionDigits:0});}
+function gv(id){const el=s(id);return el?el.value.trim():'';}
+
+function liveColor(cssVar,val,dotId,valId){
+  document.documentElement.style.setProperty(cssVar,val);
+  const dot=s(dotId);if(dot)dot.style.background=val;
+  const cv=s(valId);if(cv)cv.textContent=val;
+  // Aplicar a preview inline
+  const map={'--ac':'#e8750a','--btn-wa-bg':'#22c55e','--promos-bg':'#1e1b14','--fin-bg':'#111827','--fin-accent':'#c9a84c','--banner-tag-bg':'#dc2626'};
+  if(cssVar==='--btn-wa-bg'){document.querySelectorAll('.c-nwa,.c-pwa').forEach(el=>el.style.background=val);}
+  if(cssVar==='--ac'){document.querySelectorAll('.c-htag,.c-hbtn,.c-pcat').forEach(el=>{if(el.tagName==='DIV'&&el.classList.contains('c-htag'))el.style.background=val;if(el.tagName==='DIV'&&el.classList.contains('c-hbtn'))el.style.background=val;if(el.classList.contains('c-pcat'))el.style.color=val;});}
+  if(cssVar==='--promos-bg'){const po=s('v-promos-outer');if(po)po.style.background=val;}
+  if(cssVar==='--fin-bg'){const fs=s('v-fin-sec');if(fs)fs.style.background=val;}
+  if(cssVar==='--fin-accent'){document.querySelectorAll('.c-cnum').forEach(el=>el.style.color=val);setEl('v-fin-em',`COMPRA`);}
+  if(cssVar==='--banner-tag-bg'){const bt=s('v-btag');if(bt)bt.style.background=val;}
 }
 
-// ── UPLOAD IMG ──
-async function uploadImg(input,filename,previewId,urlInputId,onSuccess){
-  const file=input.files[0];if(!file)return;
-  showToast('Subiendo imagen...','ok');
-  try{
-    const ext=file.name.split('.').pop().toLowerCase();
-    const name=filename.replace(/\.\w+$/,'.'+ext);
-    const {data,error}=await db.storage.from(BUCKET).upload(name,file,{upsert:true,contentType:file.type});
-    if(error)throw error;
-    const url=`${SUPA_URL}/storage/v1/object/public/${BUCKET}/${name}`;
-    if(urlInputId){const el=document.getElementById(urlInputId);if(el)el.value=url;}
-    if(previewId){const el=document.getElementById(previewId);if(el){if(el.tagName==='IMG')el.src=url;else el.style.backgroundImage=`url('${url}')`;}}
-    if(onSuccess)onSuccess(url);
-    showToast('Imagen subida correctamente','ok');
-  }catch(e){showToast('Error al subir: '+e.message,'err');}
-}
+function liveFont(font){document.documentElement.style.setProperty('--font-title',`'${font}',sans-serif`);}
 
-// ── EDITOR ──
-function editSec(sec,btn){
-  document.querySelectorAll('.es').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.edit-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('sec-'+sec).classList.add('active');
-  btn.classList.add('on');
-  btnActivo=btn;
-  secActiva=sec;
-  document.getElementById('panelTitle').textContent=PANEL_TITLES[sec]||sec;
-  document.getElementById('btnSave').style.display='block';
-  document.getElementById('panelBody').innerHTML=buildPanel(sec);
-  document.getElementById('sec-'+sec).scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-const PANEL_TITLES={
-  negocio:'Negocio — Logo y datos',
-  hero:'Hero — Sección principal',
-  strip:'Strip — Barra de beneficios',
-  promos:'Promos — Carrusel de ofertas',
-  cats:'Categorías — Tiles con foto',
-  banner:'Banner — Franja promocional',
-  prods:'Productos — Catálogo',
-  fin:'Financiación — Tarjetas',
-  marcas:'Marcas',
-  cont:'Contacto',
-  footer:'Footer',
-};
-
-function buildPanel(sec){
-  const n=CFG.negocio||{};
-  const h=CFG.hero||{};
-  const b=CFG.banners&&CFG.banners[0]||{};
-  const tx=CFG.textos||{};
-  const fi=CFG.financia||{};
-
-  if(sec==='negocio') return `
-    <div class="f-sec">Logo</div>
-    <div class="f-field">
-      <label class="f-label">URL del logo</label>
-      <input class="f-input" id="inp-logo" value="${n.logo||''}" placeholder="https://..." oninput="document.getElementById('v-logo').src=this.value">
-      <div class="f-hint">O subí una imagen:</div>
-      <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
-        <img id="prev-logo" class="f-img-prev" src="${n.logo||''}" onerror="this.src=''">
-        <label class="f-upload-btn">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Subir logo
-          <input type="file" accept="image/*" onchange="uploadImg(this,'logo.jpg','prev-logo','inp-logo',v=>{document.getElementById('v-logo').src=v})">
-        </label>
-      </div>
-    </div>
-    <div class="f-sec">Nombre del negocio</div>
-    <div class="f-field"><input class="f-input" id="inp-nombre" value="${n.nombre||''}" placeholder="Ferretería Favaro" oninput="document.getElementById('v-logotext').innerHTML=this.value.toUpperCase()+'<span style=color:#e8750a>.</span>'"></div>
-    <div class="f-sec">Contacto</div>
-    <div class="f-field"><label class="f-label">Teléfono visible</label><input class="f-input" id="inp-tel" value="${n.telefono||''}" placeholder="351-XXX-XXXX" oninput="document.getElementById('v-tel').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">WhatsApp (solo números)</label><input class="f-input" id="inp-wa" value="${n.whatsapp||''}" placeholder="54351XXXXXXX"><div class="f-hint">Sin + ni espacios. Ej: 54351XXXXXXX</div></div>
-    <div class="f-field"><label class="f-label">Dirección</label><input class="f-input" id="inp-dir" value="${n.direccion||''}" placeholder="Av. Colón 1234, Córdoba" oninput="document.getElementById('v-dir').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">Email</label><input class="f-input" id="inp-email" value="${n.email||''}" placeholder="ventas@..."></div>
-    <div class="f-sec">Horarios</div>
-    <div class="f-field"><label class="f-label">Lunes a Viernes</label><input class="f-input" id="inp-h1" value="${n.h_semana||''}" placeholder="8:00 – 20:00" oninput="document.getElementById('v-h1').textContent=this.value;document.getElementById('v-strip-hs').textContent='Lun–Vie '+this.value"></div>
-    <div class="f-field"><label class="f-label">Sábados</label><input class="f-input" id="inp-h2" value="${n.h_sabado||''}" placeholder="8:00 – 13:00" oninput="document.getElementById('v-h2').textContent=this.value;document.getElementById('v-strip-hsab').textContent='Sáb '+this.value"></div>`;
-
-  if(sec==='hero') return `
-    <div class="f-sec">Foto de fondo</div>
-    <div class="f-field">
-      <div class="f-img-row">
-        <div id="prev-hero" class="f-img-prev" style="background-image:url('${h.foto||''}');background-size:cover;background-position:center"></div>
-        <div>
-          <label class="f-upload-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Subir foto<input type="file" accept="image/*" onchange="uploadImg(this,'hero-bg.jpg','v-hero-bg','inp-hero-foto',v=>{document.getElementById('prev-hero').style.backgroundImage='url('+v+')'})"></label>
-        </div>
-      </div>
-      <input class="f-input" id="inp-hero-foto" value="${h.foto||''}" placeholder="O pegá URL de la foto" style="margin-top:8px" oninput="document.getElementById('v-hero-bg').style.backgroundImage='url('+this.value+')'">
-    </div>
-    <div class="f-sec">Textos</div>
-    <div class="f-field"><label class="f-label">Tag superior</label><input class="f-input" id="inp-hero-tag" value="${h.tag||'Catálogo 2025 · Córdoba'}" oninput="document.getElementById('v-hero-tag').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">Título línea 1</label><input class="f-input" id="inp-hero-t1" value="${h.t1||'TODO LO QUE'}" oninput="reheroTitle()"></div>
-    <div class="f-field"><label class="f-label">Título línea 2</label><input class="f-input" id="inp-hero-t2" value="${h.t2||'TU OBRA'}" oninput="reheroTitle()"></div>
-    <div class="f-field"><label class="f-label">Palabra destacada (en naranja)</label><input class="f-input" id="inp-hero-em" value="${h.t3||'NECESITA'}" oninput="reheroTitle()"></div>
-    <div class="f-field"><label class="f-label">Subtítulo</label><textarea class="f-textarea" id="inp-hero-sub" oninput="document.getElementById('v-hero-sub').textContent=this.value">${h.sub||''}</textarea></div>
-    <div class="f-field"><label class="f-label">Texto botón principal</label><input class="f-input" id="inp-hero-btn" value="${h.btn1||'Ver catálogo'}" oninput="document.getElementById('v-hero-btn').textContent=this.value"></div>`;
-
-  if(sec==='promos') return `
-    <div class="f-info" style="margin-bottom:12px">Editá cada promo del carrusel. Los cambios se ven al instante.</div>
-    ${(CFG.promos||[]).map((p,i)=>`
-    <div class="f-sec">Promo ${i+1}</div>
-    <div class="f-field"><label class="f-label">Título</label><input class="f-input" id="inp-pt-${i}" value="${p.titulo||''}" oninput="CFG.promos[${i}].titulo=this.value;renderPromos()"></div>
-    <div class="f-field"><label class="f-label">Descripción</label><input class="f-input" id="inp-pd-${i}" value="${p.desc||''}" oninput="CFG.promos[${i}].desc=this.value;renderPromos()"></div>
-    <div class="f-field"><label class="f-label">Badge</label><input class="f-input" id="inp-pb-${i}" value="${p.badge||''}" oninput="CFG.promos[${i}].badge=this.value;renderPromos()"></div>`).join('')}
-    <button onclick="agregarPromo()" style="width:100%;background:#f3f4f6;border:1.5px dashed #d1d5db;border-radius:7px;padding:10px;font-family:Outfit,sans-serif;font-size:13px;color:#4b5563;cursor:pointer;margin-top:8px">+ Agregar promo</button>`;
-
-  if(sec==='cats') return `
-    <div class="f-info" style="margin-bottom:12px">Editá las tiles de categorías. Podés subir fotos propias.</div>
-    ${(CFG.categorias||[]).map((c,i)=>`
-    <div class="f-sec">Categoría ${i+1}${i===0?' (grande)':''}</div>
-    <div class="f-field"><label class="f-label">Nombre</label><input class="f-input" value="${c.nombre||''}" oninput="CFG.categorias[${i}].nombre=this.value;renderCats()"></div>
-    <div class="f-field"><label class="f-label">Cantidad de productos</label><input class="f-input" type="number" value="${c.cantidad||0}" oninput="CFG.categorias[${i}].cantidad=parseInt(this.value)||0;renderCats()"></div>
-    <div class="f-field">
-      <label class="f-label">Foto</label>
-      <div class="f-img-row">
-        <div class="f-img-prev" id="prev-cat-${i}" style="background-image:url('${c.foto||''}');background-size:cover"></div>
-        <label class="f-upload-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Subir<input type="file" accept="image/*" onchange="uploadImg(this,'cat-${i}.jpg','prev-cat-${i}',null,v=>{CFG.categorias[${i}].foto=v;renderCats()})"></label>
-        <input class="f-input" value="${c.foto||''}" placeholder="O URL de la foto" oninput="CFG.categorias[${i}].foto=this.value;renderCats();document.getElementById('prev-cat-${i}').style.backgroundImage='url('+this.value+')'">
-      </div>
-    </div>`).join('')}
-    <button onclick="agregarCat()" style="width:100%;background:#f3f4f6;border:1.5px dashed #d1d5db;border-radius:7px;padding:10px;font-family:Outfit,sans-serif;font-size:13px;color:#4b5563;cursor:pointer;margin-top:8px">+ Agregar categoría</button>`;
-
-  if(sec==='banner') return `
-    <div class="f-sec">Foto de fondo</div>
-    <div class="f-field">
-      <div class="f-img-row">
-        <div class="f-img-prev" id="prev-banner" style="background-image:url('${b.foto||''}');background-size:cover"></div>
-        <label class="f-upload-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Subir<input type="file" accept="image/*" onchange="uploadImg(this,'banner.jpg','v-banner-bg',null,v=>{document.getElementById('prev-banner').style.backgroundImage='url('+v+')'})"></label>
-      </div>
-      <input class="f-input" id="inp-banner-foto" value="${b.foto||''}" placeholder="O URL de la foto" style="margin-top:8px" oninput="document.getElementById('v-banner-bg').style.backgroundImage='url('+this.value+')'">
-    </div>
-    <div class="f-sec">Contenido</div>
-    <div class="f-field"><label class="f-label">Tag/Badge</label><input class="f-input" id="inp-btag" value="${b.tag||''}" placeholder="Oferta limitada" oninput="document.getElementById('v-btag').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">Título</label><input class="f-input" id="inp-btitle" value="${b.titulo||''}" placeholder="LIQUIDACIÓN FIN DE TEMPORADA" oninput="document.getElementById('v-btitle').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">Subtítulo</label><input class="f-input" id="inp-bsub" value="${b.sub||''}" placeholder="Hasta 30% OFF..." oninput="document.getElementById('v-bsub').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">Texto del botón</label><input class="f-input" id="inp-bbtn" value="${b.btn||''}" placeholder="Consultar por WhatsApp" oninput="document.getElementById('v-bbtn').textContent=this.value+' →'"></div>`;
-
-  if(sec==='prods') return `
-    <div class="f-info">Los productos se cargan automáticamente desde el sistema. Marcás "en catálogo" en cada producto → aparece acá con precio actualizado.</div>
-    <div class="f-sec">Título de sección</div>
-    <div class="f-field"><input class="f-input" id="inp-prods-title" value="${h.prods_titulo||'TODOS LOS PRODUCTOS'}" oninput="document.getElementById('v-prods-title').textContent=this.value"></div>`;
-
-  if(sec==='fin') return `
-    <div class="f-sec">Medios de pago</div>
-    ${(CFG.tarjetas||[]).map((t,i)=>`
-    <div class="f-tarj-row">
-      <div class="f-tarj-ico" style="background:${t.color}">${t.txt}</div>
-      <div class="f-tarj-nom">${t.nom}</div>
-      <input class="f-tarj-input" value="${t.cuotas} ${t.label||''}" oninput="actualizarTarjeta(${i},this.value)">
-    </div>`).join('')}
-    <div class="f-sec">Nota legal</div>
-    <div class="f-field"><textarea class="f-textarea" id="inp-fin-nota">${fi.nota||''}</textarea></div>`;
-
-  if(sec==='marcas') return `
-    <div class="f-sec">Lista de marcas</div>
-    <div class="f-field">
-      <label class="f-label">Separadas por coma</label>
-      <textarea class="f-textarea" id="inp-marcas" oninput="renderMarcas(this.value)">${typeof CFG.marcas==='string'?CFG.marcas:(CFG.marcas||[]).join(', ')}</textarea>
-      <div class="f-hint">Ej: BOSCH, STANLEY, ALBA, NORTON, FV, 3M</div>
-    </div>`;
-
-  if(sec==='cont') return `
-    <div class="f-sec">Datos</div>
-    <div class="f-field"><label class="f-label">Dirección</label><input class="f-input" id="inp-cont-dir" value="${n.direccion||''}" oninput="document.getElementById('v-dir').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">Teléfono visible</label><input class="f-input" id="inp-cont-tel" value="${n.telefono||''}" oninput="document.getElementById('v-tel').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">WhatsApp (solo números)</label><input class="f-input" id="inp-cont-wa" value="${n.whatsapp||''}" placeholder="54351XXXXXXX"></div>
-    <div class="f-field"><label class="f-label">Email</label><input class="f-input" id="inp-cont-email" value="${n.email||''}"></div>
-    <div class="f-sec">Horarios</div>
-    <div class="f-field"><label class="f-label">Lunes a Viernes</label><input class="f-input" id="inp-cont-h1" value="${n.h_semana||''}" oninput="document.getElementById('v-h1').textContent=this.value"></div>
-    <div class="f-field"><label class="f-label">Sábados</label><input class="f-input" id="inp-cont-h2" value="${n.h_sabado||''}" oninput="document.getElementById('v-h2').textContent=this.value"></div>`;
-
-  if(sec==='footer') return `
-    <div class="f-sec">Footer</div>
-    <div class="f-field"><label class="f-label">Texto del footer</label><input class="f-input" id="inp-fsub" value="${tx.footer||'Ferretería · Córdoba · Desde 2005'}" oninput="document.getElementById('v-fsub').textContent=this.value"></div>`;
-
-  if(sec==='strip') return `
-    <div class="f-info">La barra de beneficios se actualiza automáticamente con los datos del negocio (horarios, dirección). Los textos de cuotas y envíos se editan acá.</div>`;
-
-  return '<div class="panel-empty">Sección en construcción</div>';
-}
-
-// ── HELPERS LIVE ──
-function reheroTitle(){
-  const t1=document.getElementById('inp-hero-t1')?.value||'TODO LO QUE';
-  const t2=document.getElementById('inp-hero-t2')?.value||'TU OBRA';
-  const em=document.getElementById('inp-hero-em')?.value||'NECESITA';
-  document.getElementById('v-hero-title').innerHTML=`${t1} ${t2} <span id="v-hero-em" style="color:#e8750a">${em}</span>`;
-}
-
+// ══ RENDER PREVIEW ══
 function renderPromos(){
-  document.getElementById('v-promos').innerHTML=(CFG.promos||[]).map(p=>`
-    <div class="c-pcard">
-      <div style="position:absolute;inset:0;background:${p.color}"></div>
-      <div class="c-pov" style="background:linear-gradient(to top,rgba(0,0,0,.9),transparent)">
-        <span class="c-pbadge" style="background:${p.badge_color||'#e8750a'}">${p.badge}</span>
-        <div class="c-ptitle">${p.titulo}</div>
-        <div class="c-pdesc">${p.desc||''}</div>
+  const activas=(CFG.promos||[]).filter(p=>p.activo!==false);
+  const el=s('v-promos-scroll');
+  if(!el)return;
+  if(!activas.length){el.innerHTML='<div style="color:rgba(255,255,255,.3);font-size:11px;padding:20px">Sin promos activas</div>';return;}
+  el.innerHTML=activas.map(p=>`
+    <div class="c-pc" style="${p.foto?'background-image:url('+p.foto+');background-size:cover':'background:'+p.color}">
+      <div class="c-pov">
+        <span class="c-pb" style="background:${p.badge_color||'#e8750a'}">${p.badge||''}</span>
+        <div class="c-pt">${p.titulo||''}</div>
       </div>
     </div>`).join('');
+  renderPromosList();
+}
+
+function renderBannerActivo(){
+  const activo=(CFG.banners||[]).find(b=>b.activo!==false);
+  if(activo){
+    if(activo.foto)s('v-banner-bg').style.backgroundImage=`url('${activo.foto}')`;
+    if(activo.tag){const bt=s('v-btag');if(bt){bt.textContent=activo.tag;if(activo.tag_color)bt.style.background=activo.tag_color;}}
+    if(activo.titulo)setTxt('v-btitle',activo.titulo);
+    if(activo.sub)setTxt('v-bsub',activo.sub);
+  }
+  renderBannersList();
 }
 
 function renderCats(){
-  document.getElementById('v-cats-grid').innerHTML=(CFG.categorias||[]).filter(c=>c.activo!==false).map((c,i)=>`
+  const activas=(CFG.categorias||[]).filter(c=>c.activo!==false);
+  const grid=s('v-cats-grid');
+  if(!grid)return;
+  if(!activas.length)return;
+  grid.innerHTML=activas.map((c,i)=>`
     <div class="c-cat" ${i===0?'style="grid-column:1/-1;aspect-ratio:16/7"':''}>
       <div class="c-cat-bg" style="background-image:url('${c.foto||''}')"></div>
-      <div class="c-cat-ov">
-        <div class="c-cat-cnt">+${c.cantidad||0} productos</div>
-        <div class="c-cat-name">${c.nombre}</div>
-      </div>
+      <div class="c-cat-ov"><div class="c-cat-name">${c.nombre}</div></div>
     </div>`).join('');
+  renderCatsList();
 }
 
-function renderMarcas(val){
-  const lista=val.split(',').map(m=>m.trim()).filter(Boolean);
-  document.getElementById('v-marcas-row').innerHTML=lista.map(m=>`<span class="c-marca">${m}</span>`).join('');
+function renderMarcas(){
+  const lista=typeof CFG.marcas==='string'?CFG.marcas.split(',').map(m=>m.trim()).filter(Boolean):(CFG.marcas||[]);
+  const el=s('v-marcas');
+  if(el)el.innerHTML=lista.map(m=>`<span style="font-size:14px;font-weight:800;color:#e5e7eb;letter-spacing:-.3px">${m}</span>`).join('');
 }
 
-function actualizarTarjeta(i,val){
-  if(CFG.tarjetas&&CFG.tarjetas[i]){
-    const parts=val.trim().split(' ');
-    CFG.tarjetas[i].cuotas=parts[0]||val;
-    CFG.tarjetas[i].label=parts.slice(1).join(' ')||'';
-  }
+// ══ SORT LISTS ══
+function renderPromosList(){
+  const list=s('promosList');if(!list)return;
+  list.innerHTML=(CFG.promos||[]).map((p,i)=>`
+    <div class="sort-item" draggable="true" data-idx="${i}" data-type="promos">
+      <span class="sort-handle">⠿</span>
+      <div class="sort-thumb" style="background:${p.color||'#1e3a5f'}${p.foto?';background-image:url('+p.foto+');background-size:cover':''}"></div>
+      <div class="sort-info"><div class="sort-name">${p.titulo||'Sin título'}</div><div class="sort-meta">${p.badge||'Sin badge'}</div></div>
+      <button class="sort-edit" onclick="editPromo(${i})">✏</button>
+      <button class="sort-toggle ${p.activo!==false?'on':''}" onclick="toggleItem('promos',${i},this)"></button>
+      <button class="sort-del" onclick="delItem('promos',${i})">✕</button>
+    </div>`).join('');
+  initDrag('promosList','promos');
 }
 
+function renderBannersList(){
+  const list=s('bannersList');if(!list)return;
+  list.innerHTML=(CFG.banners||[]).map((b,i)=>`
+    <div class="sort-item" draggable="true" data-idx="${i}" data-type="banners">
+      <span class="sort-handle">⠿</span>
+      <div class="sort-thumb" style="${b.foto?'background-image:url('+b.foto+');background-size:cover':'background:#1e3a5f'}"></div>
+      <div class="sort-info"><div class="sort-name">${b.titulo||'Sin título'}</div><div class="sort-meta">${b.tag||''}</div></div>
+      <button class="sort-edit" onclick="editBanner(${i})">✏</button>
+      <button class="sort-toggle ${b.activo!==false?'on':''}" onclick="toggleItem('banners',${i},this)"></button>
+      <button class="sort-del" onclick="delItem('banners',${i})">✕</button>
+    </div>`).join('');
+  initDrag('bannersList','banners');
+}
+
+function renderCatsList(){
+  const list=s('catsList');if(!list)return;
+  list.innerHTML=(CFG.categorias||[]).map((c,i)=>`
+    <div class="sort-item" draggable="true" data-idx="${i}" data-type="categorias">
+      <span class="sort-handle">⠿</span>
+      <div class="sort-thumb" style="${c.foto?'background-image:url('+c.foto+');background-size:cover':'background:#e5e0d8'}"></div>
+      <div class="sort-info"><div class="sort-name">${c.nombre||'Sin nombre'}</div><div class="sort-meta">+${c.cantidad||0} productos</div></div>
+      <button class="sort-edit" onclick="editCat(${i})">✏</button>
+      <button class="sort-toggle ${c.activo!==false?'on':''}" onclick="toggleItem('categorias',${i},this)"></button>
+      <button class="sort-del" onclick="delItem('categorias',${i})">✕</button>
+    </div>`).join('');
+  initDrag('catsList','categorias');
+}
+
+function toggleItem(arr,i,btn){
+  CFG[arr][i].activo=!CFG[arr][i].activo;
+  btn.classList.toggle('on',CFG[arr][i].activo);
+  if(arr==='promos')renderPromos();
+  if(arr==='banners')renderBannerActivo();
+  if(arr==='categorias')renderCats();
+  addHist(`${arr.charAt(0).toUpperCase()+arr.slice(1,-1)} ${i+1} — ${CFG[arr][i].activo?'activado':'desactivado'}`,'#3b82f6');
+  markUnsaved();
+  guardarClave(`catalogo_${arr}`,CFG[arr]);
+}
+
+function delItem(arr,i){
+  if(!confirm('¿Eliminar este elemento?'))return;
+  CFG[arr].splice(i,1);
+  if(arr==='promos'){renderPromos();}
+  if(arr==='banners'){renderBannerActivo();}
+  if(arr==='categorias'){renderCats();}
+  markUnsaved();
+  guardarClave(`catalogo_${arr}`,CFG[arr]);
+}
+
+// ══ DRAG & DROP ══
+function initDrag(listId,arr){
+  const list=s(listId);if(!list)return;
+  let dragging=null;
+  list.querySelectorAll('.sort-item').forEach(item=>{
+    item.addEventListener('dragstart',()=>{dragging=item;setTimeout(()=>item.classList.add('dragging'),0);});
+    item.addEventListener('dragend',()=>{item.classList.remove('dragging');dragging=null;syncOrder(listId,arr);});
+    item.addEventListener('dragover',e=>{e.preventDefault();if(!dragging||dragging===item)return;const rect=item.getBoundingClientRect();if(e.clientY<rect.top+rect.height/2)list.insertBefore(dragging,item);else list.insertBefore(dragging,item.nextSibling);document.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over'));item.classList.add('drag-over');});
+    item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));
+  });
+}
+
+function syncOrder(listId,arr){
+  const list=s(listId);if(!list)return;
+  const items=[...list.querySelectorAll('.sort-item')];
+  const newArr=items.map(item=>{const idx=parseInt(item.dataset.idx);return CFG[arr][idx];}).filter(Boolean);
+  CFG[arr]=newArr;
+  addHist(`${arr} — orden cambiado`,'#22c55e');
+  markUnsaved();
+  guardarClave(`catalogo_${arr}`,CFG[arr]);
+  if(arr==='promos')renderPromos();
+  if(arr==='banners')renderBannerActivo();
+  if(arr==='categorias')renderCats();
+}
+
+// ══ AGREGAR ITEMS ══
 function agregarPromo(){
-  if(!CFG.promos)CFG.promos=[];
-  CFG.promos.push({titulo:'Nueva promo',desc:'Descripción',badge:'🔥 Promo',color:'linear-gradient(135deg,#1e3a5f,#0f1f35)',badge_color:'#e8750a'});
-  editSec('promos',btnActivo||document.querySelector('#sec-promos .edit-btn'));
+  CFG.promos.push({titulo:'Nueva promo',badge:'🔥 Oferta',desc:'',color:'linear-gradient(135deg,#1e3a5f,#0f1f35)',badge_color:'#e8750a',foto:'',activo:true});
   renderPromos();
+  editPromo(CFG.promos.length-1);
+}
+
+function agregarBanner(){
+  CFG.banners.push({titulo:'Nuevo banner',tag:'Oferta',sub:'',foto:'',btn:'Consultar',tag_color:'#dc2626',activo:false});
+  renderBannerActivo();
+  editBanner(CFG.banners.length-1);
 }
 
 function agregarCat(){
-  if(!CFG.categorias)CFG.categorias=[];
   CFG.categorias.push({nombre:'Nueva categoría',cantidad:0,foto:'',activo:true});
-  editSec('cats',btnActivo||document.querySelector('#sec-cats .edit-btn'));
   renderCats();
+  editCat(CFG.categorias.length-1);
 }
 
-function recargarPreview(){aplicarConfig();}
+// ══ EDITAR ITEMS ══
+function editPromo(i){
+  const p=CFG.promos[i];
+  showEditPanel(`Promo ${i+1} — ${p.titulo||'sin título'}`,`
+    <div class="f-sec" style="margin-top:0">Textos</div>
+    <div class="f-field"><div class="f-label">Título</div><input class="f-input" id="ep-titulo" value="${p.titulo||''}" oninput="CFG.promos[${i}].titulo=this.value;renderPromos()"></div>
+    <div class="f-field"><div class="f-label">Descripción</div><input class="f-input" id="ep-desc" value="${p.desc||''}" oninput="CFG.promos[${i}].desc=this.value"></div>
+    <div class="f-field"><div class="f-label">Badge</div><input class="f-input" id="ep-badge" value="${p.badge||''}" oninput="CFG.promos[${i}].badge=this.value;renderPromos()"></div>
+    <div class="f-sec">Colores</div>
+    <div class="f-field"><div class="f-label">Fondo de la card</div><input class="f-input" id="ep-color" value="${p.color||''}" placeholder="linear-gradient(...) o #hex" oninput="CFG.promos[${i}].color=this.value;renderPromos()"></div>
+    <div class="f-field"><div class="f-label">Color del badge</div><div class="f-color-row"><div class="f-cdot" style="background:${p.badge_color||'#e8750a'}"><input type="color" value="${p.badge_color||'#e8750a'}" oninput="CFG.promos[${i}].badge_color=this.value;this.parentNode.style.background=this.value;renderPromos()"></div><span class="f-cval">${p.badge_color||'#e8750a'}</span></div></div>
+    <div class="f-sec">Foto de fondo (opcional)</div>
+    <div class="f-field">
+      <div class="f-img-row">
+        <div class="f-img-prev-bg" id="ep-prev" style="background-image:url('${p.foto||''}')"></div>
+        <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'promos-${i}.jpg',v=>{CFG.promos[${i}].foto=v;s('ep-prev').style.backgroundImage='url('+v+')';s('ep-foto-url').value=v;renderPromos()})"></label>
+      </div>
+      <input class="f-input" id="ep-foto-url" value="${p.foto||''}" placeholder="O pegá URL" style="margin-top:6px" oninput="CFG.promos[${i}].foto=this.value;s('ep-prev').style.backgroundImage='url('+this.value+')';renderPromos()">
+    </div>
+    <button onclick="guardarClave('catalogo_promos',CFG.promos);toast('✓ Promo guardada','ok')" style="width:100%;background:#e8750a;color:#fff;border:none;border-radius:6px;padding:10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px">Guardar promo</button>`);
+}
 
-// ── GUARDAR ──
-async function guardarSeccion(){
-  const btn=document.getElementById('btnSave');
-  btn.disabled=true;
-  btn.textContent='Guardando...';
-  try{
-    if(secActiva==='negocio'){
-      const neg={
-        logo:gv('inp-logo'),nombre:gv('inp-nombre'),
-        telefono:gv('inp-tel'),whatsapp:gv('inp-wa').replace(/\D/g,''),
-        direccion:gv('inp-dir'),email:gv('inp-email'),
-        h_semana:gv('inp-h1'),h_sabado:gv('inp-h2'),
-      };
-      CFG.negocio={...CFG.negocio,...neg};
-      await upsert('catalogo_negocio',CFG.negocio);
-    }
-    else if(secActiva==='hero'){
-      const hero={
-        foto:gv('inp-hero-foto'),tag:gv('inp-hero-tag'),
-        t1:gv('inp-hero-t1'),t2:gv('inp-hero-t2'),t3:gv('inp-hero-em'),
-        sub:gv('inp-hero-sub'),btn1:gv('inp-hero-btn'),
-      };
-      CFG.hero={...CFG.hero,...hero};
-      await upsert('catalogo_hero',CFG.hero);
-    }
-    else if(secActiva==='promos'){await upsert('catalogo_promos',CFG.promos);}
-    else if(secActiva==='cats'){await upsert('catalogo_categorias',CFG.categorias);}
-    else if(secActiva==='banner'){
-      if(!CFG.banners||!CFG.banners.length)CFG.banners=[{}];
-      CFG.banners[0]={...CFG.banners[0],foto:gv('inp-banner-foto'),tag:gv('inp-btag'),titulo:gv('inp-btitle'),sub:gv('inp-bsub'),btn:gv('inp-bbtn'),activo:true};
-      await upsert('catalogo_banners',CFG.banners);
-    }
-    else if(secActiva==='fin'){
-      await upsert('catalogo_tarjetas',CFG.tarjetas);
-      const nota=gv('inp-fin-nota');
-      CFG.financia={...CFG.financia,tarjetas:CFG.tarjetas,nota};
-      await upsert('catalogo_financia',CFG.financia);
-    }
-    else if(secActiva==='marcas'){
-      const val=gv('inp-marcas');
-      CFG.marcas=val;
-      await upsert('catalogo_marcas',val);
-    }
-    else if(secActiva==='cont'){
-      const neg={...CFG.negocio,direccion:gv('inp-cont-dir'),telefono:gv('inp-cont-tel'),whatsapp:gv('inp-cont-wa').replace(/\D/g,''),email:gv('inp-cont-email'),h_semana:gv('inp-cont-h1'),h_sabado:gv('inp-cont-h2')};
-      CFG.negocio=neg;
-      await upsert('catalogo_negocio',neg);
-    }
-    else if(secActiva==='footer'){
-      CFG.textos={...CFG.textos,footer:gv('inp-fsub')};
-      await upsert('catalogo_textos',CFG.textos);
-    }
-    else if(secActiva==='prods'){
-      const t=gv('inp-prods-title');
-      CFG.hero={...CFG.hero,prods_titulo:t};
-      await upsert('catalogo_hero',CFG.hero);
-    }
-    showToast('✓ Guardado — el catálogo ya se actualizó','ok');
-  }catch(e){
-    showToast('Error: '+e.message,'err');
+function editBanner(i){
+  const b=CFG.banners[i];
+  showEditPanel(`Banner ${i+1} — ${b.titulo||'sin título'}`,`
+    <div class="f-sec" style="margin-top:0">Foto de fondo</div>
+    <div class="f-field">
+      <div class="f-img-row">
+        <div class="f-img-prev-bg" id="eb-prev" style="background-image:url('${b.foto||''}')"></div>
+        <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'banner-${i}.jpg',v=>{CFG.banners[${i}].foto=v;s('eb-prev').style.backgroundImage='url('+v+')';s('eb-foto').value=v;renderBannerActivo()})"></label>
+      </div>
+      <input class="f-input" id="eb-foto" value="${b.foto||''}" placeholder="O URL de foto" style="margin-top:6px" oninput="CFG.banners[${i}].foto=this.value;s('eb-prev').style.backgroundImage='url('+this.value+')';renderBannerActivo()">
+    </div>
+    <div class="f-sec">Contenido</div>
+    <div class="f-field"><div class="f-label">Tag/Badge</div><input class="f-input" value="${b.tag||''}" oninput="CFG.banners[${i}].tag=this.value;renderBannerActivo()"></div>
+    <div class="f-field"><div class="f-label">Color del tag</div><div class="f-color-row"><div class="f-cdot" style="background:${b.tag_color||'#dc2626'}"><input type="color" value="${b.tag_color||'#dc2626'}" oninput="CFG.banners[${i}].tag_color=this.value;this.parentNode.style.background=this.value;renderBannerActivo()"></div></div></div>
+    <div class="f-field"><div class="f-label">Título</div><input class="f-input" value="${b.titulo||''}" oninput="CFG.banners[${i}].titulo=this.value;renderBannerActivo()"></div>
+    <div class="f-field"><div class="f-label">Subtítulo</div><input class="f-input" value="${b.sub||''}" oninput="CFG.banners[${i}].sub=this.value;renderBannerActivo()"></div>
+    <div class="f-field"><div class="f-label">Texto botón WA</div><input class="f-input" value="${b.btn||''}" oninput="CFG.banners[${i}].btn=this.value"></div>
+    <button onclick="guardarClave('catalogo_banners',CFG.banners);toast('✓ Banner guardado','ok')" style="width:100%;background:#e8750a;color:#fff;border:none;border-radius:6px;padding:10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px">Guardar banner</button>`);
+}
+
+function editCat(i){
+  const c=CFG.categorias[i];
+  showEditPanel(`Categoría — ${c.nombre||'sin nombre'}`,`
+    <div class="f-sec" style="margin-top:0">Datos</div>
+    <div class="f-field"><div class="f-label">Nombre</div><input class="f-input" value="${c.nombre||''}" oninput="CFG.categorias[${i}].nombre=this.value;renderCats()"></div>
+    <div class="f-field"><div class="f-label">Cantidad de productos</div><input class="f-input" type="number" value="${c.cantidad||0}" oninput="CFG.categorias[${i}].cantidad=parseInt(this.value)||0;renderCats()"></div>
+    <div class="f-sec">Foto</div>
+    <div class="f-field">
+      <div class="f-img-row">
+        <div class="f-img-prev-bg" id="ec-prev" style="background-image:url('${c.foto||''}')"></div>
+        <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'cat-${i}.jpg',v=>{CFG.categorias[${i}].foto=v;s('ec-prev').style.backgroundImage='url('+v+')';s('ec-foto').value=v;renderCats()})"></label>
+      </div>
+      <input class="f-input" id="ec-foto" value="${c.foto||''}" placeholder="O URL de foto" style="margin-top:6px" oninput="CFG.categorias[${i}].foto=this.value;s('ec-prev').style.backgroundImage='url('+this.value+')';renderCats()">
+    </div>
+    <button onclick="guardarClave('catalogo_categorias',CFG.categorias);toast('✓ Categoría guardada','ok')" style="width:100%;background:#e8750a;color:#fff;border:none;border-radius:6px;padding:10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px">Guardar categoría</button>`);
+}
+
+// ══ EDIT SECCIÓN ══
+function editSec(sec,btn){
+  document.querySelectorAll('.es').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.edit-btn').forEach(x=>x.classList.remove('on'));
+  s('sec-'+sec).classList.add('active');
+  btn.classList.add('on');
+  btnActivo=btn;secActiva=sec;
+  switchPTab('edit',s('ptab-edit'));
+  document.getElementById('btnGuardar').style.display='block';
+  const h=CFG.hero;const n=CFG.negocio;const tx=CFG.textos;const fi=CFG.financia;
+
+  if(sec==='negocio'){
+    setHead('Negocio — Logo y datos');
+    setPanelContent(`
+      <div class="f-sec" style="margin-top:0">Logo</div>
+      <div class="f-field">
+        <div class="f-img-row">
+          <img id="neg-logo-prev" class="f-img-prev" src="${n.logo||''}" onerror="this.src=''" alt="">
+          <label class="f-upload">📁 Subir logo<input type="file" accept="image/*" onchange="uploadAndApply(this,'logo.png',v=>{s('neg-logo-inp').value=v;s('neg-logo-prev').src=v;const i=s('v-logo-img');i.src=v;i.style.display='block'})"></label>
+        </div>
+        <input class="f-input" id="neg-logo-inp" value="${n.logo||''}" placeholder="O URL del logo" style="margin-top:6px" oninput="const i=s('v-logo-img');i.src=this.value;i.style.display=this.value?'block':'none'">
+      </div>
+      <div class="f-sec">Datos del negocio</div>
+      <div class="f-field"><div class="f-label">Nombre</div><input class="f-input" id="neg-nombre" value="${n.nombre||''}" oninput="setEl('v-logo-txt',this.value.toUpperCase()+'<span style=color:#e8750a>.</span>')"></div>
+      <div class="f-field"><div class="f-label">Teléfono visible</div><input class="f-input" id="neg-tel" value="${n.telefono||''}" oninput="setTxt('v-tel',this.value)"></div>
+      <div class="f-field"><div class="f-label">WhatsApp (solo números)</div><input class="f-input" id="neg-wa" value="${n.whatsapp||''}" placeholder="54351XXXXXXX"><div class="f-hint">Sin + ni espacios</div></div>
+      <div class="f-field"><div class="f-label">Dirección</div><input class="f-input" id="neg-dir" value="${n.direccion||''}" oninput="setTxt('v-dir',this.value)"></div>
+      <div class="f-field"><div class="f-label">Email</div><input class="f-input" id="neg-email" value="${n.email||''}"></div>
+      <div class="f-sec">Horarios</div>
+      <div class="f-field"><div class="f-label">Lunes a Viernes</div><input class="f-input" id="neg-h1" value="${n.h_semana||''}" placeholder="8:00 – 20:00" oninput="setTxt('v-h1',this.value);setTxt('v-strip-hs','Lun–Vie '+this.value);setTxt('v-hsem','Lun–Vie '+this.value)"></div>
+      <div class="f-field"><div class="f-label">Sábados</div><input class="f-input" id="neg-h2" value="${n.h_sabado||''}" placeholder="8:00 – 13:00" oninput="setTxt('v-h2',this.value);setTxt('v-strip-hsab','Sáb '+this.value)"></div>
+      <div class="f-field"><div class="f-label">Descripción (footer)</div><textarea class="f-textarea" id="neg-desc">${n.descripcion||''}</textarea></div>`);
   }
-  btn.disabled=false;
-  btn.textContent='Guardar';
+
+  else if(sec==='hero'){
+    setHead('Hero — Sección principal');
+    setPanelContent(`
+      <div class="f-sec" style="margin-top:0">Foto de fondo</div>
+      <div class="f-field">
+        <div class="f-img-row">
+          <div class="f-img-prev-bg" id="hero-prev" style="background-image:url('${h.foto||''}')"></div>
+          <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'hero-bg.jpg',v=>{s('hero-foto').value=v;s('hero-prev').style.backgroundImage='url('+v+')';s('v-hero-bg').style.backgroundImage='url('+v+')'})"></label>
+        </div>
+        <input class="f-input" id="hero-foto" value="${h.foto||''}" placeholder="O URL de la foto" style="margin-top:6px" oninput="s('v-hero-bg').style.backgroundImage='url('+this.value+')';s('hero-prev').style.backgroundImage='url('+this.value+')'">
+      </div>
+      <div class="f-sec">Textos</div>
+      <div class="f-field"><div class="f-label">Tag superior</div><input class="f-input" id="hero-tag" value="${h.tag||'Catálogo 2025 · Córdoba'}" oninput="setTxt('v-hero-tag',this.value)"></div>
+      <div class="f-field"><div class="f-label">Título línea 1</div><input class="f-input" id="hero-t1" value="${h.t1||'TODO LO QUE'}" oninput="reHeroTitle()"></div>
+      <div class="f-field"><div class="f-label">Título línea 2</div><input class="f-input" id="hero-t2" value="${h.t2||'TU OBRA'}" oninput="reHeroTitle()"></div>
+      <div class="f-field"><div class="f-label">Palabra naranja</div><input class="f-input" id="hero-em" value="${h.t3||'NECESITA'}" oninput="reHeroTitle()"></div>
+      <div class="f-field"><div class="f-label">Subtítulo</div><textarea class="f-textarea" id="hero-sub" oninput="setTxt('v-hero-sub',this.value)">${h.sub||''}</textarea></div>
+      <div class="f-field"><div class="f-label">Texto botón</div><input class="f-input" id="hero-btn" value="${h.btn1||'Ver catálogo'}" oninput="setTxt('v-hero-btn',this.value+' →')"></div>`);
+  }
+
+  else if(sec==='strip'){
+    setHead('Strip — Barra de beneficios');
+    setPanelContent(`
+      <div class="f-info">La barra toma los datos de negocio (horarios) automáticamente. Los textos de cuotas y envíos los podés editar acá.</div>
+      <div class="f-sec">Texto cuotas</div>
+      <div class="f-field"><input class="f-input" id="strip-cuotas" value="${gv('v-strip-cuotas')||'12 cuotas sin interés'}" oninput="setTxt('v-strip-cuotas',this.value)"></div>`);
+  }
+
+  else if(sec==='prods'){
+    setHead('Productos — Catálogo');
+    setPanelContent(`
+      <div class="f-info">Los productos se cargan automáticamente desde el sistema. Marcás "en catálogo" en cada producto → aparece acá con su precio actualizado.</div>
+      <div class="f-sec">Título de sección</div>
+      <div class="f-field"><input class="f-input" id="prods-title" value="${h.prods_titulo||'TODOS LOS PRODUCTOS'}" oninput="setTxt('v-prods-title',this.value)"></div>`);
+  }
+
+  else if(sec==='fin'){
+    setHead('Financiación — Tarjetas');
+    const tarjHTML=(CFG.tarjetas||[]).map((t,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f9f6f2;border-radius:6px;margin-bottom:6px">
+        <div style="width:36px;height:22px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
+        <span style="font-size:12px;font-weight:500;color:#111;flex:1">${t.nom}</span>
+        <input style="width:80px;padding:5px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:12px;font-weight:700;color:#e8750a;text-align:center;outline:none" value="${t.cuotas} ${t.label||''}" oninput="updTarj(${i},this.value)">
+      </div>`).join('');
+    setPanelContent(`
+      <div class="f-sec" style="margin-top:0">Medios de pago</div>
+      ${tarjHTML||'<div class="f-info">No hay tarjetas configuradas. Guardar desde el admin primero.</div>'}
+      <div class="f-sec">Nota legal</div>
+      <div class="f-field"><textarea class="f-textarea" id="fin-nota">${fi.nota||''}</textarea></div>`);
+  }
+
+  else if(sec==='marcas'){
+    setHead('Marcas');
+    setPanelContent(`
+      <div class="f-sec" style="margin-top:0">Lista de marcas</div>
+      <div class="f-field">
+        <div class="f-label">Separadas por coma</div>
+        <textarea class="f-textarea" id="marcas-txt" oninput="CFG.marcas=this.value;renderMarcas()">${typeof CFG.marcas==='string'?CFG.marcas:(CFG.marcas||[]).join(', ')}</textarea>
+        <div class="f-hint">Ej: BOSCH, STANLEY, ALBA, NORTON, FV</div>
+      </div>`);
+  }
+
+  else if(sec==='cont'){
+    setHead('Contacto');
+    setPanelContent(`
+      <div class="f-sec" style="margin-top:0">Datos</div>
+      <div class="f-field"><div class="f-label">Dirección</div><input class="f-input" id="cont-dir" value="${n.direccion||''}" oninput="setTxt('v-dir',this.value)"></div>
+      <div class="f-field"><div class="f-label">Teléfono visible</div><input class="f-input" id="cont-tel" value="${n.telefono||''}" oninput="setTxt('v-tel',this.value)"></div>
+      <div class="f-field"><div class="f-label">WhatsApp (solo números)</div><input class="f-input" id="cont-wa" value="${n.whatsapp||''}" placeholder="54351XXXXXXX"></div>
+      <div class="f-field"><div class="f-label">Email</div><input class="f-input" id="cont-email" value="${n.email||''}"></div>
+      <div class="f-sec">Horarios</div>
+      <div class="f-field"><div class="f-label">Lunes a Viernes</div><input class="f-input" id="cont-h1" value="${n.h_semana||''}" oninput="setTxt('v-h1',this.value)"></div>
+      <div class="f-field"><div class="f-label">Sábados</div><input class="f-input" id="cont-h2" value="${n.h_sabado||''}" oninput="setTxt('v-h2',this.value)"></div>`);
+  }
 }
 
-function gv(id){const el=document.getElementById(id);return el?el.value.trim():'';}
-
-function showToast(msg,type='ok'){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast show '+(type==='err'?'err':'');
-  setTimeout(()=>t.classList.remove('show'),3000);
+function reHeroTitle(){
+  const t1=gv('hero-t1')||'TODO LO QUE';const t2=gv('hero-t2')||'TU OBRA';const em=gv('hero-em')||'NECESITA';
+  setEl('v-hero-title',`${t1} ${t2} <span id="v-hero-em" style="color:#e8750a">${em}</span>`);
 }
+
+function updTarj(i,val){
+  if(!CFG.tarjetas[i])return;
+  const p=val.trim().split(' ');
+  CFG.tarjetas[i].cuotas=p[0]||val;
+  CFG.tarjetas[i].label=p.slice(1).join(' ')||'';
+  const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
+  if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
+  markUnsaved();
+}
+
+function showEditPanel(title,html){
+  switchPTab('edit',s('ptab-edit'));
+  setHead(title);
+  setPanelContent(html);
+  s('btnGuardar').style.display='none';
+}
+
+function setHead(txt){s('panelTitle').textContent=txt;}
+function setPanelContent(html){const pe=s('pp-edit');if(pe){pe.innerHTML=html;pe.style.display='block';}}
+
+// ══ TABS ══
+function switchPTab(tab,btn){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  ['pp-edit','pp-gallery','pp-hist','pp-promos','pp-banners','pp-cats'].forEach(id=>{const el=s(id);if(el)el.style.display='none';});
+  const el=s('pp-'+tab);if(el)el.style.display='block';
+}
+
+function openTab(tab){
+  const tabMap={gallery:'gallery',hist:'hist',promos:'promos',banners:'banners',cats:'cats'};
+  const ptabMap={gallery:'ptab-gallery',hist:'ptab-hist',promos:'ptab-edit',banners:'ptab-edit',cats:'ptab-edit'};
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));
+  const ptab=s(ptabMap[tab]);if(ptab)ptab.classList.add('on');
+  ['pp-edit','pp-gallery','pp-hist','pp-promos','pp-banners','pp-cats'].forEach(id=>{const el=s(id);if(el)el.style.display='none';});
+  const el=s('pp-'+tab);if(el)el.style.display='block';
+  s('panelTitle').textContent={promos:'Promos — Carrusel',banners:'Banners',cats:'Categorías',gallery:'Galería de fotos',hist:'Historial'}[tab]||tab;
+  s('btnGuardar').style.display='none';
+  if(tab==='promos')renderPromosList();
+  if(tab==='banners')renderBannersList();
+  if(tab==='cats')renderCatsList();
+}
+
+// ══ DEVICE ══
+function setDevice(mode,btn){
+  document.querySelectorAll('.dev-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  s('prevWrap').classList.toggle('mobile',mode==='mobile');
+  s('prevFrame').classList.toggle('mobile',mode==='mobile');
+}
+
+// ══ GALERÍA ══
+async function cargarGaleria(){
+  try{
+    const {data}=await db.storage.from(BUCKET).list('',{limit:50});
+    galImgs=(data||[]).filter(f=>f.name.match(/\.(jpg|jpeg|png|webp|gif|bmp)$/i));
+    const grid=s('galGrid');
+    if(!grid)return;
+    const uploadBtn=grid.querySelector('.gal-upload');
+    const imgs=galImgs.map(f=>{
+      const url=`${SURL}/storage/v1/object/public/${BUCKET}/${f.name}`;
+      return `<div class="gal-item" onclick="copyUrl('${url}')" title="Click para copiar URL">
+        <img src="${url}" alt="${f.name}" loading="lazy" onerror="this.parentNode.style.display='none'">
+        <div class="gal-item-lbl">${f.name}</div>
+      </div>`;
+    }).join('');
+    grid.innerHTML='';
+    grid.appendChild(uploadBtn);
+    grid.insertAdjacentHTML('beforeend',imgs);
+    if(!galImgs.length)grid.insertAdjacentHTML('beforeend','<div class="gal-empty" style="grid-column:1/-1">Sin fotos subidas</div>');
+  }catch(e){console.warn('Galería:',e.message);}
+}
+
+async function uploadGallery(input){
+  const file=input.files[0];if(!file)return;
+  toast('Subiendo...','info');
+  try{
+    const name=Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const {error}=await db.storage.from(BUCKET).upload(name,file,{upsert:true,contentType:file.type});
+    if(error)throw error;
+    const url=`${SURL}/storage/v1/object/public/${BUCKET}/${name}`;
+    await cargarGaleria();
+    toast('✓ Foto subida — click para copiar URL','ok');
+    addHist('Foto subida: '+name,'#22c55e');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
+async function uploadAndApply(input,filename,cb){
+  const file=input.files[0];if(!file)return;
+  toast('Subiendo imagen...','info');
+  try{
+    const ext=file.name.split('.').pop().toLowerCase();
+    const name=filename.replace(/\.\w+$/,'.'+ext);
+    const {error}=await db.storage.from(BUCKET).upload(name,file,{upsert:true,contentType:file.type});
+    if(error)throw error;
+    const url=`${SURL}/storage/v1/object/public/${BUCKET}/${name}`;
+    cb(url);
+    await cargarGaleria();
+    toast('✓ Imagen subida','ok');
+    addHist('Imagen subida: '+name,'#22c55e');
+    markUnsaved();
+  }catch(e){toast('Error al subir: '+e.message,'err');}
+}
+
+function copyUrl(url){
+  navigator.clipboard.writeText(url).then(()=>toast('URL copiada al portapapeles','ok')).catch(()=>prompt('URL de la imagen:',url));
+}
+
+// ══ GUARDAR ══
+async function guardarSeccion(){
+  const btn=s('btnGuardar');
+  btn.disabled=true;btn.textContent='Guardando...';
+  try{
+    let hist='';
+    if(secActiva==='negocio'){
+      const neg={logo:gv('neg-logo-inp'),nombre:gv('neg-nombre'),telefono:gv('neg-tel'),whatsapp:gv('neg-wa').replace(/\D/g,''),direccion:gv('neg-dir'),email:gv('neg-email'),h_semana:gv('neg-h1'),h_sabado:gv('neg-h2'),descripcion:gv('neg-desc')};
+      CFG.negocio={...CFG.negocio,...neg};await guardarClave('catalogo_negocio',CFG.negocio);hist='Negocio actualizado';
+    }else if(secActiva==='hero'){
+      const h={foto:gv('hero-foto'),tag:gv('hero-tag'),t1:gv('hero-t1'),t2:gv('hero-t2'),t3:gv('hero-em'),sub:gv('hero-sub'),btn1:gv('hero-btn'),prods_titulo:gv('prods-title')||CFG.hero.prods_titulo};
+      CFG.hero={...CFG.hero,...h};await guardarClave('catalogo_hero',CFG.hero);hist='Hero actualizado';
+    }else if(secActiva==='strip'){
+      await guardarClave('catalogo_hero',CFG.hero);hist='Strip actualizado';
+    }else if(secActiva==='prods'){
+      CFG.hero.prods_titulo=gv('prods-title');await guardarClave('catalogo_hero',CFG.hero);hist='Título productos actualizado';
+    }else if(secActiva==='fin'){
+      await guardarClave('catalogo_tarjetas',CFG.tarjetas);
+      CFG.financia={...CFG.financia,nota:gv('fin-nota')};await guardarClave('catalogo_financia',CFG.financia);hist='Financiación actualizada';
+    }else if(secActiva==='marcas'){
+      CFG.marcas=gv('marcas-txt');await guardarClave('catalogo_marcas',CFG.marcas);hist='Marcas actualizadas';
+    }else if(secActiva==='cont'){
+      const neg={...CFG.negocio,direccion:gv('cont-dir'),telefono:gv('cont-tel'),whatsapp:gv('cont-wa').replace(/\D/g,''),email:gv('cont-email'),h_semana:gv('cont-h1'),h_sabado:gv('cont-h2')};
+      CFG.negocio=neg;await guardarClave('catalogo_negocio',neg);hist='Contacto actualizado';
+    }
+    // Guardar colores
+    const ap={...CFG.apariencia,
+      color_principal:document.documentElement.style.getPropertyValue('--ac')||CFG.apariencia.color_principal,
+      color_fondo:document.documentElement.style.getPropertyValue('--fondo')||CFG.apariencia.color_fondo,
+      color_oscuro:document.documentElement.style.getPropertyValue('--dk')||CFG.apariencia.color_oscuro,
+      btn_wa_bg:document.documentElement.style.getPropertyValue('--btn-wa-bg')||CFG.apariencia.btn_wa_bg,
+      promos_bg:document.documentElement.style.getPropertyValue('--promos-bg')||CFG.apariencia.promos_bg,
+      fin_bg:document.documentElement.style.getPropertyValue('--fin-bg')||CFG.apariencia.fin_bg,
+      fin_accent:document.documentElement.style.getPropertyValue('--fin-accent')||CFG.apariencia.fin_accent,
+      banner_tag_bg:document.documentElement.style.getPropertyValue('--banner-tag-bg')||CFG.apariencia.banner_tag_bg,
+      tipografia:s('sel-font')?.value||CFG.apariencia.tipografia,
+    };
+    CFG.apariencia=ap;await guardarClave('catalogo_apariencia',ap);
+    if(hist)addHist(hist,'#e8750a');
+    toast('✓ Guardado — el catálogo ya se actualizó','ok');
+    markSaved();
+  }catch(e){toast('Error: '+e.message,'err');}
+  btn.disabled=false;btn.textContent='Guardar';
+}
+
+async function guardarClave(key,value){
+  const val=JSON.stringify(value);
+  const {data:ex}=await db.from('user_config').select('user_id').eq('user_id',UID).eq('key',key).maybeSingle();
+  if(ex)await db.from('user_config').update({value:val}).eq('user_id',UID).eq('key',key);
+  else await db.from('user_config').insert({user_id:UID,key,value:val});
+}
+
+// ══ AUTOSAVE ══
+function markUnsaved(){
+  clearTimeout(saveTimer);
+  s('asDot').style.background='#f59e0b';
+  s('asLabel').textContent='Sin guardar';
+  saveTimer=setTimeout(autoSave,30000);
+}
+function markSaved(){s('asDot').style.background='#22c55e';s('asLabel').textContent='Guardado';}
+async function autoSave(){
+  // Solo guarda apariencia automáticamente
+  const ap={...CFG.apariencia,
+    color_principal:document.documentElement.style.getPropertyValue('--ac')||CFG.apariencia.color_principal,
+    color_fondo:document.documentElement.style.getPropertyValue('--fondo')||CFG.apariencia.color_fondo,
+    color_oscuro:document.documentElement.style.getPropertyValue('--dk')||CFG.apariencia.color_oscuro,
+    btn_wa_bg:document.documentElement.style.getPropertyValue('--btn-wa-bg')||CFG.apariencia.btn_wa_bg,
+    promos_bg:document.documentElement.style.getPropertyValue('--promos-bg')||CFG.apariencia.promos_bg,
+    fin_bg:document.documentElement.style.getPropertyValue('--fin-bg')||CFG.apariencia.fin_bg,
+    fin_accent:document.documentElement.style.getPropertyValue('--fin-accent')||CFG.apariencia.fin_accent,
+    banner_tag_bg:document.documentElement.style.getPropertyValue('--banner-tag-bg')||CFG.apariencia.banner_tag_bg,
+  };
+  await guardarClave('catalogo_apariencia',ap);
+  markSaved();
+  addHist('Auto-guardado','#9ca3af');
+}
+
+// ══ HISTORIAL ══
+function addHist(txt,color){
+  const now=new Date();
+  const ts=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  historial.unshift({txt,color,ts});
+  if(historial.length>20)historial.pop();
+  const el=s('histList');
+  if(!el)return;
+  el.innerHTML=historial.map((h,i)=>`
+    <div class="hist-item" id="hist-${i}">
+      <div class="hist-dot" style="background:${h.color}"></div>
+      <div style="flex:1"><div class="hist-what">${h.txt}</div><div class="hist-when">hoy ${h.ts}</div></div>
+      <button class="hist-undo" onclick="deshacerHist(${i})">↩ Deshacer</button>
+    </div>`).join('');
+}
+
+function deshacerHist(i){
+  const el=s(`hist-${i}`);
+  if(el){el.classList.add('undone');}
+  toast('Cambio deshecho — recargá el preview para ver','info');
+}
+
+function reloadPreview(){aplicarCFG();}
+
+// ══ TOAST ══
+function toast(msg,type='ok'){
+  const t=s('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+document.addEventListener('input',markUnsaved);
 </script>
 </body>
 </html>
