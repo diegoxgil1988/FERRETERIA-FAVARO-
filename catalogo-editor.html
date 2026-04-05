@@ -368,10 +368,15 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:
       <div class="prev-wrap" id="prevWrap">
         <div class="prev-frame" id="prevFrame">
 
+          <!-- TOPBAR -->
+          <div class="es" id="sec-topbar">
+            <button class="edit-btn" onclick="editSec('topbar',this)" style="top:4px;right:6px">✏ Editar topbar</button>
+            <div class="c-tb" id="v-topbar">🟢 Abierto · <span id="v-hsem">Lun–Vie 8–20hs</span> · 📦 Envíos Córdoba</div>
+          </div>
+
           <!-- NEGOCIO -->
           <div class="es" id="sec-negocio">
-            <button class="edit-btn" onclick="editSec('negocio',this)">✏ Editar</button>
-            <div class="c-tb" id="v-topbar">🟢 Abierto · <span id="v-hsem">Lun–Vie 8–20hs</span> · 📦 Envíos Córdoba</div>
+            <button class="edit-btn" onclick="editSec('negocio',this)">✏ Editar negocio</button>
             <div class="c-nav">
               <div class="c-logo" id="v-logo">
                 <img id="v-logo-img" src="" style="height:28px;object-fit:contain;display:none" alt="">
@@ -570,7 +575,7 @@ function aplicarCFG(){
   if(n.direccion) setTxt('v-dir',n.direccion);
   if(n.h_semana){setTxt('v-hsem','Lun–Vie '+n.h_semana);setTxt('v-strip-hs','Lun–Vie '+n.h_semana);setTxt('v-h1',n.h_semana);}
   if(n.h_sabado){setTxt('v-strip-hsab','Sáb '+n.h_sabado);setTxt('v-h2',n.h_sabado);}
-  // Strip textos
+  // Strip textos desde config
   const stx=CFG.textos||{};
   if(stx.strip_cuotas) setTxt('v-strip-cuotas',stx.strip_cuotas);
   if(stx.strip_cuotas_sub) setTxt('v-strip-cuotas-sub',stx.strip_cuotas_sub);
@@ -578,6 +583,7 @@ function aplicarCFG(){
   if(stx.strip_envios_sub) setTxt('v-strip-envios-sub',stx.strip_envios_sub);
   if(stx.strip_efec) setTxt('v-strip-efec',stx.strip_efec);
   if(stx.strip_efec_sub) setTxt('v-strip-efec-sub',stx.strip_efec_sub);
+  if(stx.topbar_txt) setEl('v-topbar',stx.topbar_txt);
   // Hero
   if(h.foto) s('v-hero-bg').style.backgroundImage=`url('${h.foto}')`;
   if(h.tag) setTxt('v-hero-tag',h.tag);
@@ -893,12 +899,33 @@ function editSec(sec,btn){
       <div class="f-field"><div class="f-label">Texto botón</div><input class="f-input" id="hero-btn" value="${h.btn1||'Ver catálogo'}" oninput="setTxt('v-hero-btn',this.value+' →')"></div>`);
   }
 
+  else if(sec==='topbar'){
+    setHead('Topbar — Barra superior');
+    setPanelContent(`
+      <div class="f-info">La barra negra de arriba del todo. Mostrá info rápida del negocio.</div>
+      <div class="f-sec" style="margin-top:8px">Color de fondo</div>
+      <div class="f-field"><div class="f-color-row"><div class="f-cdot" id="cd-topbar" style="background:${CFG.apariencia.topbar_bg||'#111'}"><input type="color" value="${CFG.apariencia.topbar_bg||'#111827'}" oninput="this.parentNode.style.background=this.value;document.getElementById('sec-topbar').querySelector('.c-tb').style.background=this.value;CFG.apariencia.topbar_bg=this.value;markUnsaved()"></div><span class="f-cval">Color topbar</span></div></div>
+      <div class="f-sec">Texto del topbar</div>
+      <div class="f-field"><div class="f-label">Contenido libre</div><textarea class="f-textarea" id="topbar-txt" rows="3" oninput="setEl('v-topbar',this.value)">${document.getElementById('v-topbar')?.innerHTML||''}</textarea><div class="f-hint">Usá texto y emojis. Los horarios del negocio se muestran automáticamente.</div></div>
+      <div class="f-sec">Texto rápido</div>
+      <button onclick="s('topbar-txt').value='Abierto Lun-Vie 8-20hs · Envios Cordoba Capital · 12 cuotas sin interes';setEl('v-topbar',s('topbar-txt').value)" style="width:100%;background:#f9f6f2;border:1px solid #e0d8cf;border-radius:5px;padding:7px;font-size:10px;color:#666;cursor:pointer;text-align:left;font-family:inherit;margin-bottom:4px">Abierto + Envios + Cuotas</button>
+      <button onclick="s('topbar-txt').value='Oferta del mes: 12 cuotas sin interes · Efectivo 10% OFF';setEl('v-topbar',s('topbar-txt').value)" style="width:100%;background:#f9f6f2;border:1px solid #e0d8cf;border-radius:5px;padding:7px;font-size:10px;color:#666;cursor:pointer;text-align:left;font-family:inherit">Oferta + Efectivo</button>`);
+  }
+
   else if(sec==='strip'){
     setHead('Strip — Barra de beneficios');
+    const tx2=CFG.textos||{};
     setPanelContent(`
-      <div class="f-info">La barra toma los datos de negocio (horarios) automáticamente. Los textos de cuotas y envíos los podés editar acá.</div>
-      <div class="f-sec">Texto cuotas</div>
-      <div class="f-field"><input class="f-input" id="strip-cuotas" value="${gv('v-strip-cuotas')||'12 cuotas sin interés'}" oninput="setTxt('v-strip-cuotas',this.value)"></div>`);
+      <div class="f-info">Los horarios se toman de Negocio automáticamente. Editá los otros ítems acá.</div>
+      <div class="f-sec" style="margin-top:8px">Ítem 1 — Cuotas</div>
+      <div class="f-field"><input class="f-input" id="strip-cuotas" value="${tx2.strip_cuotas||'12 cuotas sin interés'}" oninput="setTxt('v-strip-cuotas',this.value)"></div>
+      <div class="f-field"><div class="f-label">Subtexto</div><input class="f-input" id="strip-cuotas-sub" value="${tx2.strip_cuotas_sub||'Visa · Master · Naranja'}" oninput="setTxt('v-strip-cuotas-sub',this.value)"></div>
+      <div class="f-sec">Ítem 2 — Envíos</div>
+      <div class="f-field"><input class="f-input" id="strip-envios" value="${tx2.strip_envios||'Envíos a domicilio'}" oninput="setTxt('v-strip-envios',this.value)"></div>
+      <div class="f-field"><div class="f-label">Subtexto</div><input class="f-input" id="strip-envios-sub" value="${tx2.strip_envios_sub||'Córdoba Capital'}" oninput="setTxt('v-strip-envios-sub',this.value)"></div>
+      <div class="f-sec">Ítem 3 — Descuento efectivo</div>
+      <div class="f-field"><input class="f-input" id="strip-efec" value="${tx2.strip_efec||'Efectivo 10% OFF'}" oninput="setTxt('v-strip-efec',this.value)"></div>
+      <div class="f-field"><div class="f-label">Subtexto</div><input class="f-input" id="strip-efec-sub" value="${tx2.strip_efec_sub||'Transferencia 5% OFF'}" oninput="setTxt('v-strip-efec-sub',this.value)"></div>`);
   }
 
   else if(sec==='prods'){
@@ -910,28 +937,16 @@ function editSec(sec,btn){
   }
 
   else if(sec==='fin'){
-    setHead('Financiación — Tarjetas y cuotas');
-    // Tarjetas por defecto si no hay ninguna
-    if(!CFG.tarjetas||!CFG.tarjetas.length){
-      CFG.tarjetas=[
-        {nom:'Visa',sub:'Débito y Crédito',txt:'VISA',color:'linear-gradient(135deg,#1a1f71,#1565c0)',cuotas:'12x',label:'s/i',descuento:false},
-        {nom:'Mastercard',sub:'Débito y Crédito',txt:'MC',color:'linear-gradient(135deg,#eb001b,#f79e1b)',cuotas:'12x',label:'s/i',descuento:false},
-        {nom:'Naranja X',sub:'Crédito',txt:'NRJ',color:'linear-gradient(135deg,#ff6600,#ff3300)',cuotas:'6x',label:'s/i',descuento:false},
-        {nom:'Efectivo',sub:'Precio especial',txt:'EFC',color:'#1a1a1a',cuotas:'10%',label:'OFF',descuento:true},
-        {nom:'MODO / Transferencia',sub:'Descuento',txt:'MODO',color:'linear-gradient(135deg,#00bcd4,#0097a7)',cuotas:'5%',label:'OFF',descuento:true},
-      ];
-    }
-    const tarjHTML=CFG.tarjetas.map((t,i)=>`
+    setHead('Financiación — Tarjetas');
+    const tarjHTML=(CFG.tarjetas||[]).map((t,i)=>`
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f9f6f2;border-radius:6px;margin-bottom:6px">
-        <div style="width:40px;height:24px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
+        <div style="width:36px;height:22px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
         <span style="font-size:12px;font-weight:500;color:#111;flex:1">${t.nom}</span>
-        <input style="width:80px;padding:5px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:12px;font-weight:700;color:${t.descuento?'#22c55e':'#e8750a'};text-align:center;outline:none" value="${t.cuotas}${t.label?' '+t.label:''}" oninput="updTarj(${i},this.value)">
+        <input style="width:80px;padding:5px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:12px;font-weight:700;color:#e8750a;text-align:center;outline:none" value="${t.cuotas} ${t.label||''}" oninput="updTarj(${i},this.value)">
       </div>`).join('');
     setPanelContent(`
-      <div class="f-sec" style="margin-top:0">Medios de pago <span style="font-size:9px;color:#aaa;font-weight:400">(editá cuotas o descuentos)</span></div>
-      ${tarjHTML}
-      <div class="f-sec">Cuotas destacadas en el catálogo</div>
-      <div class="f-field"><div class="f-label">Máximas cuotas sin interés</div><input class="f-input" id="fin-maxcuotas" value="${Math.max(...CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n)),0)||12}" oninput="setTxt('v-maxcuota',this.value+'x')"></div>
+      <div class="f-sec" style="margin-top:0">Medios de pago</div>
+      ${tarjHTML||'<div class="f-info">No hay tarjetas configuradas. Guardar desde el admin primero.</div>'}
       <div class="f-sec">Nota legal</div>
       <div class="f-field"><textarea class="f-textarea" id="fin-nota">${fi.nota||''}</textarea></div>`);
   }
@@ -975,7 +990,6 @@ function updTarj(i,val){
   CFG.tarjetas[i].label=p.slice(1).join(' ')||'';
   const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
   if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
-  // Guardar directamente al cambiar tarjeta
   guardarClave('catalogo_tarjetas',CFG.tarjetas);
   markUnsaved();
 }
@@ -1006,7 +1020,6 @@ function openTab(tab){
   ['pp-edit','pp-gallery','pp-hist','pp-promos','pp-banners','pp-cats'].forEach(id=>{const el=s(id);if(el)el.style.display='none';});
   const el=s('pp-'+tab);if(el)el.style.display='block';
   s('panelTitle').textContent={promos:'Promos — Carrusel',banners:'Banners',cats:'Categorías',gallery:'Galería de fotos',hist:'Historial'}[tab]||tab;
-  // Mostrar guardar solo para secciones con datos que guardar
   const tabConGuardar=['promos','banners','cats'];
   s('btnGuardar').style.display=tabConGuardar.includes(tab)?'block':'none';
   if(tabConGuardar.includes(tab)) secActiva=tab;
@@ -1092,6 +1105,12 @@ async function guardarSeccion(){
     }else if(secActiva==='hero'){
       const h={foto:gv('hero-foto'),tag:gv('hero-tag'),t1:gv('hero-t1'),t2:gv('hero-t2'),t3:gv('hero-em'),sub:gv('hero-sub'),btn1:gv('hero-btn'),prods_titulo:gv('prods-title')||CFG.hero.prods_titulo};
       CFG.hero={...CFG.hero,...h};await guardarClave('catalogo_hero',CFG.hero);hist='Hero actualizado';
+    }else if(secActiva==='topbar'){
+      const topTxt=gv('topbar-txt');
+      CFG.textos={...CFG.textos,topbar_txt:topTxt};
+      await guardarClave('catalogo_textos',CFG.textos);
+      await guardarClave('catalogo_apariencia',CFG.apariencia);
+      hist='Topbar actualizado';
     }else if(secActiva==='strip'){
       const stripTx={strip_cuotas:gv('strip-cuotas'),strip_cuotas_sub:gv('strip-cuotas-sub'),strip_envios:gv('strip-envios'),strip_envios_sub:gv('strip-envios-sub'),strip_efec:gv('strip-efec'),strip_efec_sub:gv('strip-efec-sub')};
       CFG.textos={...CFG.textos,...stripTx};await guardarClave('catalogo_textos',CFG.textos);hist='Strip actualizado';
