@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ferretería Favaro — Catálogo Online</title>
+<!-- UX 1: SEO y preview social -->
+<meta name="description" content="Catálogo online de Ferretería Favaro. Herramientas, pinturas, plomería, electricidad y más. Financiación en cuotas. Córdoba, Argentina.">
+<meta property="og:type" content="website">
+<meta property="og:title" id="og-title" content="Ferretería Favaro — Catálogo Online">
+<meta property="og:description" id="og-desc" content="Catálogo online de Ferretería Favaro. Herramientas, pinturas y más. Córdoba.">
+<meta property="og:image" id="og-image" content="">
+<meta property="og:url" content="https://ferreteria-favaro.vercel.app/catalogo.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#e8750a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Big+Shoulders+Display:wght@700;800;900&family=Barlow+Condensed:wght@600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -134,7 +143,7 @@ main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
 .cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px}
 .cat-card{background:var(--wh);border:1px solid var(--fondo3);border-radius:10px;overflow:hidden;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s;cursor:pointer}
 .cat-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08);border-color:var(--ac)}
-.cat-img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--fondo2);display:block}
+.cat-img{width:100%;aspect-ratio:16/9;background:var(--fondo2);background-size:cover;background-position:center;display:block}
 .cat-body{padding:10px 12px}
 .cat-name{font-family:var(--font-title);font-size:13px;font-weight:700;color:var(--dk);margin-bottom:2px}
 .cat-count{font-size:11px;color:var(--tx3)}
@@ -214,6 +223,9 @@ main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
 .marcas-row{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:center;align-items:center}
 .marca-item{font-family:var(--font-title);font-size:18px;font-weight:800;color:var(--fondo3);letter-spacing:-.3px;transition:color .2s;cursor:default}
 .marca-item:hover{color:var(--tx2)}
+.marca-item-img{display:flex;align-items:center;justify-content:center}
+.marca-item-img img{height:32px;max-width:90px;object-fit:contain;filter:grayscale(1);opacity:.5;transition:all .2s;cursor:default}
+.marca-item-img img:hover{filter:grayscale(0);opacity:1}
 
 /* CONTACTO */
 .contacto-section{background:var(--cont-bg);border-radius:14px;padding:32px;margin-bottom:32px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
@@ -264,6 +276,11 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
 /* FICHA MODAL */
 #fichaOv{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.6);overflow-y:auto;padding:20px 16px;align-items:flex-start;justify-content:center}
 .ficha-modal{background:var(--wh);border-radius:16px;max-width:960px;margin:0 auto;overflow:hidden;position:relative;width:100%;animation:fichaIn .3s ease}
+/* UX 4: zoom overlay */
+#zoomOv{display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.95);align-items:center;justify-content:center;cursor:zoom-out}
+#zoomOv.open{display:flex}
+#zoomImg{max-width:95vw;max-height:95vh;object-fit:contain;border-radius:4px}
+.ficha-img-wrap img{cursor:zoom-in}
 @keyframes fichaIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 .ficha-inner{display:grid;grid-template-columns:1fr 1fr}
 .ficha-galeria{background:var(--fondo2);padding:24px;display:flex;flex-direction:column;gap:12px}
@@ -457,6 +474,7 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
         <option value="precio-asc">Precio: menor</option>
         <option value="precio-desc">Precio: mayor</option>
         <option value="cat">Por categoría</option>
+        <option value="dest">Destacados primero</option>
       </select>
     </div>
     <div class="prod-grid rv" id="prodGrid"></div>
@@ -584,6 +602,11 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
   </div>
 </div>
 
+<!-- UX 4: ZOOM OVERLAY -->
+<div id="zoomOv" onclick="cerrarZoom()">
+  <img id="zoomImg" src="" alt="">
+</div>
+
 <!-- CARRITO -->
 <div id="carritoFloat">
   <button class="carrito-btn" onclick="carritoAbrir()">
@@ -604,6 +627,7 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
       <span class="cart-total-label">Total estimado</span>
       <span class="cart-total-val" id="cartTotalVal"></span>
     </div>
+    <div id="cartCuotasInfo" style="display:none;font-size:12px;color:var(--ac);font-weight:600;text-align:center;margin-top:4px;padding:6px;background:var(--ac-light);border-radius:6px"></div>
     <button class="btn-cart-wa" id="btnCartWA" style="display:none" onclick="enviarCarritoWA()">
       <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.557 4.117 1.528 5.847L0 24l6.335-1.652A12 12 0 1 0 12 0z"/></svg>
       Enviar consulta por WhatsApp
@@ -621,9 +645,18 @@ let WA='54XXXXXXXXX';
 let PRODS=[];
 let CATS_FOTOS={};
 let catA='Todas';
+let subcatA=''; // FUNC 3: subcategoría activa
 let slideIdx=0;
 let fichaActual=null;
-let carrito=[];
+let MAX_CUOTAS=12; // se actualiza desde tarjetas configuradas
+let TARJETAS_CONFIG=[]; // guarda tarjetas completas para mostrar en ficha
+// UX 6: carrito persistente con localStorage
+let carrito=(()=>{
+  try{
+    const saved=localStorage.getItem('favaro_carrito');
+    return saved?JSON.parse(saved):[];
+  }catch(e){return [];}
+})();
 
 // ══ LOADING ══
 document.body.insertAdjacentHTML('afterbegin',`
@@ -639,12 +672,28 @@ document.body.insertAdjacentHTML('afterbegin',`
 function lp(p){const b=document.getElementById('lbar');if(b)b.style.width=p+'%';}
 function hl(){const el=document.getElementById('ls');if(el){el.style.opacity='0';el.style.transition='opacity .4s';setTimeout(()=>el.remove(),400);}}
 
+// UX 2: timeout — si tarda más de 10s muestra error
+const loadTimeout=setTimeout(()=>{
+  const el=document.getElementById('ls');
+  if(el&&el.parentNode){
+    el.innerHTML=`
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:40px;margin-bottom:16px">⚠️</div>
+        <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px">No se pudo cargar el catálogo</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px">Verificá tu conexión a internet</div>
+        <button onclick="location.reload()" style="background:#e8750a;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer">↻ Reintentar</button>
+      </div>`;
+  }
+},10000);
+// Cancelar timeout cuando carga OK
+const hlOK=()=>{clearTimeout(loadTimeout);hl();};
+
 // ══ INIT ══
 async function init(){
   lp(10);
   // 1. Config
   try{
-    const {data:rows}=await db.from('user_config').select('key,value');
+    const {data:rows}=await db.from('user_config').select('key,value').eq('user_id','df30c353-ffd1-4660-8269-b9c9cefad9fb');
     if(rows){
       const get=k=>{const r=rows.find(x=>x.key===k);if(!r)return null;try{return JSON.parse(r.value);}catch(e){return r.value;}};
       
@@ -652,18 +701,31 @@ async function init(){
       const ap=get('catalogo_apariencia')||{};
       if(ap.color_principal) setCSSVar('--ac',ap.color_principal);
       if(ap.color_fondo) setCSSVar('--fondo',ap.color_fondo);
-      if(ap.color_oscuro){setCSSVar('--dk',ap.color_oscuro);setCSSVar('--topbar-bg',ap.color_oscuro);setCSSVar('--strip-bg',ap.color_oscuro);}
+      if(ap.color_oscuro){setCSSVar('--dk',ap.color_oscuro);setCSSVar('--strip-bg',ap.color_oscuro);}
+      // INC 5: topbar_bg independiente del color oscuro general
+      if(ap.topbar_bg) setCSSVar('--topbar-bg',ap.topbar_bg);
+      else if(ap.color_oscuro) setCSSVar('--topbar-bg',ap.color_oscuro);
       if(ap.tipografia) setCSSVar('--font-title',`'${ap.tipografia}',sans-serif`);
       
-      // Colores extra del editor v2
-      const col=get('catalogo_colores')||{};
-      Object.entries(col).forEach(([k,v])=>setCSSVar(k,v));
+      // catalogo_colores eliminado (INC 4 — nunca se escribe desde el editor)
       
       // Negocio
       const neg=get('catalogo_negocio')||{};
-      WA=(neg.whatsapp||'54XXXXXXXXX').replace(/\D/g,'');
+      WA=neg.whatsapp||'54XXXXXXXXX'; // se normaliza en normalizarWA() al usar
       if(neg.logo){const li=document.getElementById('ls-logo');if(li){li.src=neg.logo;li.style.display='block';}document.getElementById('logoImg').src=neg.logo;}
-      if(neg.nombre){const n=neg.nombre.toUpperCase();document.getElementById('ls-name').innerHTML=n+'<span style="color:var(--ac)">.</span>';document.getElementById('logoTxt').innerHTML=n+'<span>.</span>';document.getElementById('footerLogo').innerHTML=n+'<span>.</span>';document.title=neg.nombre+' — Catálogo Online';}
+      if(neg.nombre){
+        const n=neg.nombre.toUpperCase();
+        document.getElementById('ls-name').innerHTML=n+'<span style="color:var(--ac)">.</span>';
+        document.getElementById('logoTxt').innerHTML=n+'<span>.</span>';
+        document.getElementById('footerLogo').innerHTML=n+'<span>.</span>';
+        document.title=neg.nombre+' — Catálogo Online';
+        // UX 1: actualizar OG tags
+        const ogT=document.getElementById('og-title');
+        const ogD=document.getElementById('og-desc');
+        if(ogT) ogT.content=neg.nombre+' — Catálogo Online';
+        if(ogD) ogD.content='Catálogo online de '+neg.nombre+(neg.direccion?' — '+neg.direccion:'')+'. Córdoba, Argentina.';
+      }
+      if(neg.logo){const ogI=document.getElementById('og-image');if(ogI)ogI.content=neg.logo;}
       if(neg.telefono){document.getElementById('neg-tel').textContent=neg.telefono;document.getElementById('cont-tel').textContent=neg.telefono;}
       if(neg.direccion){document.getElementById('neg-dir').textContent=neg.direccion;document.getElementById('cont-dir').textContent=neg.direccion;}
       if(neg.email) document.getElementById('cont-email').textContent=neg.email;
@@ -671,14 +733,18 @@ async function init(){
       if(neg.h_sabado){document.getElementById('neg-hsab').textContent='Sáb '+neg.h_sabado;document.getElementById('hor-sab').textContent=neg.h_sabado;}
       if(neg.h_domingo){const d=document.getElementById('hor-dom');if(d)d.textContent=neg.h_domingo;}
       if(neg.h_feriado){const f=document.getElementById('hor-fer');if(f)f.textContent=neg.h_feriado;}
-      // Strip textos
-      const stx=tx||{};
-      if(stx.strip_cuotas){const el=document.getElementById('strip-txt1');if(el)el.textContent=stx.strip_cuotas;}
       if(neg.descripcion) document.getElementById('footerDesc').textContent=neg.descripcion;
-      
-      // Textos
+
+      // Textos — declarado ANTES de usarlo (BUG 1 fix)
       const tx=get('catalogo_textos')||{};
       if(tx.footer) document.getElementById('footerCopy').textContent=tx.footer;
+      // Strip textos
+      if(tx.strip_cuotas){const el=document.getElementById('strip-txt1');if(el)el.textContent=tx.strip_cuotas;}
+      if(tx.topbar_txt){
+        // FIX 1: reemplazar contenido del topbar-inner con el texto personalizado
+        const topInner=document.getElementById('topbarEl')?.querySelector('.topbar-inner');
+        if(topInner) topInner.innerHTML=`<div class="ti" style="flex:1;justify-content:center">${tx.topbar_txt}</div>`;
+      }
       
       // Hero
       const hero=get('catalogo_hero')||{};
@@ -699,13 +765,21 @@ async function init(){
       
       // Tarjetas
       const tarj=get('catalogo_tarjetas');
-      if(tarj) buildTarjetas(tarj);
+      if(tarj){buildTarjetas(tarj);sincronizarCuotas();}
       const fin=get('catalogo_financia')||{};
       if(fin.nota) document.getElementById('finNota').textContent=fin.nota;
       
-      // Marcas
+      // Marcas — normalizado: acepta string, array, u objeto {nombre,logo}
       const marcas=get('catalogo_marcas');
-      if(marcas){const lista=typeof marcas==='string'?marcas.split(',').map(m=>m.trim()):marcas;document.getElementById('marcasRow').innerHTML=lista.map(m=>`<span class="marca-item">${m}</span>`).join('');}
+      if(marcas){
+        let lista=[];
+        if(typeof marcas==='string') lista=marcas.split(',').map(m=>m.trim()).filter(Boolean).map(m=>({nombre:m,logo:''}));
+        else if(Array.isArray(marcas)) lista=marcas.map(m=>typeof m==='string'?{nombre:m,logo:''}:m);
+        const el=document.getElementById('marcasRow');
+        if(el) el.innerHTML=lista.map(m=>m.logo
+          ?`<div class="marca-item-img"><img src="${m.logo}" alt="${m.nombre}" title="${m.nombre}"></div>`
+          :`<span class="marca-item">${m.nombre}</span>`).join('');
+      }
       
       // Categorías con fotos
       const cats=get('catalogo_categorias');
@@ -727,8 +801,8 @@ async function init(){
   
   // 2. Productos
   try{
-    const {data:prods,error}=await db.from('products').select('id,nombre,marca,categoria,precio,unidad,fotos,descripcion,estado,en_catalogo').eq('en_catalogo',true).eq('estado','activo').order('nombre',{ascending:true});
-    if(!error) PRODS=(prods||[]).map(p=>({id:p.id,nom:p.nombre||'',marca:p.marca||'',cat:p.categoria||'General',precio:p.precio||0,un:p.unidad||'u',badge:'',img:(p.fotos&&p.fotos[0])||'',fotos:p.fotos||[],descripcion:p.descripcion||'',desc:[p.marca,p.categoria].filter(Boolean).join(' · ')}));
+    const {data:prods,error}=await db.from('products').select('id,nombre,marca,categoria,subcategoria,precio,unidad,fotos,descripcion,destacado,estado,en_catalogo').eq('en_catalogo',true).eq('estado','activo').order('nombre',{ascending:true});
+    if(!error) PRODS=(prods||[]).map(p=>({id:p.id,nom:p.nombre||'',marca:p.marca||'',cat:p.categoria||'General',subcat:p.subcategoria||'',precio:p.precio||0,un:p.unidad||'u',badge:p.destacado?'top':'',img:(p.fotos&&p.fotos[0])||'',fotos:p.fotos||[],descripcion:p.descripcion||'',destacado:p.destacado||false,desc:[p.marca,p.categoria].filter(Boolean).join(' · ')}));
   }catch(e){console.error('Productos:',e.message);}
   
   lp(90);
@@ -737,13 +811,41 @@ async function init(){
   renderProds();
   observe();
   lp(100);
-  hl();
+  hlOK(); // UX 2: cancela timeout de error
 }
 
 function setCSSVar(name,value){document.documentElement.style.setProperty(name,value);}
 
+// INC 1: sincroniza cuotas en strip, badges y ficha desde tarjetas configuradas
+function sincronizarCuotas(){
+  if(MAX_CUOTAS<=0)return;
+  // Strip txt1 si no fue sobreescrito por config
+  const strip1=document.getElementById('strip-txt1');
+  if(strip1&&strip1.textContent.includes('12'))strip1.textContent=MAX_CUOTAS+'x sin interés';
+  // FIX 6: también actualiza strip-cuotas del topbar
+  const stripTop=document.getElementById('strip-cuotas');
+  if(stripTop&&stripTop.textContent.includes('12'))stripTop.textContent=MAX_CUOTAS+' cuotas sin interés';
+  // Badges de cuotas — recalcular
+  const stripEl=document.getElementById('cuotasStrip');
+  if(stripEl&&stripEl.querySelectorAll('.cuota-badge').length>0){
+    const raw=[3,6,MAX_CUOTAS].filter((v,i,a)=>v>0&&a.indexOf(v)===i).sort((a,b)=>a-b);
+    stripEl.innerHTML=raw.map(c=>`<div class="cuota-badge"><div class="cuota-num">${c}x</div><div class="cuota-lbl">cuotas</div><div class="cuota-sub">sin interés</div></div>`).join('');
+  }
+}
+
+function normalizarWA(num){
+  // INC 3: asegura formato internacional Argentina (+54)
+  let n=num.replace(/\D/g,'');
+  if(!n) return '54XXXXXXXXX';
+  // Si empieza con 0, sacar el 0
+  if(n.startsWith('0')) n=n.slice(1);
+  // Si no empieza con 54 y tiene menos de 12 dígitos, agregar 54
+  if(!n.startsWith('54')&&n.length<=11) n='54'+n;
+  return n;
+}
+
 function actualizarWA(){
-  const wa=WA.replace(/\D/g,'');
+  const wa=normalizarWA(WA);
   const msg=encodeURIComponent('Hola! Quiero consultar sobre el catálogo.');
   const url=`https://wa.me/${wa}?text=${msg}`;
   ['waFloat','waHeader','contWa','footerWa'].forEach(id=>{const el=document.getElementById(id);if(el)el.href=url;});
@@ -753,7 +855,7 @@ function actualizarWA(){
 function buildSlides(slides,neg,hero){
   const activos=slides.filter(s=>s.activo!==false);
   if(!activos.length){buildDefaultSlide(hero,neg);return;}
-  const wa=WA.replace(/\D/g,'');
+  const wa=normalizarWA(WA);
   document.getElementById('slidesWrap').innerHTML=activos.map(s=>`
     <div class="slide">
       <div class="slide-bg" style="background-image:url('${s.foto||''}')"></div>
@@ -768,7 +870,7 @@ function buildSlides(slides,neg,hero){
 }
 
 function buildDefaultSlide(hero,neg){
-  const wa=WA.replace(/\D/g,'');
+  const wa=normalizarWA(WA);
   const foto=hero.foto||'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1400&q=80';
   const t1=hero.t1||'TODO LO QUE';const t2=hero.t2||'TU OBRA';const t3=hero.t3||'NECESITA';
   const sub=hero.sub||'Herramientas, pinturas y materiales de calidad.';
@@ -787,11 +889,11 @@ function buildDefaultSlide(hero,neg){
 }
 
 function buildBanner(b,neg){
-  const wa=WA.replace(/\D/g,'');
+  const wa=normalizarWA(WA);
   const el=document.getElementById('bannerEl');
   if(!el)return;
   el.style.display='flex';
-  el.onclick=()=>window.open(`https://wa.me/${wa}?text=${encodeURIComponent(b.btn||'Hola!')},'_blank'`);
+  el.onclick=()=>window.open(`https://wa.me/${wa}?text=${encodeURIComponent(b.btn||'Hola!')}`,`_blank`);
   document.getElementById('bannerBg').style.backgroundImage=`url('${b.foto||''}')`;
   document.getElementById('bannerTag').textContent=b.tag||'';
   if(b.tag_color) document.getElementById('bannerTag').style.background=b.tag_color;
@@ -803,7 +905,7 @@ function buildBanner(b,neg){
 }
 
 function buildPromos(promos,neg){
-  const wa=WA.replace(/\D/g,'');
+  const wa=normalizarWA(WA);
   const el=document.getElementById('promosOuter');
   const grid=document.getElementById('promosGrid');
   el.style.display='block';
@@ -819,6 +921,7 @@ function buildPromos(promos,neg){
 }
 
 function buildTarjetas(tarjetas){
+  TARJETAS_CONFIG=tarjetas; // FUNC 1: guardar para usar en ficha
   const grid=document.getElementById('tarjetasGrid');
   if(!grid)return;
   grid.innerHTML=tarjetas.map(t=>`
@@ -830,6 +933,7 @@ function buildTarjetas(tarjetas){
   const nums=tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
   if(nums.length){
     const max=Math.max(...nums);
+    MAX_CUOTAS=max; // BUG 4 fix: actualiza variable global
     const strip=document.getElementById('cuotasStrip');
     if(strip){const vals=[3,6,max].filter((v,i,a)=>a.indexOf(v)===i&&v>0);strip.innerHTML=vals.map(c=>`<div class="cuota-badge"><div class="cuota-num">${c}x</div><div class="cuota-lbl">cuotas</div><div class="cuota-sub">sin interés</div></div>`).join('');}
   }
@@ -847,17 +951,33 @@ function moveSlide(dir){const slides=document.querySelectorAll('.slide');if(!sli
 function goSlide(i){slideIdx=i;document.getElementById('slidesWrap').style.transform=`translateX(-${i*100}%)`;document.querySelectorAll('.sdot').forEach((d,j)=>d.classList.toggle('on',j===i));}
 
 // ══ CATEGORÍAS ══
+const CAT_GRADIENTS=[
+  'linear-gradient(135deg,#1e3a5f,#2563eb)',
+  'linear-gradient(135deg,#7c3aed,#4f46e5)',
+  'linear-gradient(135deg,#065f46,#059669)',
+  'linear-gradient(135deg,#92400e,#d97706)',
+  'linear-gradient(135deg,#9f1239,#e11d48)',
+  'linear-gradient(135deg,#164e63,#0891b2)',
+  'linear-gradient(135deg,#1e1b14,#78350f)',
+  'linear-gradient(135deg,#312e81,#6d28d9)',
+];
+
 function buildCats(){
   const cats=[...new Set(PRODS.map(p=>p.cat))];
   const grid=document.getElementById('catsGrid');
-  grid.innerHTML=cats.map(c=>`
-    <div class="cat-card" onclick="setCatClick('${c}')">
-      ${CATS_FOTOS[c]?`<img class="cat-img" src="${CATS_FOTOS[c]}" alt="${c}" loading="lazy">`:''}
+  grid.innerHTML=cats.map((cat,idx)=>{
+    const bgStyle=CATS_FOTOS[cat]
+      ?`background-image:url('${CATS_FOTOS[cat]}');background-size:cover;background-position:center`
+      :`background:${CAT_GRADIENTS[idx%CAT_GRADIENTS.length]}`;
+    return `
+    <div class="cat-card" onclick="setCatClick('${cat}')">
+      <div class="cat-img" style="${bgStyle}"></div>
       <div class="cat-body">
-        <div class="cat-name">${c}</div>
-        <div class="cat-count">${PRODS.filter(p=>p.cat===c).length} productos</div>
+        <div class="cat-name">${cat}</div>
+        <div class="cat-count">${PRODS.filter(p=>p.cat===cat).length} productos</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   const nav=document.getElementById('navCats');
   cats.forEach(c=>{const a=document.createElement('a');a.className='ncat';a.href='#catalogo';a.textContent=c;a.dataset.cat=c;a.onclick=e=>setCat(e,c);nav.appendChild(a);});
   const fc=document.getElementById('filterCats');
@@ -873,18 +993,37 @@ function syncSearch(v){document.getElementById('prodSearch').value=v;renderProds
 
 // ══ PRODUCTOS ══
 function fmt(n){return'$'+Number(n).toLocaleString('es-AR',{minimumFractionDigits:0})}
-function wmsg(p){const wa=WA.replace(/\D/g,'');return`https://wa.me/${wa}?text=${encodeURIComponent('Hola! Consulto por: *'+p.nom+'* ('+(p.marca||'')+').'+(p.precio?' Precio: '+fmt(p.precio):''))}`;}
+function wmsg(p){const wa=normalizarWA(WA);return`https://wa.me/${wa}?text=${encodeURIComponent('Hola! Consulto por: *'+p.nom+'* ('+(p.marca||'')+').'+(p.precio?' Precio: '+fmt(p.precio):''))}`;}
 
 function renderProds(){
   const q=document.getElementById('prodSearch').value.toLowerCase();
   const sort=document.getElementById('sortSel').value;
-  let lista=PRODS.filter(p=>{if(catA!=='Todas'&&p.cat!==catA)return false;if(q&&![p.nom,p.marca,p.cat].join(' ').toLowerCase().includes(q))return false;return true;});
-  lista.sort((a,b)=>{if(sort==='az')return a.nom.localeCompare(b.nom);if(sort==='za')return b.nom.localeCompare(a.nom);if(sort==='precio-asc')return a.precio-b.precio;if(sort==='precio-desc')return b.precio-a.precio;if(sort==='cat')return a.cat.localeCompare(b.cat)||a.nom.localeCompare(b.nom);return 0;});
+  let lista=PRODS.filter(p=>{
+    if(catA!=='Todas'&&p.cat!==catA)return false;
+    if(subcatA&&p.subcat!==subcatA)return false; // FUNC 3
+    if(q&&![p.nom,p.marca,p.cat,p.subcat,p.descripcion].join(' ').toLowerCase().includes(q))return false; // FUNC 5
+    return true;
+  });
+  lista.sort((a,b)=>{
+    // FUNC 6: destacados siempre primero (salvo que se ordene por precio)
+    if(!sort.includes('precio')&&!sort.includes('za')){
+      if(a.destacado&&!b.destacado)return -1;
+      if(!a.destacado&&b.destacado)return 1;
+    }
+    if(sort==='az')return a.nom.localeCompare(b.nom);
+    if(sort==='za')return b.nom.localeCompare(a.nom);
+    if(sort==='precio-asc')return a.precio-b.precio;
+    if(sort==='precio-desc')return b.precio-a.precio;
+    if(sort==='cat')return a.cat.localeCompare(b.cat)||a.nom.localeCompare(b.nom);
+    if(sort==='dest')return (b.destacado?1:0)-(a.destacado?1:0)||a.nom.localeCompare(b.nom);
+    return 0;
+  });
   document.getElementById('prodCount').textContent=lista.length+' producto'+(lista.length!==1?'s':'');
   document.getElementById('prodGrid').innerHTML=lista.length?lista.map(p=>`
     <div class="prod-card" onclick="abrirFicha('${p.id}')">
       <div class="prod-img-wrap">
         ${p.img?`<img class="prod-img" src="${p.img}" alt="${p.nom}" loading="lazy">`:`<div class="prod-placeholder">${p.nom[0]||'?'}</div>`}
+        ${p.destacado?`<div class="prod-badge top">Destacado</div>`:''}
       </div>
       <div class="prod-body">
         <div class="prod-cat">${p.cat}</div>
@@ -892,8 +1031,12 @@ function renderProds(){
         <div class="prod-marca">${p.marca}</div>
       </div>
       <div class="prod-footer">
-        <div class="prod-precio-wrap"><div class="prod-precio">${fmt(p.precio)}</div><div class="prod-unidad">/ ${p.un}</div></div>
-        <div class="prod-cuotas"><strong>12x</strong> ${fmt(Math.round(p.precio/12))} sin interés</div>
+        <div class="prod-precio-wrap">
+          ${p.precio>0
+            ?`<div class="prod-precio">${fmt(p.precio)}</div><div class="prod-unidad">/ ${p.un}</div>`
+            :`<div class="prod-precio" style="font-size:16px;color:var(--ac)">Consultar precio</div>`}
+        </div>
+        ${p.precio>0?`<div class="prod-cuotas"><strong>${MAX_CUOTAS}x</strong> ${fmt(Math.round(p.precio/MAX_CUOTAS))} sin interés</div>`:''}
         <a class="btn-consultar" href="${wmsg(p)}" target="_blank" onclick="event.stopPropagation()">
           <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.557 4.117 1.528 5.847L0 24l6.335-1.652A12 12 0 1 0 12 0z"/></svg>
           Consultar por WhatsApp
@@ -908,18 +1051,46 @@ function abrirFicha(id){
   const p=PRODS.find(x=>String(x.id)===String(id));
   if(!p)return;
   fichaActual=p;
-  const wa=WA.replace(/\D/g,'');
+  const wa=normalizarWA(WA);
   document.getElementById('fichaBread').innerHTML=`${p.cat} › <span>${p.nom}</span>`;
   document.getElementById('fichaNom').textContent=p.nom;
   document.getElementById('fichaMar').textContent=p.marca?'Marca: '+p.marca:'';
-  document.getElementById('fichaPrec').innerHTML=`<small style="font-size:18px;font-weight:400;color:var(--tx3)">$</small>${Number(p.precio).toLocaleString('es-AR',{minimumFractionDigits:0})}<small style="font-size:14px;font-weight:400;color:var(--tx3)"> / ${p.un}</small>`;
-  document.getElementById('fichaCuot').innerHTML=`<strong>12x</strong> ${fmt(Math.round(p.precio/12))} sin interés`;
+  // UX 5: precio 0 → consultar
+  document.getElementById('fichaPrec').innerHTML= p.precio>0
+    ? `<small style="font-size:18px;font-weight:400;color:var(--tx3)">$</small>${Number(p.precio).toLocaleString('es-AR',{minimumFractionDigits:0})}<small style="font-size:14px;font-weight:400;color:var(--tx3)"> / ${p.un}</small>`
+    : `<span style="font-size:22px;font-weight:700;color:var(--ac)">Consultar precio</span>`;
+  // FUNC 1: cuotas dinámicas desde tarjetas configuradas
+  const elCuot=document.getElementById('fichaCuot');
+  if(TARJETAS_CONFIG.length){
+    const planes=TARJETAS_CONFIG.filter(t=>!t.descuento&&parseInt(t.cuotas)>0);
+    if(planes.length){
+      const cuotaInfo=planes.map(t=>{
+        const n=parseInt(t.cuotas);
+        return `<span style="margin-right:12px"><strong style="color:var(--ac)">${n}x</strong> ${fmt(Math.round(p.precio/n))} s/i</span>`;
+      }).join('');
+      elCuot.innerHTML=cuotaInfo;
+    } else {
+      elCuot.innerHTML=`<strong>${MAX_CUOTAS}x</strong> ${fmt(Math.round(p.precio/MAX_CUOTAS))} sin interés`;
+    }
+    // Descuentos efectivo/transferencia
+    const descs=TARJETAS_CONFIG.filter(t=>t.descuento);
+    if(descs.length){
+      const descInfo=descs.map(t=>`<span style="margin-right:10px;color:#22c55e">${t.nom}: ${t.cuotas} ${t.label||''}</span>`).join('');
+      elCuot.innerHTML+=`<div style="font-size:11px;margin-top:4px">${descInfo}</div>`;
+    }
+  } else {
+    elCuot.innerHTML=`<strong>${MAX_CUOTAS}x</strong> ${fmt(Math.round(p.precio/MAX_CUOTAS))} sin interés`;
+  }
   const desc=p.descripcion||'';
   if(desc&&desc.length>10){document.getElementById('fichaDescTxt').textContent=desc;document.getElementById('fichaDescWrap').style.display='block';}
   else document.getElementById('fichaDescWrap').style.display='none';
   const fotos=p.fotos&&p.fotos.length?p.fotos:(p.img?[p.img]:[]);
   const main=document.getElementById('fichaImgMain');
-  if(fotos.length){main.src=fotos[0];main.style.display='block';}else main.style.display='none';
+  if(fotos.length){
+    main.src=fotos[0];
+    main.style.display='block';
+    main.onclick=()=>abrirZoom(main.src); // UX 4: click abre zoom
+  } else main.style.display='none';
   document.getElementById('fichaThumbs').innerHTML=fotos.length>1?fotos.map((f,i)=>`<img class="ficha-thumb ${i===0?'on':''}" src="${f}" onclick="fichaThumb(${i})" alt="">`).join(''):'';
   document.getElementById('fichaQtyCnt').value=1;
   document.getElementById('btnFichaWA').href=`https://wa.me/${wa}?text=${encodeURIComponent('Hola! Consulto por: *'+p.nom+'* ('+(p.marca||'')+').')}`;
@@ -931,9 +1102,58 @@ function abrirFicha(id){
   document.body.style.overflow='hidden';
 }
 function fichaClose(){document.getElementById('fichaOv').style.display='none';document.body.style.overflow='';}
-function fichaThumb(i){const p=fichaActual;const fotos=p.fotos&&p.fotos.length?p.fotos:[p.img];document.getElementById('fichaImgMain').src=fotos[i];document.querySelectorAll('.ficha-thumb').forEach((t,j)=>t.classList.toggle('on',j===i));}
+
+// UX 4: zoom en imágenes
+function abrirZoom(src){
+  const ov=document.getElementById('zoomOv');
+  const img=document.getElementById('zoomImg');
+  img.src=src;
+  ov.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function cerrarZoom(){
+  document.getElementById('zoomOv').classList.remove('open');
+  document.body.style.overflow='';
+}
+function fichaThumb(i){
+  const p=fichaActual;
+  const fotos=p.fotos&&p.fotos.length?p.fotos:[p.img];
+  const main=document.getElementById('fichaImgMain');
+  main.src=fotos[i];
+  main.onclick=()=>abrirZoom(main.src); // FIX 3: actualiza zoom al cambiar foto
+  document.querySelectorAll('.ficha-thumb').forEach((t,j)=>t.classList.toggle('on',j===i));
+}
 function fichaQty(d){const el=document.getElementById('fichaQtyCnt');el.value=Math.max(1,Math.min(999,(parseInt(el.value)||1)+d));}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){fichaClose();carritoCerrar();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){fichaClose();carritoCerrar();cerrarZoom();}});
+
+// FUNC 4: Swipe en mobile para el slider
+(function(){
+  const slider=document.querySelector('.hero-slider');
+  if(!slider)return;
+  let startX=0,startY=0,isDragging=false;
+  slider.addEventListener('touchstart',e=>{
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    isDragging=true;
+  },{passive:true});
+  slider.addEventListener('touchmove',e=>{
+    if(!isDragging)return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=Math.abs(e.touches[0].clientY-startY);
+    // solo si el movimiento horizontal supera al vertical
+    if(Math.abs(dx)>dy&&Math.abs(dx)>20) e.preventDefault();
+  },{passive:false});
+  slider.addEventListener('touchend',e=>{
+    if(!isDragging)return;
+    isDragging=false;
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=Math.abs(e.changedTouches[0].clientY-startY);
+    if(Math.abs(dx)>50&&Math.abs(dx)>dy){
+      if(dx<0) moveSlide(1); // swipe izquierda → siguiente
+      else moveSlide(-1);     // swipe derecha → anterior
+    }
+  },{passive:true});
+})();
 
 // ══ CARRITO ══
 function agregarCarrito(){
@@ -948,7 +1168,12 @@ function agregarCarrito(){
   actualizarCarrito();
   setTimeout(()=>fichaClose(),900);
 }
+function persistirCarrito(){
+  try{localStorage.setItem('favaro_carrito',JSON.stringify(carrito));}catch(e){}
+}
+
 function actualizarCarrito(){
+  persistirCarrito(); // UX 6
   const items=carrito.reduce((s,x)=>s+x.qty,0);
   document.getElementById('cartBadge').textContent=items;
   document.getElementById('carritoFloat').style.display=carrito.length?'block':'none';
@@ -961,24 +1186,39 @@ function renderCartItems(){
   el.innerHTML=carrito.map((p,i)=>`
     <div class="cart-item">
       ${p.img?`<img class="ci-img" src="${p.img}" alt="">`:`<div class="ci-img" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:22px;font-weight:800;color:var(--fondo3)">${p.nom[0]}</div>`}
-      <div class="ci-info"><div class="ci-nom">${p.nom}</div><div class="ci-marca">${p.marca}</div><div class="ci-precio">${fmt(p.precio*p.qty)} <small style="color:var(--tx3);font-weight:400">(${fmt(p.precio)} c/u)</small></div></div>
+      <div class="ci-info"><div class="ci-nom">${p.nom}</div><div class="ci-marca">${p.marca}</div><div class="ci-precio">${p.precio>0?fmt(p.precio*p.qty)+' <small style="color:var(--tx3);font-weight:400">('+fmt(p.precio)+' c/u)</small>':'<span style="color:var(--ac)">Consultar precio</span>'}</div></div>
       <div class="ci-qty"><button class="ci-qty-btn" onclick="cartQty(${i},-1)">−</button><span class="ci-qty-num">${p.qty}</span><button class="ci-qty-btn" onclick="cartQty(${i},1)">+</button></div>
       <button class="ci-del" onclick="cartQuitar(${i})">✕</button>
     </div>`).join('');
   const total=carrito.reduce((s,x)=>s+x.precio*x.qty,0);
   document.getElementById('cartTotalVal').textContent=fmt(total);
+  // FUNC 2: mostrar cuánto sería en cuotas
+  const cartCuotEl=document.getElementById('cartCuotasInfo');
+  if(cartCuotEl&&MAX_CUOTAS>1){
+    cartCuotEl.textContent=`${MAX_CUOTAS}x de ${fmt(Math.round(total/MAX_CUOTAS))} sin interés`;
+    cartCuotEl.style.display='block';
+  }
   document.getElementById('cartTotalRow').style.display='flex';
   document.getElementById('btnCartWA').style.display='flex';
 }
 function cartQty(i,d){carrito[i].qty=Math.max(1,carrito[i].qty+d);renderCartItems();actualizarCarrito();}
-function cartQuitar(i){carrito.splice(i,1);renderCartItems();actualizarCarrito();}
+function cartQuitar(i){carrito.splice(i,1);renderCartItems();actualizarCarrito();persistirCarrito();}
 function enviarCarritoWA(){
-  const wa=WA.replace(/\D/g,'');
+  const wa=normalizarWA(WA);
   const total=carrito.reduce((s,x)=>s+x.precio*x.qty,0);
   let msg='Hola Ferretería Favaro! Quiero consultar sobre estos productos:\n\n';
   carrito.forEach(p=>{msg+=`• *${p.nom}* (${p.marca}) — ${p.qty} unidad${p.qty>1?'es':''} — ${fmt(p.precio*p.qty)}\n`;});
   msg+=`\n*Total estimado: ${fmt(total)}*\n\n¿Pueden confirmar disponibilidad y precio final?`;
   window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`,'_blank');
+  // UX 6: limpiar carrito tras enviar consulta
+  setTimeout(()=>{
+    if(confirm('¿Querés vaciar la consulta?')){
+      carrito=[];
+      renderCartItems();
+      actualizarCarrito();
+      carritoCerrar();
+    }
+  },1000);
 }
 
 // ══ REVEAL ══
@@ -990,6 +1230,8 @@ function observe(){
 document.getElementById('prodSearch').addEventListener('input',renderProds);
 document.getElementById('headerSearch').addEventListener('input',e=>syncSearch(e.target.value));
 
+// UX 6: restaurar badge del carrito si había items guardados
+if(carrito.length) actualizarCarrito();
 init();
 </script>
 </body>

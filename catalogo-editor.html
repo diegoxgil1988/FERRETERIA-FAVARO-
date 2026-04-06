@@ -538,8 +538,9 @@ db.auth.getSession().then(({data})=>{if(data?.session?.user){UID=data.session.us
 
 // ══ LOAD CONFIG ══
 async function cargarTodo(){
-  const {data:rows}=await db.from('user_config').select('key,value').eq('user_id',UID);
-  if(!rows)return;
+  // FIX 6: manejo de error en carga inicial
+  const {data:rows,error:rowsErr}=await db.from('user_config').select('key,value').eq('user_id',UID);
+  if(rowsErr||!rows){toast('Error al cargar configuración: '+(rowsErr?.message||'sin datos'),'err');return;}
   const get=k=>{const r=rows.find(x=>x.key===k);if(!r)return null;try{return JSON.parse(r.value);}catch(e){return r.value;}};
   CFG.negocio=get('catalogo_negocio')||{};
   CFG.apariencia=get('catalogo_apariencia')||{};
@@ -599,7 +600,7 @@ function aplicarCFG(){
   // Marcas
   renderMarcas();
   // Tarjetas
-  if(CFG.tarjetas&&CFG.tarjetas.length){const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');}
+  if(CFG.tarjetas&&CFG.tarjetas.length){const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(num=>!isNaN(num));if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');} // FIX 8
   // Fondo promos, fin, cont
   const po=s('v-promos-outer');if(po&&CFG.apariencia.promos_bg)po.style.background=CFG.apariencia.promos_bg;
   const fs=s('v-fin-sec');if(fs&&CFG.apariencia.fin_bg)fs.style.background=CFG.apariencia.fin_bg;
@@ -623,7 +624,11 @@ function liveColor(cssVar,val,dotId,valId){
   if(cssVar==='--ac'){document.querySelectorAll('.c-htag,.c-hbtn,.c-pcat').forEach(el=>{if(el.tagName==='DIV'&&el.classList.contains('c-htag'))el.style.background=val;if(el.tagName==='DIV'&&el.classList.contains('c-hbtn'))el.style.background=val;if(el.classList.contains('c-pcat'))el.style.color=val;});}
   if(cssVar==='--promos-bg'){const po=s('v-promos-outer');if(po)po.style.background=val;}
   if(cssVar==='--fin-bg'){const fs=s('v-fin-sec');if(fs)fs.style.background=val;}
-  if(cssVar==='--fin-accent'){document.querySelectorAll('.c-cnum').forEach(el=>el.style.color=val);setEl('v-fin-em',`COMPRA`);}
+  if(cssVar==='--fin-accent'){
+    document.querySelectorAll('.c-cnum').forEach(el=>el.style.color=val);
+    // FIX 3: no reemplazar innerHTML, solo cambiar color
+    const fem=s('v-fin-em');if(fem){fem.style.color=val;}
+  }
   if(cssVar==='--banner-tag-bg'){const bt=s('v-btag');if(bt)bt.style.background=val;}
 }
 
@@ -670,9 +675,14 @@ function renderCats(){
 }
 
 function renderMarcas(){
-  const lista=typeof CFG.marcas==='string'?CFG.marcas.split(',').map(m=>m.trim()).filter(Boolean):(CFG.marcas||[]);
+  // FIX 5: normalizar igual que el catálogo — soporta string, array, u objeto {nombre,logo}
+  let lista=[];
+  if(typeof CFG.marcas==='string') lista=CFG.marcas.split(',').map(m=>m.trim()).filter(Boolean).map(m=>({nombre:m,logo:''}));
+  else if(Array.isArray(CFG.marcas)) lista=CFG.marcas.map(m=>typeof m==='string'?{nombre:m,logo:''}:m);
   const el=s('v-marcas');
-  if(el)el.innerHTML=lista.map(m=>`<span style="font-size:14px;font-weight:800;color:#e5e7eb;letter-spacing:-.3px">${m}</span>`).join('');
+  if(el) el.innerHTML=lista.map(m=>m.logo
+    ?`<div style="display:flex;align-items:center;justify-content:center"><img src="${m.logo}" alt="${m.nombre}" style="height:24px;max-width:70px;object-fit:contain;filter:grayscale(1);opacity:.6"></div>`
+    :`<span style="font-size:14px;font-weight:800;color:#e5e7eb;letter-spacing:-.3px">${m.nombre}</span>`).join('');
 }
 
 // ══ SORT LISTS ══
@@ -754,7 +764,9 @@ function initDrag(listId,arr){
 function syncOrder(listId,arr){
   const list=s(listId);if(!list)return;
   const items=[...list.querySelectorAll('.sort-item')];
-  const newArr=items.map(item=>{const idx=parseInt(item.dataset.idx);return CFG[arr][idx];}).filter(Boolean);
+  // FIX 4: capturar datos antes de re-renderizar para evitar índices stale
+  const snapshot=[...CFG[arr]];
+  const newArr=items.map(item=>{const idx=parseInt(item.dataset.idx);return snapshot[idx];}).filter(Boolean);
   CFG[arr]=newArr;
   addHist(`${arr} — orden cambiado`,'#22c55e');
   markUnsaved();
@@ -937,8 +949,19 @@ function editSec(sec,btn){
   }
 
   else if(sec==='fin'){
-    setHead('Financiación — Tarjetas');
-    const tarjHTML=(CFG.tarjetas||[]).map((t,i)=>`
+    setHead('Financiación — Tarjetas y cuotas');
+    const fi2=CFG.financia||{}; // FIX 1: fi declarada
+    // FIX 2: defaults si no hay tarjetas
+    if(!CFG.tarjetas||!CFG.tarjetas.length){
+      CFG.tarjetas=[
+        {nom:'Visa',sub:'Déb. y Créd.',txt:'VISA',color:'linear-gradient(135deg,#1a1f71,#1565c0)',cuotas:'12x',label:'s/i',descuento:false},
+        {nom:'Mastercard',sub:'Déb. y Créd.',txt:'MC',color:'linear-gradient(135deg,#eb001b,#f79e1b)',cuotas:'12x',label:'s/i',descuento:false},
+        {nom:'Naranja X',sub:'Crédito',txt:'NRJ',color:'linear-gradient(135deg,#ff6600,#ff3300)',cuotas:'6x',label:'s/i',descuento:false},
+        {nom:'Efectivo',sub:'Precio especial',txt:'EFC',color:'#1a1a1a',cuotas:'10%',label:'OFF',descuento:true},
+        {nom:'MODO/Transf.',sub:'Descuento',txt:'MODO',color:'linear-gradient(135deg,#00bcd4,#0097a7)',cuotas:'5%',label:'OFF',descuento:true},
+      ];
+    }
+    const tarjHTML=CFG.tarjetas.map((t,i)=>`
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f9f6f2;border-radius:6px;margin-bottom:6px">
         <div style="width:36px;height:22px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
         <span style="font-size:12px;font-weight:500;color:#111;flex:1">${t.nom}</span>
@@ -946,9 +969,10 @@ function editSec(sec,btn){
       </div>`).join('');
     setPanelContent(`
       <div class="f-sec" style="margin-top:0">Medios de pago</div>
-      ${tarjHTML||'<div class="f-info">No hay tarjetas configuradas. Guardar desde el admin primero.</div>'}
+      ${tarjHTML}
       <div class="f-sec">Nota legal</div>
-      <div class="f-field"><textarea class="f-textarea" id="fin-nota">${fi.nota||''}</textarea></div>`);
+      <div class="f-field"><textarea class="f-textarea" id="fin-nota">${fi2.nota||''}</textarea></div>`);
+  }
   }
 
   else if(sec==='marcas'){
@@ -1132,17 +1156,21 @@ async function guardarSeccion(){
       CFG.negocio=neg;await guardarClave('catalogo_negocio',neg);hist='Contacto actualizado';
     }
     // Guardar colores
-    const ap={...CFG.apariencia,
-      color_principal:document.documentElement.style.getPropertyValue('--ac')||CFG.apariencia.color_principal,
-      color_fondo:document.documentElement.style.getPropertyValue('--fondo')||CFG.apariencia.color_fondo,
-      color_oscuro:document.documentElement.style.getPropertyValue('--dk')||CFG.apariencia.color_oscuro,
-      btn_wa_bg:document.documentElement.style.getPropertyValue('--btn-wa-bg')||CFG.apariencia.btn_wa_bg,
-      promos_bg:document.documentElement.style.getPropertyValue('--promos-bg')||CFG.apariencia.promos_bg,
-      fin_bg:document.documentElement.style.getPropertyValue('--fin-bg')||CFG.apariencia.fin_bg,
-      fin_accent:document.documentElement.style.getPropertyValue('--fin-accent')||CFG.apariencia.fin_accent,
-      banner_tag_bg:document.documentElement.style.getPropertyValue('--banner-tag-bg')||CFG.apariencia.banner_tag_bg,
-      tipografia:s('sel-font')?.value||CFG.apariencia.tipografia,
+    // FIX 7: solo guardar colores si tienen valor real (no pisar con strings vacíos)
+    const getColor=(cssVar,fallback)=>{
+      const v=document.documentElement.style.getPropertyValue(cssVar).trim();
+      return v||fallback||'';
     };
+    const ap={...CFG.apariencia};
+    const c1=getColor('--ac',CFG.apariencia.color_principal);if(c1)ap.color_principal=c1;
+    const c2=getColor('--fondo',CFG.apariencia.color_fondo);if(c2)ap.color_fondo=c2;
+    const c3=getColor('--dk',CFG.apariencia.color_oscuro);if(c3)ap.color_oscuro=c3;
+    const c4=getColor('--btn-wa-bg',CFG.apariencia.btn_wa_bg);if(c4)ap.btn_wa_bg=c4;
+    const c5=getColor('--promos-bg',CFG.apariencia.promos_bg);if(c5)ap.promos_bg=c5;
+    const c6=getColor('--fin-bg',CFG.apariencia.fin_bg);if(c6)ap.fin_bg=c6;
+    const c7=getColor('--fin-accent',CFG.apariencia.fin_accent);if(c7)ap.fin_accent=c7;
+    const c8=getColor('--banner-tag-bg',CFG.apariencia.banner_tag_bg);if(c8)ap.banner_tag_bg=c8;
+    const fnt=s('sel-font')?.value;if(fnt)ap.tipografia=fnt;
     CFG.apariencia=ap;await guardarClave('catalogo_apariencia',ap);
     if(hist)addHist(hist,'#e8750a');
     toast('✓ Guardado — el catálogo ya se actualizó','ok');
