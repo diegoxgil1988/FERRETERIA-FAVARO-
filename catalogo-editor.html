@@ -584,7 +584,9 @@ function aplicarCFG(){
   if(stx.strip_envios_sub) setTxt('v-strip-envios-sub',stx.strip_envios_sub);
   if(stx.strip_efec) setTxt('v-strip-efec',stx.strip_efec);
   if(stx.strip_efec_sub) setTxt('v-strip-efec-sub',stx.strip_efec_sub);
-  if(stx.topbar_txt) setEl('v-topbar',stx.topbar_txt);
+  // Topbar slider preview: mostrar primer mensaje activo
+  const tbFirst=stx.topbar_txt1||stx.topbar_txt||'';
+  if(tbFirst) setTxt('v-topbar',tbFirst);
   // Hero
   if(h.foto) s('v-hero-bg').style.backgroundImage=`url('${h.foto}')`;
   if(h.tag) setTxt('v-hero-tag',h.tag);
@@ -912,16 +914,34 @@ function editSec(sec,btn){
   }
 
   else if(sec==='topbar'){
-    setHead('Topbar — Barra superior');
+    setHead('Topbar — Slider animado');
+    const tx4=CFG.textos||{};
+    const spd=parseInt(tx4.topbar_speed)||4000;
     setPanelContent(`
-      <div class="f-info">La barra negra de arriba del todo. Mostrá info rápida del negocio.</div>
+      <div class="f-info">El topbar muestra los 3 mensajes rotando. Siempre animado.</div>
       <div class="f-sec" style="margin-top:8px">Color de fondo</div>
-      <div class="f-field"><div class="f-color-row"><div class="f-cdot" id="cd-topbar" style="background:${CFG.apariencia.topbar_bg||'#111'}"><input type="color" value="${CFG.apariencia.topbar_bg||'#111827'}" oninput="this.parentNode.style.background=this.value;document.getElementById('sec-topbar').querySelector('.c-tb').style.background=this.value;CFG.apariencia.topbar_bg=this.value;markUnsaved()"></div><span class="f-cval">Color topbar</span></div></div>
-      <div class="f-sec">Texto del topbar</div>
-      <div class="f-field"><div class="f-label">Contenido libre</div><textarea class="f-textarea" id="topbar-txt" rows="3" oninput="setEl('v-topbar',this.value)">${document.getElementById('v-topbar')?.innerHTML||''}</textarea><div class="f-hint">Usá texto y emojis. Los horarios del negocio se muestran automáticamente.</div></div>
-      <div class="f-sec">Texto rápido</div>
-      <button onclick="s('topbar-txt').value='Abierto Lun-Vie 8-20hs · Envios Cordoba Capital · 12 cuotas sin interes';setEl('v-topbar',s('topbar-txt').value)" style="width:100%;background:#f9f6f2;border:1px solid #e0d8cf;border-radius:5px;padding:7px;font-size:10px;color:#666;cursor:pointer;text-align:left;font-family:inherit;margin-bottom:4px">Abierto + Envios + Cuotas</button>
-      <button onclick="s('topbar-txt').value='Oferta del mes: 12 cuotas sin interes · Efectivo 10% OFF';setEl('v-topbar',s('topbar-txt').value)" style="width:100%;background:#f9f6f2;border:1px solid #e0d8cf;border-radius:5px;padding:7px;font-size:10px;color:#666;cursor:pointer;text-align:left;font-family:inherit">Oferta + Efectivo</button>`);
+      <div class="f-field"><div class="f-color-row"><div class="f-cdot" id="cd-topbar" style="background:${CFG.apariencia.topbar_bg||'#111827'}"><input type="color" value="${CFG.apariencia.topbar_bg||'#111827'}" oninput="this.parentNode.style.background=this.value;document.getElementById('sec-topbar').querySelector('.c-tb').style.background=this.value;CFG.apariencia.topbar_bg=this.value;markUnsaved()"></div><span class="f-cval">Color topbar</span></div></div>
+      <div class="f-sec">Mensaje 1</div>
+      <div class="f-field"><input class="f-input" id="tb-txt1" value="${tx4.topbar_txt1||''}" placeholder="Ej: Envios a Cordoba Capital - Retiro en local" oninput="previewTopbar()"><div class="f-hint">Podés usar emojis: 📦 🔧 💳 ✅</div></div>
+      <div class="f-sec">Mensaje 2</div>
+      <div class="f-field"><input class="f-input" id="tb-txt2" value="${tx4.topbar_txt2||''}" placeholder="Ej: 12 cuotas sin interes con Visa y Mastercard" oninput="previewTopbar()"></div>
+      <div class="f-sec">Mensaje 3</div>
+      <div class="f-field"><input class="f-input" id="tb-txt3" value="${tx4.topbar_txt3||''}" placeholder="Ej: Lun a Vie 8-20hs · Sab 8-13hs" oninput="previewTopbar()"></div>
+      <div class="f-sec">Velocidad</div>
+      <div class="f-field">
+        <div class="f-label">Tiempo por mensaje</div>
+        <input type="range" id="tb-speed" min="2000" max="10000" step="500" value="${spd}"
+          style="width:100%;accent-color:#e8750a;margin-bottom:4px"
+          oninput="document.getElementById('tb-speed-val').textContent=(this.value/1000).toFixed(1)+'s';markUnsaved()">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa">
+          <span>Rapido (2s)</span>
+          <span id="tb-speed-val" style="color:#e8750a;font-weight:700">${(spd/1000).toFixed(1)}s</span>
+          <span>Lento (10s)</span>
+        </div>
+      </div>
+      <div class="f-sec">Mensajes rapidos</div>
+      <button onclick="fillTopbar('📦 Envios a Cordoba Capital','💳 12 cuotas sin interes - Efectivo 10% OFF','🕐 Lun-Vie 8-20hs · Sab 8-13hs')" style="width:100%;background:#f9f6f2;border:1px dashed #d1ccc4;border-radius:5px;padding:7px;font-size:10px;color:#666;cursor:pointer;text-align:left;font-family:inherit;margin-bottom:4px">Envios + Cuotas + Horarios</button>
+      <button onclick="fillTopbar('✅ Stock permanente de herramientas','📦 Envios a domicilio Cordoba','💳 Hasta 12 cuotas sin interes')" style="width:100%;background:#f9f6f2;border:1px dashed #d1ccc4;border-radius:5px;padding:7px;font-size:10px;color:#666;cursor:pointer;text-align:left;font-family:inherit">Stock + Envios + Cuotas</button>`);
   }
 
   else if(sec==='strip'){
@@ -961,12 +981,30 @@ function editSec(sec,btn){
         {nom:'MODO/Transf.',sub:'Descuento',txt:'MODO',color:'linear-gradient(135deg,#00bcd4,#0097a7)',cuotas:'5%',label:'OFF',descuento:true},
       ];
     }
-    const tarjHTML=CFG.tarjetas.map((t,i)=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f9f6f2;border-radius:6px;margin-bottom:6px">
-        <div style="width:36px;height:22px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
-        <span style="font-size:12px;font-weight:500;color:#111;flex:1">${t.nom}</span>
-        <input style="width:80px;padding:5px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:12px;font-weight:700;color:#e8750a;text-align:center;outline:none" value="${t.cuotas} ${t.label||''}" oninput="updTarj(${i},this.value)">
-      </div>`).join('');
+    const tarjHTML=CFG.tarjetas.map((t,i)=>{
+      const isDesc=t.descuento;
+      const cuotasHint=isDesc?'10%, 5%...':'12, 6, 3...';
+      const labelHint=isDesc?'OFF':'x s/i';
+      const cuotasColor=isDesc?'#22c55e':'#e8750a';
+      return `
+      <div style="background:#f9f6f2;border:1px solid #e5e0d8;border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:40px;height:25px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
+          <span style="font-size:12px;font-weight:600;color:#111;flex:1">${t.nom}</span>
+          <span style="font-size:9px;padding:2px 7px;border-radius:3px;background:${isDesc?'#dcfce7':'#fff4ed'};color:${isDesc?'#16a34a':'#c45e00'};font-weight:700">${isDesc?'DESCUENTO':'CUOTAS'}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1">
+            <div style="font-size:9px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Número</div>
+            <input style="width:100%;padding:6px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:13px;font-weight:700;color:${cuotasColor};outline:none;text-align:center" placeholder="${cuotasHint}" value="${t.cuotas||''}" oninput="updTarjCuotas(${i},this.value)">
+          </div>
+          <div style="flex:1">
+            <div style="font-size:9px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Etiqueta</div>
+            <input style="width:100%;padding:6px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:13px;font-weight:700;color:${cuotasColor};outline:none;text-align:center" placeholder="${labelHint}" value="${t.label||''}" oninput="updTarjLabel(${i},this.value)">
+          </div>
+        </div>
+      </div>`;
+    }).join('');
     setPanelContent(`
       <div class="f-sec" style="margin-top:0">Medios de pago</div>
       ${tarjHTML}
@@ -1006,15 +1044,24 @@ function reHeroTitle(){
   setEl('v-hero-title',`${t1} ${t2} <span id="v-hero-em" style="color:#e8750a">${em}</span>`);
 }
 
-function updTarj(i,val){
+// Dos funciones separadas — elimina el bug del split(' ')
+function updTarjCuotas(i,val){
   if(!CFG.tarjetas[i])return;
-  const p=val.trim().split(' ');
-  CFG.tarjetas[i].cuotas=p[0]||val;
-  CFG.tarjetas[i].label=p.slice(1).join(' ')||'';
-  const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
+  CFG.tarjetas[i].cuotas=val.trim();
+  const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(num=>!isNaN(num));
   if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
   guardarClave('catalogo_tarjetas',CFG.tarjetas);
   markUnsaved();
+}
+function updTarjLabel(i,val){
+  if(!CFG.tarjetas[i])return;
+  CFG.tarjetas[i].label=val.trim();
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  markUnsaved();
+}
+// Mantener updTarj por compatibilidad con otros lugares que lo llamen
+function updTarj(i,val){
+  updTarjCuotas(i,val);
 }
 
 function showEditPanel(title,html){
@@ -1129,8 +1176,16 @@ async function guardarSeccion(){
       const h={foto:gv('hero-foto'),tag:gv('hero-tag'),t1:gv('hero-t1'),t2:gv('hero-t2'),t3:gv('hero-em'),sub:gv('hero-sub'),btn1:gv('hero-btn'),prods_titulo:gv('prods-title')||CFG.hero.prods_titulo};
       CFG.hero={...CFG.hero,...h};await guardarClave('catalogo_hero',CFG.hero);hist='Hero actualizado';
     }else if(secActiva==='topbar'){
-      const topTxt=gv('topbar-txt');
-      CFG.textos={...CFG.textos,topbar_txt:topTxt};
+      const spd=parseInt(document.getElementById('tb-speed')?.value)||4000;
+      const tbUpd={
+        topbar_txt1:gv('tb-txt1'),
+        topbar_txt2:gv('tb-txt2'),
+        topbar_txt3:gv('tb-txt3'),
+        topbar_speed:spd,
+        // mantener topbar_txt legacy por compatibilidad
+        topbar_txt:gv('tb-txt1'),
+      };
+      CFG.textos={...CFG.textos,...tbUpd};
       await guardarClave('catalogo_textos',CFG.textos);
       await guardarClave('catalogo_apariencia',CFG.apariencia);
       hist='Topbar actualizado';
@@ -1233,6 +1288,21 @@ function deshacerHist(i){
 }
 
 function reloadPreview(){aplicarCFG();}
+
+// Topbar editor helpers
+function previewTopbar(){
+  const t1=gv('tb-txt1')||'';const t2=gv('tb-txt2')||'';const t3=gv('tb-txt3')||'';
+  const msgs=[t1,t2,t3].filter(m=>m.trim());
+  const tb=s('v-topbar');
+  if(tb) tb.textContent=msgs[0]||'(sin mensaje)';
+  markUnsaved();
+}
+function fillTopbar(m1,m2,m3){
+  const i1=s('tb-txt1');if(i1)i1.value=m1;
+  const i2=s('tb-txt2');if(i2)i2.value=m2;
+  const i3=s('tb-txt3');if(i3)i3.value=m3;
+  previewTopbar();
+}
 
 // ══ TOAST ══
 function toast(msg,type='ok'){

@@ -71,13 +71,17 @@ body{font-family:var(--font-body);background:var(--fondo);color:var(--tx);overfl
 .wa-float{position:fixed;bottom:24px;right:20px;z-index:999;display:flex;align-items:center;gap:8px;background:var(--btn-wa-bg);color:var(--btn-wa-txt);padding:13px 20px 13px 16px;border-radius:50px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 4px 20px rgba(34,197,94,.4);animation:popIn .5s .5s both}
 @keyframes popIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
 
-/* TOPBAR */
-.topbar{background:var(--topbar-bg);display:flex;overflow-x:auto;scrollbar-width:none}
-.topbar::-webkit-scrollbar{display:none}
-.topbar-inner{max-width:1400px;margin:0 auto;padding:0 20px;display:flex;align-items:center;min-width:max-content;width:100%}
-.ti{display:flex;align-items:center;gap:6px;padding:8px 20px;border-right:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--topbar-txt);flex-shrink:0}
-.ti strong{color:#fff}
-.ti svg{color:var(--ac);flex-shrink:0}
+/* TOPBAR SLIDER */
+.topbar{background:var(--topbar-bg);overflow:hidden;position:relative;height:36px}
+.topbar-slider{position:relative;width:100%;height:100%}
+.topbar-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--topbar-txt);font-weight:500;padding:0 40px 0 20px;gap:8px;opacity:0;transform:translateY(100%);transition:opacity .5s ease,transform .5s ease;pointer-events:none}
+.topbar-slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+.topbar-slide.exit{opacity:0;transform:translateY(-100%)}
+.topbar-slide strong{color:#fff}
+.topbar-slide a{color:var(--ac)}
+.topbar-dots{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;gap:4px;z-index:10}
+.topbar-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .3s;cursor:pointer}
+.topbar-dot.on{background:var(--ac);width:12px;border-radius:2px}
 
 /* HEADER */
 header{background:var(--nav-bg);border-bottom:1px solid var(--nav-border);position:sticky;top:0;z-index:300;box-shadow:0 1px 8px rgba(0,0,0,.06)}
@@ -369,14 +373,16 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
   Consultá por WhatsApp
 </a>
 
-<!-- TOPBAR -->
+<!-- IDs ocultos: topbar slider los lee para fallback -->
+<span id="neg-dir" style="display:none">Av. Colón 1234</span>
+<span id="neg-hsem" style="display:none">Lun-Vie 8-20hs</span>
+<span id="neg-hsab" style="display:none">Sab 8-13hs</span>
+<span id="strip-cuotas" style="display:none">12 cuotas sin interes</span>
+
+<!-- TOPBAR SLIDER -->
 <div class="topbar" id="topbarEl">
-  <div class="topbar-inner">
-    <div class="ti"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg><div><strong id="neg-dir">Av. Colón 1234</strong> Córdoba</div></div>
-    <div class="ti"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><div><strong id="neg-hsem">Lun–Vie 8–20hs</strong> · <span id="neg-hsab">Sáb 8–13hs</span></div></div>
-    <div class="ti"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><strong id="strip-cuotas">12 cuotas sin interés</strong></div>
-    <div class="ti"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg><strong>Envíos a domicilio</strong> · Córdoba Capital</div>
-  </div>
+  <div class="topbar-slider" id="topbarSlider"></div>
+  <div class="topbar-dots" id="topbarDots"></div>
 </div>
 
 <!-- HEADER -->
@@ -740,11 +746,14 @@ async function init(){
       if(tx.footer) document.getElementById('footerCopy').textContent=tx.footer;
       // Strip textos
       if(tx.strip_cuotas){const el=document.getElementById('strip-txt1');if(el)el.textContent=tx.strip_cuotas;}
-      if(tx.topbar_txt){
-        // FIX 1: reemplazar contenido del topbar-inner con el texto personalizado
-        const topInner=document.getElementById('topbarEl')?.querySelector('.topbar-inner');
-        if(topInner) topInner.innerHTML=`<div class="ti" style="flex:1;justify-content:center">${tx.topbar_txt}</div>`;
-      }
+      // Topbar slider: leer 3 mensajes configurados + velocidad
+      const tbMsgs=[
+        tx.topbar_txt1||(tx.topbar_txt||''),
+        tx.topbar_txt2||'',
+        tx.topbar_txt3||'',
+      ].filter(m=>m.trim());
+      const tbSpeed=parseInt(tx.topbar_speed)||4000;
+      initTopbarSlider(tbMsgs,tbSpeed);
       
       // Hero
       const hero=get('catalogo_hero')||{};
@@ -822,9 +831,7 @@ function sincronizarCuotas(){
   // Strip txt1 si no fue sobreescrito por config
   const strip1=document.getElementById('strip-txt1');
   if(strip1&&strip1.textContent.includes('12'))strip1.textContent=MAX_CUOTAS+'x sin interés';
-  // FIX 6: también actualiza strip-cuotas del topbar
-  const stripTop=document.getElementById('strip-cuotas');
-  if(stripTop&&stripTop.textContent.includes('12'))stripTop.textContent=MAX_CUOTAS+' cuotas sin interés';
+  // strip-cuotas del topbar ahora es slider dinamico — no necesita actualización manual
   // Badges de cuotas — recalcular
   const stripEl=document.getElementById('cuotasStrip');
   if(stripEl&&stripEl.querySelectorAll('.cuota-badge').length>0){
@@ -849,6 +856,52 @@ function actualizarWA(){
   const msg=encodeURIComponent('Hola! Quiero consultar sobre el catálogo.');
   const url=`https://wa.me/${wa}?text=${msg}`;
   ['waFloat','waHeader','contWa','footerWa'].forEach(id=>{const el=document.getElementById(id);if(el)el.href=url;});
+}
+
+// ══ TOPBAR SLIDER ══
+function initTopbarSlider(msgs,speed){
+  const slider=document.getElementById('topbarSlider');
+  const dotsEl=document.getElementById('topbarDots');
+  if(!slider)return;
+  // Fallback si no hay mensajes configurados
+  if(!msgs||!msgs.length){
+    const dir=document.getElementById('neg-dir')?.textContent||'';
+    const hs=document.getElementById('neg-hsem')?.textContent||'';
+    const cuotas=document.getElementById('strip-cuotas')?.textContent||'12 cuotas sin interes';
+    msgs=[
+      dir?'Encontranos en '+dir:'',
+      hs?'Horarios: '+hs:'',
+      cuotas?cuotas+' - Efectivo 10% OFF':'',
+    ].filter(Boolean);
+    if(!msgs.length) msgs=['Bienvenidos a nuestra ferreteria'];
+  }
+  // Generar slides
+  slider.innerHTML=msgs.map((m,i)=>
+    '<div class="topbar-slide'+(i===0?' active':'')+'" id="tbslide-'+i+'">'+m+'</div>'
+  ).join('');
+  // Generar dots solo si hay mas de 1
+  dotsEl.innerHTML=msgs.length>1?msgs.map((_,i)=>
+    '<div class="topbar-dot'+(i===0?' on':'')+'" onclick="goTopbarSlide('+i+')"></div>'
+  ).join(''):'';
+  // Siempre animar aunque haya 1 solo (fade in/out)
+  let tbIdx=0;
+  let tbTimer=null;
+  window.goTopbarSlide=function(next){
+    const slides=slider.querySelectorAll('.topbar-slide');
+    const dots=dotsEl.querySelectorAll('.topbar-dot');
+    slides[tbIdx].classList.remove('active');
+    slides[tbIdx].classList.add('exit');
+    const old=tbIdx;
+    tbIdx=((next%msgs.length)+msgs.length)%msgs.length;
+    setTimeout(()=>slides[old].classList.remove('exit'),520);
+    slides[tbIdx].classList.add('active');
+    dots.forEach((d,i)=>d.classList.toggle('on',i===tbIdx));
+  };
+  const tick=()=>{
+    clearTimeout(tbTimer);
+    tbTimer=setTimeout(()=>{goTopbarSlide(tbIdx+1);tick();},speed);
+  };
+  tick();
 }
 
 // ══ SLIDES ══
