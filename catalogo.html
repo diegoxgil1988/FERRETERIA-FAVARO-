@@ -213,7 +213,7 @@ main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
 .cuota-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px}
 .tarjetas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 .tarj-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:8px}
-.tarj-ico{width:44px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.tarj-ico{width:44px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden}
 .tarj-info{flex:1;min-width:0}
 .tarj-nom{font-size:13px;color:rgba(255,255,255,.85);font-weight:500}
 .tarj-sub{font-size:10px;color:rgba(255,255,255,.35)}
@@ -223,13 +223,15 @@ main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
 
 /* MARCAS */
 .marcas-section{background:var(--marcas-bg);border:1px solid var(--fondo3);border-radius:14px;padding:28px 32px;margin-bottom:32px}
-.marcas-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);text-align:center;margin-bottom:20px}
-.marcas-row{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:center;align-items:center}
+.marcas-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);text-align:center;margin-bottom:24px}
+.marcas-row{display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:center;align-items:center}
 .marca-item{font-family:var(--font-title);font-size:18px;font-weight:800;color:var(--fondo3);letter-spacing:-.3px;transition:color .2s;cursor:default}
 .marca-item:hover{color:var(--tx2)}
-.marca-item-img{display:flex;align-items:center;justify-content:center}
-.marca-item-img img{height:32px;max-width:90px;object-fit:contain;filter:grayscale(1);opacity:.5;transition:all .2s;cursor:default}
-.marca-item-img img:hover{filter:grayscale(0);opacity:1}
+.marca-item-img{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.marca-item-img img{height:36px;max-width:100px;object-fit:contain;filter:grayscale(1);opacity:.45;transition:all .3s;cursor:default}
+.marca-item-img img:hover{filter:grayscale(0);opacity:1;transform:scale(1.05)}
+.marca-item-img .marca-nombre{font-size:10px;color:var(--tx3);font-weight:600;text-align:center;display:none}
+.marca-item-img:hover .marca-nombre{display:block}
 
 /* CONTACTO */
 .contacto-section{background:var(--cont-bg);border-radius:14px;padding:32px;margin-bottom:32px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
@@ -786,7 +788,7 @@ async function init(){
         else if(Array.isArray(marcas)) lista=marcas.map(m=>typeof m==='string'?{nombre:m,logo:''}:m);
         const el=document.getElementById('marcasRow');
         if(el) el.innerHTML=lista.map(m=>m.logo
-          ?`<div class="marca-item-img"><img src="${m.logo}" alt="${m.nombre}" title="${m.nombre}"></div>`
+          ?`<div class="marca-item-img"><img src="${m.logo}" alt="${m.nombre}" title="${m.nombre}"><span class="marca-nombre">${m.nombre}</span></div>`
           :`<span class="marca-item">${m.nombre}</span>`).join('');
       }
       
@@ -979,7 +981,12 @@ function buildTarjetas(tarjetas){
   if(!grid)return;
   grid.innerHTML=tarjetas.map(t=>`
     <div class="tarj-row">
-      <div class="tarj-ico" style="background:${t.color}">${t.txt}</div>
+      <div class="tarj-ico" style="background:${t.color};overflow:hidden;padding:0">
+        ${t.logo
+          ?`<img src="${t.logo}" alt="${t.nom}" style="width:100%;height:100%;object-fit:contain;padding:3px">`
+          :t.txt
+        }
+      </div>
       <div class="tarj-info"><div class="tarj-nom">${t.nom}</div><div class="tarj-sub">${t.sub}</div></div>
       <div class="tarj-cuotas ${t.descuento?'off':''}">${t.cuotas}${t.label?' '+t.label:''}</div>
     </div>`).join('');
