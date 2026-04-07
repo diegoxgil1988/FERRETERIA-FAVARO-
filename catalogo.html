@@ -213,7 +213,7 @@ main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
 .cuota-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px}
 .tarjetas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 .tarj-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:8px}
-.tarj-ico{width:44px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden}
+.tarj-ico{width:44px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
 .tarj-info{flex:1;min-width:0}
 .tarj-nom{font-size:13px;color:rgba(255,255,255,.85);font-weight:500}
 .tarj-sub{font-size:10px;color:rgba(255,255,255,.35)}
@@ -223,15 +223,13 @@ main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
 
 /* MARCAS */
 .marcas-section{background:var(--marcas-bg);border:1px solid var(--fondo3);border-radius:14px;padding:28px 32px;margin-bottom:32px}
-.marcas-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);text-align:center;margin-bottom:24px}
-.marcas-row{display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:center;align-items:center}
+.marcas-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);text-align:center;margin-bottom:20px}
+.marcas-row{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:center;align-items:center}
 .marca-item{font-family:var(--font-title);font-size:18px;font-weight:800;color:var(--fondo3);letter-spacing:-.3px;transition:color .2s;cursor:default}
 .marca-item:hover{color:var(--tx2)}
-.marca-item-img{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-.marca-item-img img{height:36px;max-width:100px;object-fit:contain;filter:grayscale(1);opacity:.45;transition:all .3s;cursor:default}
-.marca-item-img img:hover{filter:grayscale(0);opacity:1;transform:scale(1.05)}
-.marca-item-img .marca-nombre{font-size:10px;color:var(--tx3);font-weight:600;text-align:center;display:none}
-.marca-item-img:hover .marca-nombre{display:block}
+.marca-item-img{display:flex;align-items:center;justify-content:center}
+.marca-item-img img{height:32px;max-width:90px;object-fit:contain;filter:grayscale(1);opacity:.5;transition:all .2s;cursor:default}
+.marca-item-img img:hover{filter:grayscale(0);opacity:1}
 
 /* CONTACTO */
 .contacto-section{background:var(--cont-bg);border-radius:14px;padding:32px;margin-bottom:32px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
@@ -455,16 +453,8 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
     </div>
   </div>
 
-  <!-- BANNER -->
-  <div class="banner-promo rv" id="bannerEl" style="display:none">
-    <div class="banner-bg" id="bannerBg"></div>
-    <div class="banner-overlay"></div>
-    <div class="banner-content">
-      <div class="banner-tag" id="bannerTag">Oferta limitada</div>
-      <div class="banner-title" id="bannerTitle">LIQUIDACIÓN FIN DE TEMPORADA</div>
-      <div class="banner-sub" id="bannerSub">Hasta 30% OFF en herramientas</div>
-      <a href="#" class="banner-btn" id="bannerBtn">Consultar →</a>
-    </div>
+  <!-- BANNERS -->
+  <div id="bannersContainer">
   </div>
 
   <!-- CATÁLOGO -->
@@ -765,13 +755,13 @@ async function init(){
       
       // Banners
       const banners=get('catalogo_banners')||[];
-      const activeBanner=banners.find(b=>b.activo!==false);
-      if(activeBanner) buildBanner(activeBanner,neg);
+      const activeBanners=banners.filter(b=>b.activo!==false);
+      if(activeBanners.length) buildBanners(activeBanners,neg);
       
       // Promos
       const promos=get('catalogo_promos')||[];
       const promSistema=get('promociones')||[];
-      const todasPromos=[...promos,...promSistema.filter(p=>p.activa&&p.catalogo)];
+      const todasPromos=[...promos.filter(p=>p.activo!==false),...promSistema.filter(p=>p.activa&&p.catalogo)];
       if(todasPromos.length) buildPromos(todasPromos,neg);
       
       // Tarjetas
@@ -788,7 +778,7 @@ async function init(){
         else if(Array.isArray(marcas)) lista=marcas.map(m=>typeof m==='string'?{nombre:m,logo:''}:m);
         const el=document.getElementById('marcasRow');
         if(el) el.innerHTML=lista.map(m=>m.logo
-          ?`<div class="marca-item-img"><img src="${m.logo}" alt="${m.nombre}" title="${m.nombre}"><span class="marca-nombre">${m.nombre}</span></div>`
+          ?`<div class="marca-item-img"><img src="${m.logo}" alt="${m.nombre}" title="${m.nombre}"></div>`
           :`<span class="marca-item">${m.nombre}</span>`).join('');
       }
       
@@ -943,20 +933,24 @@ function buildDefaultSlide(hero,neg){
     </div>`;
 }
 
-function buildBanner(b,neg){
+function buildBanners(banners,neg){
   const wa=normalizarWA(WA);
-  const el=document.getElementById('bannerEl');
-  if(!el)return;
-  el.style.display='flex';
-  el.onclick=()=>window.open(`https://wa.me/${wa}?text=${encodeURIComponent(b.btn||'Hola!')}`,`_blank`);
-  document.getElementById('bannerBg').style.backgroundImage=`url('${b.foto||''}')`;
-  document.getElementById('bannerTag').textContent=b.tag||'';
-  if(b.tag_color) document.getElementById('bannerTag').style.background=b.tag_color;
-  document.getElementById('bannerTitle').textContent=b.titulo||'';
-  document.getElementById('bannerSub').textContent=b.sub||'';
-  const btn=document.getElementById('bannerBtn');
-  btn.textContent=(b.btn||'Consultar')+' →';
-  btn.href=`https://wa.me/${wa}?text=${encodeURIComponent(b.btn||'Hola!')}`;
+  const container=document.getElementById('bannersContainer');
+  if(!container)return;
+  container.innerHTML=banners.map(b=>`
+    <div class="banner-promo rv" style="cursor:pointer;margin-bottom:16px" onclick="window.open('https://wa.me/${wa}?text=${encodeURIComponent(b.btn||'Hola!')}','_blank')">
+      <div class="banner-bg" style="background-image:url('${b.foto||''}');"></div>
+      <div class="banner-overlay"></div>
+      <div class="banner-content">
+        <div class="banner-tag" style="${b.tag_color?'background:'+b.tag_color:''}">
+          ${b.tag||''}
+        </div>
+        <div class="banner-title">${b.titulo||''}</div>
+        <div class="banner-sub">${b.sub||''}</div>
+        <a class="banner-btn" onclick="event.stopPropagation()" href="https://wa.me/${wa}?text=${encodeURIComponent(b.btn||'Hola!')}" target="_blank">${b.btn||'Consultar'} →</a>
+      </div>
+    </div>
+  `).join('');
 }
 
 function buildPromos(promos,neg){
@@ -981,12 +975,7 @@ function buildTarjetas(tarjetas){
   if(!grid)return;
   grid.innerHTML=tarjetas.map(t=>`
     <div class="tarj-row">
-      <div class="tarj-ico" style="background:${t.color};overflow:hidden;padding:0">
-        ${t.logo
-          ?`<img src="${t.logo}" alt="${t.nom}" style="width:100%;height:100%;object-fit:contain;padding:3px">`
-          :t.txt
-        }
-      </div>
+      <div class="tarj-ico" style="background:${t.color}">${t.txt}</div>
       <div class="tarj-info"><div class="tarj-nom">${t.nom}</div><div class="tarj-sub">${t.sub}</div></div>
       <div class="tarj-cuotas ${t.descuento?'off':''}">${t.cuotas}${t.label?' '+t.label:''}</div>
     </div>`).join('');
