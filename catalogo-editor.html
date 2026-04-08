@@ -974,47 +974,28 @@ function editSec(sec,btn){
   }
 
   else if(sec==='fin'){
-    setHead('Financiación — Tarjetas y cuotas');
-    const fi2=CFG.financia||{}; // FIX 1: fi declarada
-    // FIX 2: defaults si no hay tarjetas
+    setHead('Financiación — Planes por tarjeta');
+    const fi2=CFG.financia||{};
+    // Defaults si no hay tarjetas o no tienen planes
     if(!CFG.tarjetas||!CFG.tarjetas.length){
       CFG.tarjetas=[
-        {nom:'Visa',sub:'Déb. y Créd.',txt:'VISA',color:'linear-gradient(135deg,#1a1f71,#1565c0)',cuotas:'12x',label:'s/i',descuento:false},
-        {nom:'Mastercard',sub:'Déb. y Créd.',txt:'MC',color:'linear-gradient(135deg,#eb001b,#f79e1b)',cuotas:'12x',label:'s/i',descuento:false},
-        {nom:'Naranja X',sub:'Crédito',txt:'NRJ',color:'linear-gradient(135deg,#ff6600,#ff3300)',cuotas:'6x',label:'s/i',descuento:false},
-        {nom:'Efectivo',sub:'Precio especial',txt:'EFC',color:'#1a1a1a',cuotas:'10%',label:'OFF',descuento:true},
-        {nom:'MODO/Transf.',sub:'Descuento',txt:'MODO',color:'linear-gradient(135deg,#00bcd4,#0097a7)',cuotas:'5%',label:'OFF',descuento:true},
+        {nom:'Visa',sub:'Déb. y Créd.',txt:'VISA',color:'linear-gradient(135deg,#1a1f71,#1565c0)',descuento:false,planes:[{n:1,recargo:0},{n:3,recargo:16},{n:6,recargo:32},{n:12,recargo:55}]},
+        {nom:'Mastercard',sub:'Déb. y Créd.',txt:'MC',color:'linear-gradient(135deg,#eb001b,#f79e1b)',descuento:false,planes:[{n:1,recargo:0},{n:3,recargo:16},{n:6,recargo:32}]},
+        {nom:'Naranja X',sub:'Crédito',txt:'NRJ',color:'linear-gradient(135deg,#ff6600,#ff3300)',descuento:false,planes:[{n:3,recargo:0},{n:6,recargo:0}]},
+        {nom:'Efectivo',sub:'Precio especial',txt:'EFC',color:'#1a1a1a',descuento:true,planes:[{n:1,recargo:-10}]},
+        {nom:'MODO/Transf.',sub:'Descuento',txt:'MODO',color:'linear-gradient(135deg,#00bcd4,#0097a7)',descuento:true,planes:[{n:1,recargo:-5}]},
       ];
     }
-    const tarjHTML=CFG.tarjetas.map((t,i)=>{
-      const isDesc=t.descuento;
-      const cuotasHint=isDesc?'10%, 5%...':'12, 6, 3...';
-      const labelHint=isDesc?'OFF':'x s/i';
-      const cuotasColor=isDesc?'#22c55e':'#e8750a';
-      return `
-      <div style="background:#f9f6f2;border:1px solid #e5e0d8;border-radius:8px;padding:10px 12px;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="width:40px;height:25px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
-          <span style="font-size:12px;font-weight:600;color:#111;flex:1">${t.nom}</span>
-          <span style="font-size:9px;padding:2px 7px;border-radius:3px;background:${isDesc?'#dcfce7':'#fff4ed'};color:${isDesc?'#16a34a':'#c45e00'};font-weight:700">${isDesc?'DESCUENTO':'CUOTAS'}</span>
-        </div>
-        <div style="display:flex;gap:6px">
-          <div style="flex:1">
-            <div style="font-size:9px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Número</div>
-            <input style="width:100%;padding:6px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:13px;font-weight:700;color:${cuotasColor};outline:none;text-align:center" placeholder="${cuotasHint}" value="${t.cuotas||''}" oninput="updTarjCuotas(${i},this.value)">
-          </div>
-          <div style="flex:1">
-            <div style="font-size:9px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Etiqueta</div>
-            <input style="width:100%;padding:6px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:13px;font-weight:700;color:${cuotasColor};outline:none;text-align:center" placeholder="${labelHint}" value="${t.label||''}" oninput="updTarjLabel(${i},this.value)">
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-    setPanelContent(`
-      <div class="f-sec" style="margin-top:0">Medios de pago</div>
-      ${tarjHTML}
-      <div class="f-sec">Nota legal</div>
-      <div class="f-field"><textarea class="f-textarea" id="fin-nota">${fi2.nota||''}</textarea></div>`);
+    // Migrar tarjetas viejas (sin planes) al nuevo formato
+    CFG.tarjetas=CFG.tarjetas.map(t=>{
+      if(!t.planes){
+        const n=parseInt(t.cuotas)||1;
+        const rec=t.descuento?-(parseFloat(t.cuotas)||0):0;
+        return {...t,planes:[{n,recargo:rec}]};
+      }
+      return t;
+    });
+    setPanelContent(renderFinPanel(fi2));
   }
 
   else if(sec==='marcas'){
@@ -1058,38 +1039,108 @@ function renderTarjetasPreview(){
   el.innerHTML=tarjetas.map(t=>{
     const logoHTML=t.logo
       ?'<img src="'+t.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:4px">'
-      :'<span style="font-size:8px;font-weight:800">'+( t.txt||'')+'</span>';
+      :'<span style="font-size:8px;font-weight:800">'+(t.txt||'')+'</span>';
+    // Armar texto de planes
+    let cuotasTxt='';
+    if(t.planes&&t.planes.length){
+      if(t.descuento){
+        const rec=Math.abs(t.planes[0].recargo);
+        cuotasTxt='<span style="color:#22c55e;font-size:14px;font-weight:800">'+rec+'% OFF</span>';
+      } else {
+        cuotasTxt=t.planes.map(p=>{
+          const col=p.recargo>0?'#ef4444':p.recargo<0?'#22c55e':'var(--fin-accent,#c9a84c)';
+          return '<span style="color:'+col+';font-size:12px;font-weight:700">'+p.n+'x</span>';
+        }).join(' ');
+      }
+    } else {
+      cuotasTxt='<span style="color:var(--fin-accent,#c9a84c);font-size:13px;font-weight:800">'+(t.cuotas||'')+(t.label?' '+t.label:'')+'</span>';
+    }
     return '<div class="tarj-row">'
       +'<div class="tarj-ico" style="background:'+t.color+'">'+logoHTML+'</div>'
       +'<div class="tarj-info"><div class="tarj-nom">'+t.nom+'</div><div class="tarj-sub">'+t.sub+'</div></div>'
-      +'<div class="tarj-cuotas'+(t.descuento?' off':'')+'">'+t.cuotas+(t.label?' '+t.label:'')+'</div>'
+      +'<div style="flex-shrink:0;text-align:right">'+cuotasTxt+'</div>'
       +'</div>';
   }).join('');
-  // actualizar maxcuota
-  const nums=tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
-  if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
+  // maxcuota
+  const maxN=Math.max(...tarjetas.filter(t=>!t.descuento).flatMap(t=>(t.planes||[{n:parseInt(t.cuotas)||1}]).map(p=>p.n)).filter(n=>n>0));
+  if(maxN>0)setTxt('v-maxcuota',maxN+'x');
 }
 
+// ── PLANES DE FINANCIACIÓN ──
+function renderFinPanel(fi2){
+  var tarjHTML='';
+  CFG.tarjetas.forEach(function(t,ti){
+    var isDesc=t.descuento;
+    var planesHTML='';
+    (t.planes||[]).forEach(function(p,pi){
+      var rec=p.recargo;
+      var isNeg=rec<0; var isZero=rec===0;
+      var col=isNeg?'#16a34a':isZero?'#e8750a':'#ef4444';
+      var lbl=isNeg?'% descuento':isZero?'% sin cargo':'% recargo';
+      planesHTML+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">';
+      planesHTML+='<div style="display:flex;align-items:center;gap:3px;background:#f5f0ea;border-radius:5px;padding:3px 7px;flex-shrink:0">';
+      if(!isDesc) planesHTML+='<span style="font-size:9px;color:#aaa">x</span>';
+      planesHTML+='<input style="width:28px;background:none;border:none;outline:none;font-size:13px;font-weight:800;color:#111;font-family:inherit;text-align:center" type="number" value="'+p.n+'" min="1" onchange="updPlanN('+ti+','+pi+',this.value)">';
+      planesHTML+='</div>';
+      planesHTML+='<div style="flex:1;position:relative">';
+      planesHTML+='<input style="width:100%;padding:5px 24px 5px 8px;border:1.5px solid '+col+'33;border-radius:5px;font-size:13px;font-weight:700;color:'+col+';outline:none;font-family:inherit;text-align:center" type="number" value="'+Math.abs(rec)+'" min="0" max="100" step="0.5" onchange="updPlanRec('+ti+','+pi+',this.value,'+isNeg+')">';
+      planesHTML+='<span style="position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:11px;color:#aaa;pointer-events:none">%</span>';
+      planesHTML+='</div>';
+      planesHTML+='<span style="font-size:10px;color:'+col+';width:68px;flex-shrink:0">'+lbl+'</span>';
+      if(!isDesc) planesHTML+='<button style="width:22px;height:22px;border:none;background:none;cursor:pointer;color:#ccc;font-size:16px;line-height:1;flex-shrink:0" onmouseover="this.style.color=&quot;#ef4444&quot;" onmouseout="this.style.color=&quot;#ccc&quot;" onclick="delPlan('+ti+','+pi+')">×</button>';
+      planesHTML+='</div>';
+    });
+    tarjHTML+='<div style="background:#f9f6f2;border:1px solid #e5e0d8;border-radius:8px;margin-bottom:8px;overflow:hidden">';
+    tarjHTML+='<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:#f5f1ec">';
+    tarjHTML+='<div style="width:38px;height:23px;border-radius:4px;background:'+t.color+';display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#fff;flex-shrink:0">'+t.txt+'</div>';
+    tarjHTML+='<span style="font-size:12px;font-weight:700;color:#111;flex:1">'+t.nom+'</span>';
+    tarjHTML+='<span style="font-size:9px;padding:2px 6px;border-radius:3px;background:'+(isDesc?'#dcfce7':'#fff4ed')+';color:'+(isDesc?'#16a34a':'#c45e00')+';font-weight:700">'+(isDesc?'DESCUENTO':'CUOTAS')+'</span>';
+    tarjHTML+='</div>';
+    tarjHTML+='<div style="padding:10px 11px 6px">';
+    tarjHTML+='<div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:#aaa;font-weight:700;margin-bottom:7px">'+(isDesc?'Descuento':'Planes de cuotas')+'</div>';
+    tarjHTML+=planesHTML;
+    if(!isDesc) tarjHTML+='<button style="width:100%;padding:5px;background:none;border:1.5px dashed #d0c8c0;border-radius:5px;cursor:pointer;font-size:11px;color:#aaa;font-family:inherit;margin-top:2px" onmouseover="this.style.borderColor=&quot;#e8750a&quot;;this.style.color=&quot;#e8750a&quot;" onmouseout="this.style.borderColor=&quot;#d0c8c0&quot;;this.style.color=&quot;#aaa&quot;" onclick="addPlan('+ti+')">＋ Agregar plan</button>';
+    tarjHTML+='</div></div>';
+  });
+  return '<div class="f-sec" style="margin-top:0">Medios de pago</div>'+tarjHTML+'<div class="f-sec">Nota legal</div><div class="f-field"><textarea class="f-textarea" id="fin-nota">'+(fi2.nota||'')+'</textarea></div>';
+}
+function updPlanN(ti,pi,val){
+  if(!CFG.tarjetas[ti]||!CFG.tarjetas[ti].planes[pi])return;
+  CFG.tarjetas[ti].planes[pi].n=Math.max(1,parseInt(val)||1);
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  renderTarjetasPreview();markUnsaved();
+}
+function updPlanRec(ti,pi,val,isNeg){
+  if(!CFG.tarjetas[ti]||!CFG.tarjetas[ti].planes[pi])return;
+  const v=parseFloat(val)||0;
+  CFG.tarjetas[ti].planes[pi].recargo=isNeg?-v:v;
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  renderTarjetasPreview();markUnsaved();
+}
+function addPlan(ti){
+  if(!CFG.tarjetas[ti])return;
+  const planes=CFG.tarjetas[ti].planes||[];
+  const last=planes[planes.length-1];
+  const nextN=last?last.n*2:3;
+  CFG.tarjetas[ti].planes.push({n:nextN,recargo:0});
+  editSec('fin',null);
+}
+function delPlan(ti,pi){
+  if(!CFG.tarjetas[ti])return;
+  if(CFG.tarjetas[ti].planes.length<=1)return;
+  CFG.tarjetas[ti].planes.splice(pi,1);
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  editSec('fin',null);
+}
 function updTarjCuotas(i,val){
   if(!CFG.tarjetas[i])return;
-  CFG.tarjetas[i].cuotas=val.trim();
-  const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(num=>!isNaN(num));
-  if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
+  if(!CFG.tarjetas[i].planes)CFG.tarjetas[i].planes=[{n:parseInt(val)||1,recargo:0}];
+  else CFG.tarjetas[i].planes[0].n=parseInt(val)||1;
   guardarClave('catalogo_tarjetas',CFG.tarjetas);
-  renderTarjetasPreview();
-  markUnsaved();
+  renderTarjetasPreview();markUnsaved();
 }
-function updTarjLabel(i,val){
-  if(!CFG.tarjetas[i])return;
-  CFG.tarjetas[i].label=val.trim();
-  guardarClave('catalogo_tarjetas',CFG.tarjetas);
-  renderTarjetasPreview();
-  markUnsaved();
-}
-// Mantener updTarj por compatibilidad con otros lugares que lo llamen
-function updTarj(i,val){
-  updTarjCuotas(i,val);
-}
+function updTarjLabel(i,val){markUnsaved();}
+function updTarj(i,val){updTarjCuotas(i,val);}
 
 function showEditPanel(title,html){
   switchPTab('edit',s('ptab-edit'));
