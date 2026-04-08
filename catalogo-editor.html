@@ -205,6 +205,13 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:
 .c-cuota{flex:1;border-radius:7px;padding:8px;text-align:center;border:1px solid rgba(255,255,255,.1)}
 .c-cnum{font-size:18px;font-weight:800;line-height:1}
 .c-clbl{font-size:7px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.tarj-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-bottom:6px}
+.tarj-ico{width:44px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden}
+.tarj-info{flex:1;min-width:0}
+.tarj-nom{font-size:13px;color:rgba(255,255,255,.85);font-weight:500}
+.tarj-sub{font-size:10px;color:rgba(255,255,255,.35)}
+.tarj-cuotas{font-size:15px;font-weight:700;color:var(--fin-accent,#c9a84c);flex-shrink:0}
+.tarj-cuotas.off{color:#22c55e}
 .c-cont-s{padding:14px 12px}
 .c-cont-title{font-size:18px;font-weight:800;line-height:.9;letter-spacing:-.5px;margin-bottom:12px}
 .c-ci{display:flex;gap:8px;margin-bottom:9px;align-items:flex-start}
@@ -472,11 +479,8 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:
             <button class="edit-btn" onclick="editSec('fin',this)">✏ Editar</button>
             <div class="c-fin-s" id="v-fin-sec" style="background:#111827">
               <div class="c-fin-title" style="color:#fff">FINANCIÁ TU <span id="v-fin-em" style="color:#c9a84c">COMPRA</span></div>
-              <div class="c-cuotas" id="v-cuotas">
-                <div class="c-cuota" style="background:rgba(255,255,255,.07)"><div class="c-cnum" style="color:#c9a84c">3x</div><div class="c-clbl" style="color:rgba(255,255,255,.4)">sin interés</div></div>
-                <div class="c-cuota" style="background:rgba(255,255,255,.07)"><div class="c-cnum" style="color:#c9a84c">6x</div><div class="c-clbl" style="color:rgba(255,255,255,.4)">sin interés</div></div>
-                <div class="c-cuota" style="background:rgba(255,255,255,.07)"><div class="c-cnum" id="v-maxcuota" style="color:#c9a84c">12x</div><div class="c-clbl" style="color:rgba(255,255,255,.4)">sin interés</div></div>
-              </div>
+              <div id="v-tarjetas-preview" style="margin-top:10px"></div>
+              <span id="v-maxcuota" style="display:none"></span>
             </div>
           </div>
 
@@ -517,7 +521,7 @@ const BUCKET='catalogo-assets';
 const db=window.supabase.createClient(SURL,SKEY);
 
 let UID=null;
-let CFG={negocio:{},apariencia:{},hero:{},slides:[],banners:[],promos:[],categorias:[],tarjetas:[],marcas:[],textos:{},financia:{}};
+let CFG={negocio:{},apariencia:{},hero:{},slides:[],banners:[],promos:[],categorias:[],tarjetas:[],marcas:'',textos:{},financia:{}};
 let secActiva=null;
 let btnActivo=null;
 let historial=[];
@@ -550,12 +554,8 @@ async function cargarTodo(){
   CFG.promos=get('catalogo_promos')||[];
   CFG.categorias=get('catalogo_categorias')||[];
   CFG.tarjetas=get('catalogo_tarjetas')||[];
-  // Normalizar marcas a array de {nombre,logo}
-  const rawMarcas=get('catalogo_marcas');
-  if(!rawMarcas) CFG.marcas=[];
-  else if(typeof rawMarcas==='string') CFG.marcas=rawMarcas.split(',').map(m=>({nombre:m.trim(),logo:''})).filter(m=>m.nombre);
-  else if(Array.isArray(rawMarcas)) CFG.marcas=rawMarcas.map(m=>typeof m==='string'?{nombre:m,logo:''}:m);
-  else CFG.marcas=[];
+  renderTarjetasPreview();
+  CFG.marcas=get('catalogo_marcas')||'';
   CFG.textos=get('catalogo_textos')||{};
   CFG.financia=get('catalogo_financia')||{};
   aplicarCFG();
@@ -682,16 +682,14 @@ function renderCats(){
 }
 
 function renderMarcas(){
-  const lista=Array.isArray(CFG.marcas)?CFG.marcas:[];
+  // FIX 5: normalizar igual que el catálogo — soporta string, array, u objeto {nombre,logo}
+  let lista=[];
+  if(typeof CFG.marcas==='string') lista=CFG.marcas.split(',').map(m=>m.trim()).filter(Boolean).map(m=>({nombre:m,logo:''}));
+  else if(Array.isArray(CFG.marcas)) lista=CFG.marcas.map(m=>typeof m==='string'?{nombre:m,logo:''}:m);
   const el=s('v-marcas');
-  if(!el)return;
-  if(!lista.length){el.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,.3)">Sin marcas configuradas</span>';return;}
-  el.innerHTML=lista.map(m=>m.logo
-    ?`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-        <img src="${m.logo}" alt="${m.nombre}" style="height:28px;max-width:80px;object-fit:contain;filter:grayscale(1);opacity:.7">
-      </div>`
-    :`<span style="font-size:14px;font-weight:800;color:#e5e7eb;letter-spacing:-.3px">${m.nombre}</span>`
-  ).join('');
+  if(el) el.innerHTML=lista.map(m=>m.logo
+    ?`<div style="display:flex;align-items:center;justify-content:center"><img src="${m.logo}" alt="${m.nombre}" style="height:24px;max-width:70px;object-fit:contain;filter:grayscale(1);opacity:.6"></div>`
+    :`<span style="font-size:14px;font-weight:800;color:#e5e7eb;letter-spacing:-.3px">${m.nombre}</span>`).join('');
 }
 
 // ══ SORT LISTS ══
@@ -996,11 +994,9 @@ function editSec(sec,btn){
       return `
       <div style="background:#f9f6f2;border:1px solid #e5e0d8;border-radius:8px;padding:10px 12px;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="width:40px;height:25px;border-radius:4px;overflow:hidden;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0" id="tarj-ico-${i}">
-            ${t.logo?`<img src="${t.logo}" style="width:100%;height:100%;object-fit:contain;padding:2px">`:`${t.txt}`}
-          </div>
+          <div style="width:40px;height:25px;border-radius:4px;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0">${t.txt}</div>
           <span style="font-size:12px;font-weight:600;color:#111;flex:1">${t.nom}</span>
-          <label style="font-size:9px;padding:2px 7px;border-radius:3px;background:#f9f6f2;border:1px solid #e0d8cf;color:#666;cursor:pointer;white-space:nowrap">📷 Logo<input type="file" accept="image/*" style="display:none" onchange="uploadTarjLogo(this,${i})"></label>
+          <span style="font-size:9px;padding:2px 7px;border-radius:3px;background:${isDesc?'#dcfce7':'#fff4ed'};color:${isDesc?'#16a34a':'#c45e00'};font-weight:700">${isDesc?'DESCUENTO':'CUOTAS'}</span>
         </div>
         <div style="display:flex;gap:6px">
           <div style="flex:1">
@@ -1022,8 +1018,14 @@ function editSec(sec,btn){
   }
 
   else if(sec==='marcas'){
-    setHead('Marcas y logos');
-    renderMarcasPanel();
+    setHead('Marcas');
+    setPanelContent(`
+      <div class="f-sec" style="margin-top:0">Lista de marcas</div>
+      <div class="f-field">
+        <div class="f-label">Separadas por coma</div>
+        <textarea class="f-textarea" id="marcas-txt" oninput="CFG.marcas=this.value;renderMarcas()">${typeof CFG.marcas==='string'?CFG.marcas:(CFG.marcas||[]).join(', ')}</textarea>
+        <div class="f-hint">Ej: BOSCH, STANLEY, ALBA, NORTON, FV</div>
+      </div>`);
   }
 
   else if(sec==='cont'){
@@ -1048,18 +1050,40 @@ function reHeroTitle(){
 }
 
 // Dos funciones separadas — elimina el bug del split(' ')
+function renderTarjetasPreview(){
+  const el=document.getElementById('v-tarjetas-preview');
+  if(!el)return;
+  const tarjetas=CFG.tarjetas||[];
+  if(!tarjetas.length){el.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:10px">Sin tarjetas configuradas</div>';return;}
+  el.innerHTML=tarjetas.map(t=>{
+    const logoHTML=t.logo
+      ?'<img src="'+t.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:4px">'
+      :'<span style="font-size:8px;font-weight:800">'+( t.txt||'')+'</span>';
+    return '<div class="tarj-row">'
+      +'<div class="tarj-ico" style="background:'+t.color+'">'+logoHTML+'</div>'
+      +'<div class="tarj-info"><div class="tarj-nom">'+t.nom+'</div><div class="tarj-sub">'+t.sub+'</div></div>'
+      +'<div class="tarj-cuotas'+(t.descuento?' off':'')+'">'+t.cuotas+(t.label?' '+t.label:'')+'</div>'
+      +'</div>';
+  }).join('');
+  // actualizar maxcuota
+  const nums=tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
+  if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
+}
+
 function updTarjCuotas(i,val){
   if(!CFG.tarjetas[i])return;
   CFG.tarjetas[i].cuotas=val.trim();
   const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(num=>!isNaN(num));
   if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');
   guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  renderTarjetasPreview();
   markUnsaved();
 }
 function updTarjLabel(i,val){
   if(!CFG.tarjetas[i])return;
   CFG.tarjetas[i].label=val.trim();
   guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  renderTarjetasPreview();
   markUnsaved();
 }
 // Mantener updTarj por compatibilidad con otros lugares que lo llamen
@@ -1147,35 +1171,19 @@ async function uploadGallery(input){
 
 async function uploadAndApply(input,filename,cb){
   const file=input.files[0];if(!file)return;
-  // Validar tamaño — máximo 3MB
-  if(file.size>3*1024*1024){toast('La imagen es muy grande. Máximo 3MB.','err');return;}
-  // Feedback inmediato
-  const label=input.closest('label');
-  const origTxt=label?label.innerText:'';
-  if(label){label.style.opacity='.5';label.style.pointerEvents='none';}
-  toast('Subiendo '+file.name+'...','info');
+  toast('Subiendo imagen...','info');
   try{
     const ext=file.name.split('.').pop().toLowerCase();
-    const safeBase=filename.replace(/\.\w+$/,'');
-    const name=safeBase+'.'+ext;
-    // Verificar sesión activa
-    const {data:sess}=await db.auth.getSession();
-    if(!sess?.session) throw new Error('Sesión expirada. Recargá la página.');
+    const name=filename.replace(/\.\w+$/,'.'+ext);
     const {error}=await db.storage.from(BUCKET).upload(name,file,{upsert:true,contentType:file.type});
-    if(error) throw new Error(error.message||(error.statusCode===403?'Sin permiso. Verificá las policies del bucket.':JSON.stringify(error)));
+    if(error)throw error;
     const url=`${SURL}/storage/v1/object/public/${BUCKET}/${name}`;
     cb(url);
     await cargarGaleria();
-    toast('✓ '+file.name+' subida correctamente','ok');
-    addHist('Imagen: '+name,'#22c55e');
+    toast('✓ Imagen subida','ok');
+    addHist('Imagen subida: '+name,'#22c55e');
     markUnsaved();
-  }catch(e){
-    console.error('Upload error:',e);
-    toast('Error: '+e.message,'err');
-  }finally{
-    if(label){label.style.opacity='';label.style.pointerEvents='';}
-    input.value='';
-  }
+  }catch(e){toast('Error al subir: '+e.message,'err');}
 }
 
 function copyUrl(url){
@@ -1223,7 +1231,7 @@ async function guardarSeccion(){
     }else if(secActiva==='cats'){
       await guardarClave('catalogo_categorias',CFG.categorias);hist='Categorías guardadas';
     }else if(secActiva==='marcas'){
-      await guardarClave('catalogo_marcas',CFG.marcas);hist='Marcas actualizadas';
+      CFG.marcas=gv('marcas-txt');await guardarClave('catalogo_marcas',CFG.marcas);hist='Marcas actualizadas';
     }else if(secActiva==='cont'){
       const neg={...CFG.negocio,direccion:gv('cont-dir'),telefono:gv('cont-tel'),whatsapp:gv('cont-wa').replace(/\D/g,''),email:gv('cont-email'),h_semana:gv('cont-h1'),h_sabado:gv('cont-h2'),h_domingo:gv('cont-h3'),h_feriado:gv('cont-h4')};
       CFG.negocio=neg;await guardarClave('catalogo_negocio',neg);hist='Contacto actualizado';
@@ -1307,113 +1315,6 @@ function deshacerHist(i){
 }
 
 function reloadPreview(){aplicarCFG();}
-
-// ══ MARCAS PANEL ══
-function renderMarcasPanel(){
-  const lista=Array.isArray(CFG.marcas)?CFG.marcas:[];
-  const marcasHTML=lista.map((m,i)=>{
-    const haLogo=!!m.logo;
-    return `
-    <div id="marca-row-${i}" style="display:flex;align-items:center;gap:8px;padding:9px 10px;background:#f9f6f2;border:1px solid #e5e0d8;border-radius:8px;margin-bottom:6px">
-      <div style="width:48px;height:32px;border-radius:5px;border:1px solid #e0d8cf;background:#fff;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">
-        ${haLogo
-          ?`<img src="${m.logo}" style="width:100%;height:100%;object-fit:contain;padding:2px">`
-          :`<span style="font-size:9px;font-weight:800;color:#ccc">${m.nombre.slice(0,4).toUpperCase()}</span>`
-        }
-      </div>
-      <input style="flex:1;padding:5px 8px;border:1.5px solid #e0d8cf;border-radius:5px;font-family:inherit;font-size:12px;font-weight:600;color:#111;outline:none" value="${m.nombre}" placeholder="Nombre" oninput="CFG.marcas[${i}].nombre=this.value;renderMarcas();markUnsaved()">
-      <label style="font-size:10px;padding:4px 8px;background:#f0f0f0;border:1px solid #e0d8cf;border-radius:4px;cursor:pointer;color:#666;white-space:nowrap;flex-shrink:0">📷 Logo<input type="file" accept="image/*" style="display:none" onchange="uploadMarcaLogo(this,${i})"></label>
-      ${haLogo?`<button onclick="CFG.marcas[${i}].logo='';renderMarcas();renderMarcasPanel();markUnsaved()" style="background:none;border:none;color:#ddd;cursor:pointer;font-size:14px;padding:2px" title="Quitar logo">✕</button>`:''}
-      <button onclick="delMarca(${i})" style="background:none;border:none;color:#ddd;cursor:pointer;font-size:13px;padding:2px" title="Eliminar marca">🗑</button>
-    </div>`;
-  }).join('');
-
-  s('btnGuardar').style.display='block';
-  setPanelContent(`
-    <div class="f-info" style="margin-bottom:12px">Cada marca puede tener un logo. Si no hay logo, se muestra el nombre en texto.</div>
-    <div id="marcas-list">${marcasHTML}</div>
-    <button onclick="agregarMarca()" style="width:100%;background:#fff;border:1.5px dashed #d1ccc4;border-radius:6px;padding:9px;font-family:inherit;font-size:11px;color:#aaa;cursor:pointer;margin-top:4px;transition:all .15s" onmouseover="this.style.borderColor='#e8750a';this.style.color='#e8750a'" onmouseout="this.style.borderColor='#d1ccc4';this.style.color='#aaa'">+ Agregar marca</button>`);
-}
-
-function agregarMarca(){
-  if(!Array.isArray(CFG.marcas)) CFG.marcas=[];
-  CFG.marcas.push({nombre:'Nueva marca',logo:''});
-  renderMarcas();
-  renderMarcasPanel();
-  markUnsaved();
-}
-
-function delMarca(i){
-  if(!confirm('Eliminar esta marca?'))return;
-  CFG.marcas.splice(i,1);
-  renderMarcas();
-  renderMarcasPanel();
-  markUnsaved();
-  guardarClave('catalogo_marcas',CFG.marcas);
-}
-
-async function uploadMarcaLogo(input,i){
-  const file=input.files[0];if(!file)return;
-  if(file.size>2*1024*1024){toast('Imagen muy grande. Máximo 2MB.','err');return;}
-  const label=input.closest('label');
-  if(label){label.style.opacity='.5';label.style.pointerEvents='none';}
-  toast('Subiendo logo...','info');
-  try{
-    const {data:sess}=await db.auth.getSession();
-    if(!sess?.session) throw new Error('Sesión expirada. Recargá la página.');
-    const ext=file.name.split('.').pop().toLowerCase();
-    const name='marca-'+i+'-'+Date.now()+'.'+ext;
-    const {error}=await db.storage.from(BUCKET).upload(name,file,{upsert:true,contentType:file.type});
-    if(error) throw new Error(error.message||(error.statusCode===403?'Sin permiso en el bucket. Verificá las storage policies.':JSON.stringify(error)));
-    const url=`${SURL}/storage/v1/object/public/${BUCKET}/${name}`;
-    if(!Array.isArray(CFG.marcas)) CFG.marcas=[];
-    if(!CFG.marcas[i]) CFG.marcas[i]={nombre:'',logo:''};
-    CFG.marcas[i].logo=url;
-    await cargarGaleria();
-    renderMarcas();
-    renderMarcasPanel();
-    guardarClave('catalogo_marcas',CFG.marcas);
-    toast('✓ Logo de '+CFG.marcas[i].nombre+' subido','ok');
-    addHist('Logo marca: '+CFG.marcas[i].nombre,'#22c55e');
-    markUnsaved();
-  }catch(e){
-    console.error('Upload marca error:',e);
-    toast('Error: '+e.message,'err');
-  }finally{
-    if(label){label.style.opacity='';label.style.pointerEvents='';}
-    input.value='';
-  }
-}
-
-async function uploadTarjLogo(input,i){
-  const file=input.files[0];if(!file)return;
-  if(file.size>1*1024*1024){toast('Imagen muy grande. Máximo 1MB.','err');return;}
-  const label=input.closest('label');
-  if(label){label.style.opacity='.5';label.style.pointerEvents='none';}
-  toast('Subiendo logo tarjeta...','info');
-  try{
-    const {data:sess}=await db.auth.getSession();
-    if(!sess?.session) throw new Error('Sesión expirada. Recargá la página.');
-    const ext=file.name.split('.').pop().toLowerCase();
-    const name='tarjeta-'+i+'-'+Date.now()+'.'+ext;
-    const {error}=await db.storage.from(BUCKET).upload(name,file,{upsert:true,contentType:file.type});
-    if(error) throw new Error(error.message||(error.statusCode===403?'Sin permiso en el bucket. Verificá las storage policies.':JSON.stringify(error)));
-    const url=`${SURL}/storage/v1/object/public/${BUCKET}/${name}`;
-    if(CFG.tarjetas[i]) CFG.tarjetas[i].logo=url;
-    // Actualizar preview del ícono
-    const ico=s('tarj-ico-'+i);
-    if(ico) ico.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:contain;padding:2px">`;
-    guardarClave('catalogo_tarjetas',CFG.tarjetas);
-    toast('✓ Logo de tarjeta subido','ok');
-    markUnsaved();
-  }catch(e){
-    console.error('Upload tarjeta error:',e);
-    toast('Error: '+e.message,'err');
-  }finally{
-    if(label){label.style.opacity='';label.style.pointerEvents='';}
-    input.value='';
-  }
-}
 
 // Topbar editor helpers
 function previewTopbar(){
