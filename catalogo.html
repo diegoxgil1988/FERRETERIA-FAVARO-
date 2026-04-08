@@ -206,12 +206,12 @@ main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
 .tarjetas-section{background:linear-gradient(135deg,var(--fin-bg) 60%,var(--fin-bg2) 100%);border-radius:14px;padding:32px;margin:32px 0}
 .tar-title{font-family:var(--font-title);font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:20px}
 .tar-title span{color:var(--fin-accent)}
-.cuotas-strip{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.cuotas-strip{display:none}
 .cuota-badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 20px;text-align:center;min-width:90px}
 .cuota-num{font-family:var(--font-title);font-size:28px;font-weight:800;color:var(--fin-accent);line-height:1}
 .cuota-lbl{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 .cuota-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px}
-.tarjetas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.tarjetas-grid{display:flex;flex-direction:column;gap:8px}
 .tarj-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:8px}
 .tarj-ico{width:44px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
 .tarj-info{flex:1;min-width:0}
@@ -357,7 +357,7 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
   .footer-top{grid-template-columns:1fr}
   .prod-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
   .cats-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
-  .tarjetas-grid{grid-template-columns:1fr}
+
   .ficha-inner{grid-template-columns:1fr}
   .ficha-info{max-height:none;padding:20px}
   #fichaOv{padding:0}
@@ -973,12 +973,16 @@ function buildTarjetas(tarjetas){
   TARJETAS_CONFIG=tarjetas; // FUNC 1: guardar para usar en ficha
   const grid=document.getElementById('tarjetasGrid');
   if(!grid)return;
-  grid.innerHTML=tarjetas.map(t=>`
-    <div class="tarj-row">
-      <div class="tarj-ico" style="background:${t.color}">${t.txt}</div>
-      <div class="tarj-info"><div class="tarj-nom">${t.nom}</div><div class="tarj-sub">${t.sub}</div></div>
-      <div class="tarj-cuotas ${t.descuento?'off':''}">${t.cuotas}${t.label?' '+t.label:''}</div>
-    </div>`).join('');
+  grid.innerHTML=tarjetas.map(t=>{
+    const logoHTML=t.logo
+      ?'<img src="'+t.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:4px">'
+      :'<span>'+t.txt+'</span>';
+    return '<div class="tarj-row">'
+      +'<div class="tarj-ico" style="background:'+t.color+'">'+logoHTML+'</div>'
+      +'<div class="tarj-info"><div class="tarj-nom">'+t.nom+'</div><div class="tarj-sub">'+t.sub+'</div></div>'
+      +'<div class="tarj-cuotas'+(t.descuento?' off':'')+'">'+t.cuotas+(t.label?' '+t.label:'')+'</div>'
+      +'</div>';
+  }).join('');
   const nums=tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
   if(nums.length){
     const max=Math.max(...nums);
