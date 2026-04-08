@@ -571,7 +571,6 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
         <div class="ficha-nombre" id="fichaNom"></div>
         <div class="ficha-marca" id="fichaMar"></div>
         <div class="ficha-precio-big" id="fichaPrec"></div>
-        <div class="ficha-cuotas-big" id="fichaCuot"></div>
         <div class="ficha-divider"></div>
         <div id="fichaDescWrap" style="display:none">
           <div class="ficha-desc-title">Descripción</div>
@@ -582,9 +581,20 @@ footer{background:var(--footer-bg);padding:40px 20px 20px;color:rgba(255,255,255
           <span style="font-size:13px;font-weight:600;color:var(--tx)">Cantidad:</span>
           <div class="qty-ctrl">
             <button class="qty-btn" onclick="fichaQty(-1)">−</button>
-            <input class="qty-num" id="fichaQtyCnt" type="number" value="1" min="1" max="999">
+            <input class="qty-num" id="fichaQtyCnt" type="number" value="1" min="1" max="999" oninput="fichaTotalActualizar()">
             <button class="qty-btn" onclick="fichaQty(1)">+</button>
           </div>
+        </div>
+        <div id="fichaTotalRow" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:11px;color:#16a34a;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Total</span>
+          <span id="fichaTotalVal" style="font-size:20px;font-weight:800;color:#15803d"></span>
+        </div>
+        <div id="fichaFinTitle" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;display:none">Elegí cómo pagar</div>
+        <div id="fichaFinList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
+        <div id="fichaFinResult" style="display:none;border-radius:8px;padding:12px 14px;margin-bottom:12px">
+          <div id="fichaFinResultTop" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px"></div>
+          <div id="fichaFinResultNum" style="font-size:22px;font-weight:800"></div>
+          <div id="fichaFinResultSub" style="font-size:11px;color:#888;margin-top:2px"></div>
         </div>
         <button class="btn-ficha-carrito" id="btnAddCart" onclick="agregarCarrito()">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -1112,28 +1122,10 @@ function abrirFicha(id){
   document.getElementById('fichaPrec').innerHTML= p.precio>0
     ? `<small style="font-size:18px;font-weight:400;color:var(--tx3)">$</small>${Number(p.precio).toLocaleString('es-AR',{minimumFractionDigits:0})}<small style="font-size:14px;font-weight:400;color:var(--tx3)"> / ${p.un}</small>`
     : `<span style="font-size:22px;font-weight:700;color:var(--ac)">Consultar precio</span>`;
-  // FUNC 1: cuotas dinámicas desde tarjetas configuradas
-  const elCuot=document.getElementById('fichaCuot');
-  if(TARJETAS_CONFIG.length){
-    const planes=TARJETAS_CONFIG.filter(t=>!t.descuento&&parseInt(t.cuotas)>0);
-    if(planes.length){
-      const cuotaInfo=planes.map(t=>{
-        const n=parseInt(t.cuotas);
-        return `<span style="margin-right:12px"><strong style="color:var(--ac)">${n}x</strong> ${fmt(Math.round(p.precio/n))} s/i</span>`;
-      }).join('');
-      elCuot.innerHTML=cuotaInfo;
-    } else {
-      elCuot.innerHTML=`<strong>${MAX_CUOTAS}x</strong> ${fmt(Math.round(p.precio/MAX_CUOTAS))} sin interés`;
-    }
-    // Descuentos efectivo/transferencia
-    const descs=TARJETAS_CONFIG.filter(t=>t.descuento);
-    if(descs.length){
-      const descInfo=descs.map(t=>`<span style="margin-right:10px;color:#22c55e">${t.nom}: ${t.cuotas} ${t.label||''}</span>`).join('');
-      elCuot.innerHTML+=`<div style="font-size:11px;margin-top:4px">${descInfo}</div>`;
-    }
-  } else {
-    elCuot.innerHTML=`<strong>${MAX_CUOTAS}x</strong> ${fmt(Math.round(p.precio/MAX_CUOTAS))} sin interés`;
-  }
+  // Inicializar selector de financiación
+  fichaSelectedTarj=null;
+  const fr=document.getElementById('fichaFinResult');if(fr)fr.style.display='none';
+  fichaTotalActualizar();
   const desc=p.descripcion||'';
   if(desc&&desc.length>10){document.getElementById('fichaDescTxt').textContent=desc;document.getElementById('fichaDescWrap').style.display='block';}
   else document.getElementById('fichaDescWrap').style.display='none';
@@ -1176,7 +1168,92 @@ function fichaThumb(i){
   main.onclick=()=>abrirZoom(main.src); // FIX 3: actualiza zoom al cambiar foto
   document.querySelectorAll('.ficha-thumb').forEach((t,j)=>t.classList.toggle('on',j===i));
 }
-function fichaQty(d){const el=document.getElementById('fichaQtyCnt');el.value=Math.max(1,Math.min(999,(parseInt(el.value)||1)+d));}
+function fichaQty(d){const el=document.getElementById('fichaQtyCnt');el.value=Math.max(1,Math.min(999,(parseInt(el.value)||1)+d));fichaTotalActualizar();}
+
+let fichaSelectedTarj=null;
+
+function fichaTotalActualizar(){
+  const p=fichaActual;
+  if(!p||!p.precio)return;
+  const qty=Math.max(1,parseInt(document.getElementById('fichaQtyCnt').value)||1);
+  const total=p.precio*qty;
+  // Total row
+  const totalRow=document.getElementById('fichaTotalRow');
+  const totalVal=document.getElementById('fichaTotalVal');
+  if(totalRow&&totalVal){totalRow.style.display='flex';totalVal.textContent=fmt(total);}
+  // Renderizar tarjetas
+  fichaRenderFinList(total);
+  // Actualizar resultado si hay selección
+  if(fichaSelectedTarj!==null) fichaRenderFinResult(fichaSelectedTarj,total);
+}
+
+function fichaRenderFinList(total){
+  const list=document.getElementById('fichaFinList');
+  const title=document.getElementById('fichaFinTitle');
+  if(!list||!TARJETAS_CONFIG.length)return;
+  title.style.display='block';
+  list.innerHTML=TARJETAS_CONFIG.map((t,i)=>{
+    const isDesc=t.descuento;
+    const n=parseInt(t.cuotas);
+    let rightTop,rightBot;
+    if(isDesc){
+      const precio=total*(1-n/100);
+      rightTop='<span style="font-size:13px;font-weight:800;color:#16a34a">'+fmt(precio)+'</span>';
+      rightBot=n+'% OFF';
+    } else {
+      const pc=total/n;
+      rightTop='<span style="font-size:13px;font-weight:800;color:var(--ac)">'+n+'x '+fmt(pc)+'</span>';
+      rightBot=t.label||'s/i';
+    }
+    const isSel=fichaSelectedTarj===i;
+    const borderColor=isSel?(isDesc?'#22c55e':'var(--ac)'):'#e5e7eb';
+    const bgColor=isSel?(isDesc?'#f0fdf4':'#fff4ed'):'#fff';
+    const logoHTML=t.logo
+      ?'<img src="'+t.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:3px">'
+      :'<span style="font-size:8px;font-weight:800">'+t.txt+'</span>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:2px solid '+borderColor+';border-radius:8px;cursor:pointer;background:'+bgColor+';transition:all .15s" onclick="fichaElegirTarj('+i+')">'+
+      '<div style="width:42px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;background:'+t.color+';flex-shrink:0;overflow:hidden">'+logoHTML+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:#111">'+t.nom+'</div><div style="font-size:10px;color:#aaa">'+t.sub+'</div></div>'+
+      '<div style="text-align:right;flex-shrink:0">'+rightTop+'<div style="font-size:9px;color:#aaa">'+rightBot+'</div></div>'+
+      '</div>';
+  }).join('');
+}
+
+function fichaElegirTarj(i){
+  fichaSelectedTarj=i;
+  const qty=Math.max(1,parseInt(document.getElementById('fichaQtyCnt').value)||1);
+  const total=(fichaActual?fichaActual.precio:0)*qty;
+  fichaRenderFinList(total);
+  fichaRenderFinResult(i,total);
+}
+
+function fichaRenderFinResult(i,total){
+  const t=TARJETAS_CONFIG[i];
+  if(!t)return;
+  const res=document.getElementById('fichaFinResult');
+  const isDesc=t.descuento;
+  const n=parseInt(t.cuotas);
+  res.style.display='block';
+  if(isDesc){
+    const precio=total*(1-n/100);
+    res.style.background='#f0fdf4';
+    res.style.border='1px solid #86efac';
+    document.getElementById('fichaFinResultTop').style.color='#16a34a';
+    document.getElementById('fichaFinResultTop').textContent=t.nom+' — '+n+'% de descuento';
+    document.getElementById('fichaFinResultNum').style.color='#15803d';
+    document.getElementById('fichaFinResultNum').textContent=fmt(precio);
+    document.getElementById('fichaFinResultSub').textContent='Ahorrás '+fmt(total-precio)+' sobre '+fmt(total);
+  } else {
+    const pc=total/n;
+    res.style.background='#fff4ed';
+    res.style.border='1px solid #fed7aa';
+    document.getElementById('fichaFinResultTop').style.color='#c45e00';
+    document.getElementById('fichaFinResultTop').textContent=t.nom+' — '+n+' cuotas '+(t.label||'');
+    document.getElementById('fichaFinResultNum').style.color='#e8750a';
+    document.getElementById('fichaFinResultNum').textContent=n+'x '+fmt(pc);
+    document.getElementById('fichaFinResultSub').textContent='Total: '+fmt(total)+' sin interés';
+  }
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){fichaClose();carritoCerrar();cerrarZoom();}});
 
 // FUNC 4: Swipe en mobile para el slider
