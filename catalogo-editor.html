@@ -1090,11 +1090,16 @@ function renderFinPanel(fi2){
       if(!isDesc) planesHTML+='<button style="width:22px;height:22px;border:none;background:none;cursor:pointer;color:#ccc;font-size:16px;line-height:1;flex-shrink:0" onmouseover="this.style.color=&quot;#ef4444&quot;" onmouseout="this.style.color=&quot;#ccc&quot;" onclick="delPlan('+ti+','+pi+')">×</button>';
       planesHTML+='</div>';
     });
+    var logoHTML=t.logo?'<img src="'+t.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:3px">':'<span style="font-size:7px;font-weight:800">'+t.txt+'</span>';
     tarjHTML+='<div style="background:#f9f6f2;border:1px solid #e5e0d8;border-radius:8px;margin-bottom:8px;overflow:hidden">';
     tarjHTML+='<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:#f5f1ec">';
-    tarjHTML+='<div style="width:38px;height:23px;border-radius:4px;background:'+t.color+';display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#fff;flex-shrink:0">'+t.txt+'</div>';
-    tarjHTML+='<span style="font-size:12px;font-weight:700;color:#111;flex:1">'+t.nom+'</span>';
-    tarjHTML+='<span style="font-size:9px;padding:2px 6px;border-radius:3px;background:'+(isDesc?'#dcfce7':'#fff4ed')+';color:'+(isDesc?'#16a34a':'#c45e00')+';font-weight:700">'+(isDesc?'DESCUENTO':'CUOTAS')+'</span>';
+    tarjHTML+='<div style="width:38px;height:23px;border-radius:4px;background:'+t.color+';display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">'+logoHTML+'</div>';
+    tarjHTML+='<div style="flex:1;min-width:0">';
+    tarjHTML+='<input style="width:100%;font-size:12px;font-weight:700;color:#111;border:none;background:none;outline:none;font-family:inherit" value="'+t.nom+'" placeholder="Nombre" onchange="updTarjNom('+ti+',this.value)">';
+    tarjHTML+='<input style="width:100%;font-size:10px;color:#aaa;border:none;background:none;outline:none;font-family:inherit;margin-top:1px" value="'+(t.sub||'')+'" placeholder="Subtítulo" onchange="updTarjSub('+ti+',this.value)">';
+    tarjHTML+='</div>';
+    tarjHTML+='<label style="font-size:9px;padding:3px 7px;border-radius:4px;background:#fff;border:1px solid #e0d8cf;cursor:pointer;color:#666;white-space:nowrap">📷 Logo<input type="file" accept="image/*" style="display:none" onchange="uploadTarjLogo(this,'+ti+')"></label>';
+    tarjHTML+='<span style="font-size:9px;padding:2px 6px;border-radius:3px;background:'+(isDesc?'#dcfce7':'#fff4ed')+';color:'+(isDesc?'#16a34a':'#c45e00')+';font-weight:700;flex-shrink:0">'+(isDesc?'DSCTO':'CUOTAS')+'</span>';
     tarjHTML+='</div>';
     tarjHTML+='<div style="padding:10px 11px 6px">';
     tarjHTML+='<div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:#aaa;font-weight:700;margin-bottom:7px">'+(isDesc?'Descuento':'Planes de cuotas')+'</div>';
@@ -1131,6 +1136,37 @@ function delPlan(ti,pi){
   CFG.tarjetas[ti].planes.splice(pi,1);
   guardarClave('catalogo_tarjetas',CFG.tarjetas);
   editSec('fin',null);
+}
+function updTarjNom(i,val){
+  if(!CFG.tarjetas[i])return;
+  CFG.tarjetas[i].nom=val.trim();
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  renderTarjetasPreview();markUnsaved();
+}
+function updTarjSub(i,val){
+  if(!CFG.tarjetas[i])return;
+  CFG.tarjetas[i].sub=val.trim();
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  markUnsaved();
+}
+async function uploadTarjLogo(input,i){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>3*1024*1024){toast('Imagen muy grande (máx 3MB)');return;}
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){toast('Sesión inactiva. Ingresá de nuevo.');return;}
+  input.disabled=true;
+  const fname='tarjeta-'+i+'-'+Date.now()+'.'+file.name.split('.').pop();
+  const {data,error}=await db.storage.from(BUCKET).upload(fname,file,{upsert:true,contentType:file.type});
+  input.disabled=false;
+  if(error){toast('Error subiendo: '+error.message);return;}
+  const url=db.storage.from(BUCKET).getPublicUrl(fname).data.publicUrl;
+  CFG.tarjetas[i].logo=url;
+  guardarClave('catalogo_tarjetas',CFG.tarjetas);
+  renderTarjetasPreview();
+  editSec('fin',null);
+  markUnsaved();
+  toast('Logo subido');
 }
 function updTarjCuotas(i,val){
   if(!CFG.tarjetas[i])return;
