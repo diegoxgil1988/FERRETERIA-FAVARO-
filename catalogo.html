@@ -987,10 +987,28 @@ function buildTarjetas(tarjetas){
     const logoHTML=t.logo
       ?'<img src="'+t.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:4px">'
       :'<span>'+t.txt+'</span>';
+    // Armar texto de cuotas desde planes o desde campos viejos
+    var cuotasTxt='';
+    if(t.planes&&t.planes.length){
+      if(t.descuento){
+        var pct=Math.abs(t.planes[0].recargo);
+        cuotasTxt='<span class="tarj-cuotas off">'+pct+'% OFF</span>';
+      } else {
+        cuotasTxt=t.planes.map(function(p){
+          var col=p.recargo>0?'#ef4444':p.recargo<0?'#22c55e':'var(--fin-accent)';
+          var lbl=p.n===1?'contado':p.n+'x'+(p.recargo===0?' s/i':p.recargo>0?' +'+p.recargo+'%':' -'+Math.abs(p.recargo)+'%');
+          return '<span style="color:'+col+';font-size:13px;font-weight:700;margin-left:6px">'+lbl+'</span>';
+        }).join('');
+        cuotasTxt='<div style="text-align:right">'+cuotasTxt+'</div>';
+      }
+    } else {
+      var cls=t.descuento?' off':'';
+      cuotasTxt='<div class="tarj-cuotas'+cls+'">'+t.cuotas+(t.label?' '+t.label:'')+'</div>';
+    }
     return '<div class="tarj-row">'
       +'<div class="tarj-ico" style="background:'+t.color+'">'+logoHTML+'</div>'
       +'<div class="tarj-info"><div class="tarj-nom">'+t.nom+'</div><div class="tarj-sub">'+t.sub+'</div></div>'
-      +'<div class="tarj-cuotas'+(t.descuento?' off':'')+'">'+t.cuotas+(t.label?' '+t.label:'')+'</div>'
+      +cuotasTxt
       +'</div>';
   }).join('');
   const nums=tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(n=>!isNaN(n));
