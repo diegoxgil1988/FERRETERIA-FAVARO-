@@ -306,6 +306,17 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:
           <div class="f-field"><div class="f-label">Fondo financiación</div><div class="f-color-row"><div class="f-cdot" id="cd-fin" style="background:#111827"><input type="color" value="#111827" oninput="liveColor('--fin-bg',this.value,'cd-fin','cv-fin');markUnsaved()"></div><span class="f-cval" id="cv-fin">#111827</span></div></div>
           <div class="f-field"><div class="f-label">Acento financiación (cuotas)</div><div class="f-color-row"><div class="f-cdot" id="cd-finacc" style="background:#c9a84c"><input type="color" value="#c9a84c" oninput="liveColor('--fin-accent',this.value,'cd-finacc','cv-finacc');markUnsaved()"></div><span class="f-cval" id="cv-finacc">#c9a84c</span></div></div>
           <div class="f-field"><div class="f-label">Tag del banner</div><div class="f-color-row"><div class="f-cdot" id="cd-bantag" style="background:#dc2626"><input type="color" value="#dc2626" oninput="liveColor('--banner-tag-bg',this.value,'cd-bantag','cv-bantag');markUnsaved()"></div><span class="f-cval" id="cv-bantag">#dc2626</span></div></div>
+          <div class="f-sec">Overlays — opacidad global</div>
+          <div class="f-field">
+            <div class="f-label">Hero / Slider</div>
+            <input type="range" id="gl-hero-ov" min="0" max="1" step="0.05" value="0.5" style="width:100%;accent-color:#e8750a" oninput="document.getElementById('gl-hero-ov-v').textContent=this.value;CFG.hero.overlay_opacity=parseFloat(this.value);updHeroOverlay();markUnsaved()">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Transparente</span><span id="gl-hero-ov-v" style="color:#e8750a;font-weight:700">0.5</span><span>Opaco</span></div>
+          </div>
+          <div class="f-field">
+            <div class="f-label">Color overlay global (banners + cats + hero)</div>
+            <div class="f-color-row"><div class="f-cdot" id="cd-gl-ov" style="background:#000000"><input type="color" value="#000000" id="inp-gl-ov" oninput="this.parentNode.style.background=this.value;CFG.apariencia.overlay_color=this.value;markUnsaved()"></div><span class="f-cval">Color de overlay</span></div>
+            <div class="f-hint">Podés cambiar el color en cada sección individualmente</div>
+          </div>
           <div class="f-sec">Tipografía</div>
           <div class="f-field">
             <div class="f-label">Fuente de títulos</div>
@@ -834,7 +845,10 @@ function editPromo(i){
     <div class="f-field">
       <div class="f-img-row">
         <div class="f-img-prev-bg" id="ep-prev" style="background-image:url('${p.foto||''}')"></div>
-        <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'promos-${i}.jpg',v=>{CFG.promos[${i}].foto=v;s('ep-prev').style.backgroundImage='url('+v+')';s('ep-foto-url').value=v;renderPromos()})"></label>
+        <div>
+          <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'promos-${i}.jpg',v=>{CFG.promos[${i}].foto=v;s('ep-prev').style.backgroundImage='url('+v+')';s('ep-foto-url').value=v;renderPromos()})"></label>
+          <div class="f-hint">📐 Ideal: 600 × 400 px · El texto se superpone abajo</div>
+        </div>
       </div>
       <input class="f-input" id="ep-foto-url" value="${p.foto||''}" placeholder="O pegá URL" style="margin-top:6px" oninput="CFG.promos[${i}].foto=this.value;s('ep-prev').style.backgroundImage='url('+this.value+')';renderPromos()">
     </div>
@@ -848,9 +862,18 @@ function editBanner(i){
     <div class="f-field">
       <div class="f-img-row">
         <div class="f-img-prev-bg" id="eb-prev" style="background-image:url('${b.foto||''}')"></div>
-        <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'banner-${i}.jpg',v=>{CFG.banners[${i}].foto=v;s('eb-prev').style.backgroundImage='url('+v+')';s('eb-foto').value=v;renderBannerActivo()})"></label>
+        <div>
+          <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'banner-${i}.jpg',v=>{CFG.banners[${i}].foto=v;s('eb-prev').style.backgroundImage='url('+v+')';s('eb-foto').value=v;renderBannerActivo()})"></label>
+          <div class="f-hint">📐 Ideal: 1920 × 400 px · Motivo a la derecha o centro</div>
+        </div>
       </div>
       <input class="f-input" id="eb-foto" value="${b.foto||''}" placeholder="O URL de foto" style="margin-top:6px" oninput="CFG.banners[${i}].foto=this.value;s('eb-prev').style.backgroundImage='url('+this.value+')';renderBannerActivo()">
+    </div>
+    <div class="f-sec">Overlay</div>
+    <div class="f-field"><div class="f-label">Color del overlay</div><div class="f-color-row"><div class="f-cdot" style="background:${b.overlay_color||'#000000'}"><input type="color" value="${b.overlay_color||'#000000'}" oninput="CFG.banners[${i}].overlay_color=this.value;this.parentNode.style.background=this.value;renderBannerActivo();markUnsaved()"></div></div></div>
+    <div class="f-field"><div class="f-label">Opacidad overlay (0–1)</div>
+      <input type="range" min="0" max="1" step="0.05" value="${b.overlay_opacity!=null?b.overlay_opacity:0.6}" style="width:100%;accent-color:#e8750a" oninput="CFG.banners[${i}].overlay_opacity=parseFloat(this.value);this.nextElementSibling.textContent=this.value;renderBannerActivo();markUnsaved()">
+      <div style="font-size:10px;color:#e8750a;font-weight:700;text-align:center">${b.overlay_opacity!=null?b.overlay_opacity:0.6}</div>
     </div>
     <div class="f-sec">Contenido</div>
     <div class="f-field"><div class="f-label">Tag/Badge</div><input class="f-input" value="${b.tag||''}" oninput="CFG.banners[${i}].tag=this.value;renderBannerActivo()"></div>
@@ -871,9 +894,18 @@ function editCat(i){
     <div class="f-field">
       <div class="f-img-row">
         <div class="f-img-prev-bg" id="ec-prev" style="background-image:url('${c.foto||''}')"></div>
-        <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'cat-${i}.jpg',v=>{CFG.categorias[${i}].foto=v;s('ec-prev').style.backgroundImage='url('+v+')';s('ec-foto').value=v;renderCats()})"></label>
+        <div>
+          <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'cat-${i}.jpg',v=>{CFG.categorias[${i}].foto=v;s('ec-prev').style.backgroundImage='url('+v+')';s('ec-foto').value=v;renderCats()})"></label>
+          <div class="f-hint">📐 1ª cat (ancho completo): 1200 × 400 px<br>Otras: 600 × 400 px o 600 × 600 px</div>
+        </div>
       </div>
       <input class="f-input" id="ec-foto" value="${c.foto||''}" placeholder="O URL de foto" style="margin-top:6px" oninput="CFG.categorias[${i}].foto=this.value;s('ec-prev').style.backgroundImage='url('+this.value+')';renderCats()">
+    </div>
+    <div class="f-sec">Overlay</div>
+    <div class="f-field"><div class="f-label">Color del overlay</div><div class="f-color-row"><div class="f-cdot" style="background:${c.overlay_color||'#000000'}"><input type="color" value="${c.overlay_color||'#000000'}" oninput="CFG.categorias[${i}].overlay_color=this.value;this.parentNode.style.background=this.value;renderCats();markUnsaved()"></div></div></div>
+    <div class="f-field"><div class="f-label">Opacidad overlay (0–1)</div>
+      <input type="range" min="0" max="1" step="0.05" value="${c.overlay_opacity!=null?c.overlay_opacity:0.5}" style="width:100%;accent-color:#e8750a" oninput="CFG.categorias[${i}].overlay_opacity=parseFloat(this.value);this.nextElementSibling.textContent=this.value;renderCats();markUnsaved()">
+      <div style="font-size:10px;color:#e8750a;font-weight:700;text-align:center">${c.overlay_opacity!=null?c.overlay_opacity:0.5}</div>
     </div>
     <button onclick="guardarClave('catalogo_categorias',CFG.categorias);toast('✓ Categoría guardada','ok')" style="width:100%;background:#e8750a;color:#fff;border:none;border-radius:6px;padding:10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px">Guardar categoría</button>`);
 }
@@ -897,6 +929,7 @@ function editSec(sec,btn){
         <div class="f-img-row">
           <img id="neg-logo-prev" class="f-img-prev" src="${n.logo||''}" onerror="this.src=''" alt="">
           <label class="f-upload">📁 Subir logo<input type="file" accept="image/*" onchange="uploadAndApply(this,'logo.png',v=>{s('neg-logo-inp').value=v;s('neg-logo-prev').src=v;const i=s('v-logo-img');i.src=v;i.style.display='block'})"></label>
+          <div class="f-hint">📐 PNG transparente · Ideal: 300 × 80 px</div>
         </div>
         <input class="f-input" id="neg-logo-inp" value="${n.logo||''}" placeholder="O URL del logo" style="margin-top:6px" oninput="const i=s('v-logo-img');i.src=this.value;i.style.display=this.value?'block':'none'">
       </div>
@@ -922,9 +955,18 @@ function editSec(sec,btn){
       <div class="f-field">
         <div class="f-img-row">
           <div class="f-img-prev-bg" id="hero-prev" style="background-image:url('${h.foto||''}')"></div>
-          <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'hero-bg.jpg',v=>{s('hero-foto').value=v;s('hero-prev').style.backgroundImage='url('+v+')';s('v-hero-bg').style.backgroundImage='url('+v+')'})"></label>
+          <div>
+            <label class="f-upload">📁 Subir<input type="file" accept="image/*" onchange="uploadAndApply(this,'hero-bg.jpg',v=>{s('hero-foto').value=v;s('hero-prev').style.backgroundImage='url('+v+')';s('v-hero-bg').style.backgroundImage='url('+v+')'})"></label>
+            <div class="f-hint">📐 Medida ideal: 1920 × 600 px · El motivo principal centrado</div>
+          </div>
         </div>
         <input class="f-input" id="hero-foto" value="${h.foto||''}" placeholder="O URL de la foto" style="margin-top:6px" oninput="s('v-hero-bg').style.backgroundImage='url('+this.value+')';s('hero-prev').style.backgroundImage='url('+this.value+')'">
+      </div>
+      <div class="f-sec">Overlay de color</div>
+      <div class="f-field"><div class="f-label">Color del overlay</div><div class="f-color-row"><div class="f-cdot" id="cd-hero-ov" style="background:${h.overlay_color||'#000000'}"><input type="color" value="${h.overlay_color||'#000000'}" oninput="CFG.hero.overlay_color=this.value;this.parentNode.style.background=this.value;updHeroOverlay();markUnsaved()"></div><span class="f-cval" id="cv-hero-ov">${h.overlay_color||'#000'}</span></div></div>
+      <div class="f-field"><div class="f-label">Opacidad del overlay (0 = sin overlay, 1 = opaco)</div>
+        <input type="range" min="0" max="1" step="0.05" value="${h.overlay_opacity!=null?h.overlay_opacity:0.5}" style="width:100%;accent-color:#e8750a" oninput="CFG.hero.overlay_opacity=parseFloat(this.value);document.getElementById('hero-ov-val').textContent=this.value;updHeroOverlay();markUnsaved()">
+        <div style="font-size:10px;color:#e8750a;font-weight:700;text-align:center" id="hero-ov-val">${h.overlay_opacity!=null?h.overlay_opacity:0.5}</div>
       </div>
       <div class="f-sec">Textos</div>
       <div class="f-field"><div class="f-label">Tag superior</div><input class="f-input" id="hero-tag" value="${h.tag||'Catálogo 2025 · Córdoba'}" oninput="setTxt('v-hero-tag',this.value)"></div>
@@ -1062,6 +1104,24 @@ function editSec(sec,btn){
   }
 }
 
+function updHeroOverlay(){
+  const color=CFG.hero.overlay_color||'#000000';
+  const opacity=CFG.hero.overlay_opacity!=null?CFG.hero.overlay_opacity:0.5;
+  // Actualizar el slider global si existe
+  const gl=document.getElementById('gl-hero-ov');
+  if(gl)gl.value=opacity;
+  const glv=document.getElementById('gl-hero-ov-v');
+  if(glv)glv.textContent=opacity;
+  // Aplicar al hero del preview
+  const heroOv=document.querySelector('#v-hero-bg ~ .c-hov, .hero-slide .c-hov');
+  // Buscar el overlay del hero en el preview frame
+  const slides=document.querySelectorAll('.hero-slide');
+  slides.forEach(sl=>{
+    const ov=sl.querySelector('.c-hov');
+    if(ov) ov.style.background='linear-gradient(to right,'+color+Math.round(opacity*255).toString(16).padStart(2,'0')+' 40%,'+color+'00 100%)';
+  });
+}
+
 function previewFooterMapa(){
   const url=document.getElementById('footer-mapa')?document.getElementById('footer-mapa').value.trim():'';
   const prev=document.getElementById('footer-mapa-prev');
@@ -1162,7 +1222,10 @@ function renderFinPanel(fi2){
     tarjHTML+='<input style="width:100%;font-size:12px;font-weight:700;color:#111;border:none;background:none;outline:none;font-family:inherit" value="'+t.nom+'" placeholder="Nombre" onchange="updTarjNom('+ti+',this.value)">';
     tarjHTML+='<input style="width:100%;font-size:10px;color:#aaa;border:none;background:none;outline:none;font-family:inherit;margin-top:1px" value="'+(t.sub||'')+'" placeholder="Subtítulo" onchange="updTarjSub('+ti+',this.value)">';
     tarjHTML+='</div>';
+    tarjHTML+='<div style="text-align:center">';
     tarjHTML+='<label style="font-size:9px;padding:3px 7px;border-radius:4px;background:#fff;border:1px solid #e0d8cf;cursor:pointer;color:#666;white-space:nowrap">📷 Logo<input type="file" accept="image/*" style="display:none" onchange="uploadTarjLogo(this,'+ti+')"></label>';
+    tarjHTML+='<div style="font-size:8px;color:#aaa;margin-top:2px">📐 180×80 px PNG</div>';
+    tarjHTML+='</div>';
     tarjHTML+='<span style="font-size:9px;padding:2px 6px;border-radius:3px;background:'+(isDesc?'#dcfce7':'#fff4ed')+';color:'+(isDesc?'#16a34a':'#c45e00')+';font-weight:700;flex-shrink:0">'+(isDesc?'DSCTO':'CUOTAS')+'</span>';
     tarjHTML+='</div>';
     tarjHTML+='<div style="padding:10px 11px 6px">';
