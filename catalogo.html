@@ -994,10 +994,12 @@ function buildTarjetas(tarjetas){
         var pct=Math.abs(t.planes[0].recargo);
         cuotasTxt='<span class="tarj-cuotas off">'+pct+'% OFF</span>';
       } else {
+        // Mostrar cada plan: número de cuotas + etiqueta (sin mostrar el % de recargo)
         cuotasTxt=t.planes.map(function(p){
-          var col=p.recargo>0?'#ef4444':p.recargo<0?'#22c55e':'var(--fin-accent)';
-          var lbl=p.n===1?'contado':p.n+'x'+(p.recargo===0?' s/i':p.recargo>0?' +'+p.recargo+'%':' -'+Math.abs(p.recargo)+'%');
-          return '<span style="color:'+col+';font-size:13px;font-weight:700;margin-left:6px">'+lbl+'</span>';
+          var col=p.recargo>0?'rgba(255,255,255,.5)':p.recargo<0?'#22c55e':'var(--fin-accent)';
+          var etiqueta=p.label||(p.recargo===0?'sin interés':'');
+          var txt=p.n===1?'Contado':(p.n+'x'+(etiqueta?' '+etiqueta:''));
+          return '<div style="color:'+col+';font-size:12px;font-weight:700">'+txt+'</div>';
         }).join('');
         cuotasTxt='<div style="text-align:right">'+cuotasTxt+'</div>';
       }
@@ -1251,10 +1253,11 @@ function fichaRenderFinList(total){
         const colRec=rec>0?'#ef4444':rec<0?'#16a34a':'var(--ac)';
         const planBorder=isPlanSel?colRec:'#e5e7eb';
         const planBg=isPlanSel?(rec>0?'#fef2f2':rec<0?'#f0fdf4':'#fff4ed'):'#f9fafb';
-        const recLbl=rec>0?'+'+rec+'% recargo':rec<0?Math.abs(rec)+'% desc':'sin cargo';
+        // Etiqueta visible al cliente — no mostramos % de recargo
+        const etiqueta=p.label||(rec===0?'sin interés':rec<0?Math.abs(rec)+'% descuento':'');
+        const planTitle=p.n===1?'Pago único':(p.n+' cuotas'+(etiqueta?' — '+etiqueta:''));
         html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border:1.5px solid '+planBorder+';border-radius:6px;cursor:pointer;background:'+planBg+';transition:all .12s" onclick="fichaElegirPlan('+i+','+pi+')">'+
-          '<div><div style="font-size:12px;font-weight:600;color:#333">'+(p.n===1?'Pago único':p.n+' cuotas')+'</div>'+
-          '<div style="font-size:10px;color:'+colRec+'">'+recLbl+(rec!==0?' → total '+fmt(totalConRec):'')+'</div></div>'+
+          '<div><div style="font-size:12px;font-weight:600;color:#333">'+planTitle+'</div></div>'+
           '<div style="text-align:right"><div style="font-size:13px;font-weight:800;color:'+colRec+'">'+(p.n===1?fmt(totalConRec):p.n+'x '+fmt(porCuota))+'</div></div>'+
           '</div>';
       });
@@ -1295,7 +1298,8 @@ function fichaRenderFinResult(ti,pi,total){
     // Recargo
     res.style.background='#fef2f2';res.style.border='1px solid #fca5a5';
     document.getElementById('fichaFinResultTop').style.color='#ef4444';
-    document.getElementById('fichaFinResultTop').textContent=t.nom+' — '+n+(n===1?' pago':' cuotas')+' (+'+rec+'% recargo)';
+    const etqRec=planes[pi].label||'';
+    document.getElementById('fichaFinResultTop').textContent=t.nom+' — '+n+(n===1?' pago':' cuotas')+(etqRec?' — '+etqRec:'');
     document.getElementById('fichaFinResultNum').style.color='#ef4444';
     document.getElementById('fichaFinResultNum').textContent=n===1?fmt(totalConRec):n+'x '+fmt(porCuota);
     document.getElementById('fichaFinResultSub').textContent='Total a pagar: '+fmt(totalConRec);
