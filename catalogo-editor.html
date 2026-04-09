@@ -449,15 +449,7 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:
           <!-- BANNER -->
           <div class="es" id="sec-banner">
             <button class="edit-btn" onclick="openTab('banners')">✏ Editar</button>
-            <div class="c-banner">
-              <div class="c-bbg" id="v-banner-bg" style="background-image:url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=60')"></div>
-              <div class="c-bov"></div>
-              <div class="c-bc">
-                <div class="c-btag" id="v-btag" style="background:#dc2626">Oferta limitada</div>
-                <div class="c-btitle" id="v-btitle">LIQUIDACIÓN FIN DE TEMPORADA</div>
-                <div class="c-bsub" id="v-bsub">Hasta 30% OFF en herramientas</div>
-              </div>
-            </div>
+            <div id="v-banners-preview"></div>
           </div>
 
           <!-- PRODS -->
@@ -658,12 +650,25 @@ function renderPromos(){
 }
 
 function renderBannerActivo(){
-  const activo=(CFG.banners||[]).find(b=>b.activo!==false);
-  if(activo){
-    if(activo.foto)s('v-banner-bg').style.backgroundImage=`url('${activo.foto}')`;
-    if(activo.tag){const bt=s('v-btag');if(bt){bt.textContent=activo.tag;if(activo.tag_color)bt.style.background=activo.tag_color;}}
-    if(activo.titulo)setTxt('v-btitle',activo.titulo);
-    if(activo.sub)setTxt('v-bsub',activo.sub);
+  const container=s('v-banners-preview');
+  if(container){
+    const activos=(CFG.banners||[]).filter(b=>b.activo!==false);
+    if(!activos.length){
+      container.innerHTML='<div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;background:#f5f0ea;border-radius:8px">Sin banners activos</div>';
+    } else {
+      container.innerHTML=activos.map(b=>{
+        const bgStyle=b.foto?"background-image:url("+JSON.stringify(b.foto)+");background-size:cover;background-position:center":"background:#374151";
+        return '<div class="c-banner" style="margin-bottom:8px;border-radius:8px;overflow:hidden">'+
+          '<div class="c-bbg" style="'+bgStyle+'"></div>'+
+          '<div class="c-bov"></div>'+
+          '<div class="c-bc">'+
+            '<div class="c-btag" style="background:'+(b.tag_color||'#dc2626')+'">'+(b.tag||'')+'</div>'+
+            '<div class="c-btitle">'+(b.titulo||'')+'</div>'+
+            '<div class="c-bsub">'+(b.sub||'')+'</div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+    }
   }
   renderBannersList();
 }
@@ -865,8 +870,8 @@ function editCat(i){
 function editSec(sec,btn){
   document.querySelectorAll('.es').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.edit-btn').forEach(x=>x.classList.remove('on'));
-  s('sec-'+sec).classList.add('active');
-  btn.classList.add('on');
+  if(s('sec-'+sec))s('sec-'+sec).classList.add('active');
+  if(btn)btn.classList.add('on');
   btnActivo=btn;secActiva=sec;
   switchPTab('edit',s('ptab-edit'));
   document.getElementById('btnGuardar').style.display='block';
