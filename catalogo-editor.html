@@ -496,6 +496,17 @@ html,body{height:100%;overflow:hidden;font-family:'Outfit',sans-serif;font-size:
             </div>
           </div>
 
+          <!-- FOOTER -->
+          <div class="es" id="sec-footer">
+            <button class="edit-btn" onclick="editSec('footer',this)">✏ Editar</button>
+            <div style="background:#080806;padding:20px 14px">
+              <div style="font-family:var(--font-title,sans-serif);font-size:16px;font-weight:800;color:#fff;margin-bottom:6px">FAVARO<span style="color:#e8750a">.</span></div>
+              <div id="v-footer-desc" style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:10px">Ferretería en Córdoba Capital con más de 20 años de experiencia.</div>
+              <div id="v-footer-mapa" style="display:none;margin-bottom:10px;border-radius:6px;overflow:hidden"></div>
+              <div style="font-size:10px;color:rgba(255,255,255,.3)" id="v-footer-copy">© 2025 Ferretería Favaro · Todos los derechos reservados</div>
+            </div>
+          </div>
+
         </div><!-- /prev-frame -->
       </div><!-- /prev-wrap -->
     </div><!-- /preview -->
@@ -598,6 +609,7 @@ function aplicarCFG(){
   renderCats();
   // Marcas
   renderMarcas();
+  renderFooterPreview();
   // Tarjetas
   if(CFG.tarjetas&&CFG.tarjetas.length){const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(num=>!isNaN(num));if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');} // FIX 8
   // Fondo promos, fin, cont
@@ -1003,6 +1015,26 @@ function editSec(sec,btn){
     setPanelContent(renderFinPanel(fi2));
   }
 
+  else if(sec==='footer'){
+    setHead('Footer — Pie de página');
+    const neg=CFG.negocio||{};
+    setPanelContent(
+      '<div class="f-sec" style="margin-top:0">Descripción</div>'+
+      '<div class="f-field"><div class="f-label">Texto debajo del logo</div>'+
+      '<textarea class="f-textarea" id="footer-desc" oninput="setTxt(&quot;v-footer-desc&quot;,this.value)">'+(neg.footer_desc||'Ferretería en Córdoba Capital con más de 20 años de experiencia.')+'</textarea></div>'+
+      '<div class="f-sec">Copyright</div>'+
+      '<div class="f-field"><div class="f-label">Texto de copyright</div>'+
+      '<input class="f-input" id="footer-copy" value="'+(neg.footer_copy||'© 2025 Ferretería Favaro · Todos los derechos reservados')+'" oninput="setTxt(&quot;v-footer-copy&quot;,this.value)"></div>'+
+      '<div class="f-sec">Mapa de Google Maps</div>'+
+      '<div class="f-field"><div class="f-label">URL de embed de Google Maps</div>'+
+      '<input class="f-input" id="footer-mapa" value="'+(neg.footer_mapa||'')+'" placeholder="https://www.google.com/maps/embed?pb=...">'+
+      '<div class="f-hint">En Google Maps → Compartir → Insertar mapa → copiar solo la URL del src del iframe</div></div>'+
+      '<div class="f-field"><div class="f-label">Preview del mapa</div>'+
+      '<div id="footer-mapa-prev" style="border-radius:8px;overflow:hidden;height:140px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa">'+(neg.footer_mapa?'<iframe src="'+neg.footer_mapa+'" width="100%" height="140" style="border:0" loading="lazy"></iframe>':'Sin mapa configurado')+'</div></div>'+
+      '<button onclick="previewFooterMapa()" style="width:100%;padding:7px;background:#e8750a;color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:6px">Ver mapa</button>'
+    );
+  }
+
   else if(sec==='marcas'){
     setHead('Marcas');
     setPanelContent(`
@@ -1027,6 +1059,28 @@ function editSec(sec,btn){
       <div class="f-field"><div class="f-label">Sábados</div><input class="f-input" id="cont-h2" value="${n.h_sabado||''}" oninput="setTxt('v-h2',this.value)"></div>
       <div class="f-field"><div class="f-label">Domingos</div><input class="f-input" id="cont-h3" value="${n.h_domingo||'Cerrado'}"></div>
       <div class="f-field"><div class="f-label">Feriados</div><input class="f-input" id="cont-h4" value="${n.h_feriado||'Cerrado'}"></div>`);
+  }
+}
+
+function previewFooterMapa(){
+  const url=document.getElementById('footer-mapa')?document.getElementById('footer-mapa').value.trim():'';
+  const prev=document.getElementById('footer-mapa-prev');
+  if(!prev)return;
+  if(!url){prev.innerHTML='<span style="font-size:11px;color:#aaa">Ingresá una URL de Google Maps</span>';return;}
+  prev.innerHTML='<iframe src="'+url+'" width="100%" height="140" style="border:0" loading="lazy" allowfullscreen></iframe>';
+  // actualizar preview
+  const vm=document.getElementById('v-footer-mapa');
+  if(vm){vm.style.display='block';vm.innerHTML='<iframe src="'+url+'" width="100%" height="120" style="border:0" loading="lazy"></iframe>';}
+}
+
+function renderFooterPreview(){
+  const neg=CFG.negocio||{};
+  setTxt('v-footer-desc',neg.footer_desc||'Ferretería en Córdoba Capital con más de 20 años de experiencia.');
+  setTxt('v-footer-copy',neg.footer_copy||'© 2025 Ferretería Favaro · Todos los derechos reservados');
+  const vm=document.getElementById('v-footer-mapa');
+  if(vm&&neg.footer_mapa){
+    vm.style.display='block';
+    vm.innerHTML='<iframe src="'+neg.footer_mapa+'" width="100%" height="120" style="border:0;border-radius:6px" loading="lazy"></iframe>';
   }
 }
 
@@ -1338,6 +1392,10 @@ async function guardarSeccion(){
     }else if(secActiva==='cont'){
       const neg={...CFG.negocio,direccion:gv('cont-dir'),telefono:gv('cont-tel'),whatsapp:gv('cont-wa').replace(/\D/g,''),email:gv('cont-email'),h_semana:gv('cont-h1'),h_sabado:gv('cont-h2'),h_domingo:gv('cont-h3'),h_feriado:gv('cont-h4')};
       CFG.negocio=neg;await guardarClave('catalogo_negocio',neg);hist='Contacto actualizado';
+    }else if(secActiva==='footer'){
+      const mapaUrl=gv('footer-mapa')?gv('footer-mapa').trim():'';
+      const neg={...CFG.negocio,footer_desc:gv('footer-desc'),footer_copy:gv('footer-copy'),footer_mapa:mapaUrl};
+      CFG.negocio=neg;await guardarClave('catalogo_negocio',neg);hist='Footer actualizado';
     }
     // Guardar colores
     // FIX 7: solo guardar colores si tienen valor real (no pisar con strings vacíos)
