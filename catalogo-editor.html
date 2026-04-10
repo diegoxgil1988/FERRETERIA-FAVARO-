@@ -621,6 +621,7 @@ function aplicarCFG(){
   // Marcas
   renderMarcas();
   renderFooterPreview();
+  applyHeroStyles();
   // Tarjetas
   if(CFG.tarjetas&&CFG.tarjetas.length){const nums=CFG.tarjetas.filter(t=>!t.descuento).map(t=>parseInt(t.cuotas)).filter(num=>!isNaN(num));if(nums.length)setTxt('v-maxcuota',Math.max(...nums)+'x');} // FIX 8
   // Fondo promos, fin, cont
@@ -987,7 +988,31 @@ function editSec(sec,btn){
       <div class="f-field"><div class="f-label">Título línea 2</div><input class="f-input" id="hero-t2" value="${h.t2||'TU OBRA'}" oninput="reHeroTitle()"></div>
       <div class="f-field"><div class="f-label">Palabra naranja</div><input class="f-input" id="hero-em" value="${h.t3||'NECESITA'}" oninput="reHeroTitle()"></div>
       <div class="f-field"><div class="f-label">Subtítulo</div><textarea class="f-textarea" id="hero-sub" oninput="setTxt('v-hero-sub',this.value)">${h.sub||''}</textarea></div>
-      <div class="f-field"><div class="f-label">Texto botón</div><input class="f-input" id="hero-btn" value="${h.btn1||'Ver catálogo'}" oninput="setTxt('v-hero-btn',this.value+' →')"></div>`);
+      <div class="f-field"><div class="f-label">Texto botón</div><input class="f-input" id="hero-btn" value="${h.btn1||'Ver catálogo'}" oninput="setTxt('v-hero-btn',this.value+' →')"></div>
+      <div class="f-sec">Colores del texto</div>
+      <div class="f-field"><div class="f-label">Color título</div><div class="f-color-row"><div class="f-cdot" style="background:${h.txt_color||'#ffffff'}"><input type="color" value="${h.txt_color||'#ffffff'}" oninput="CFG.hero.txt_color=this.value;this.parentNode.style.background=this.value;const ht=s('v-hero-title');if(ht)ht.style.color=this.value;markUnsaved()"></div><span class="f-cval">${h.txt_color||'#fff'}</span></div></div>
+      <div class="f-field"><div class="f-label">Color acento (palabra naranja)</div><div class="f-color-row"><div class="f-cdot" style="background:${h.em_color||'#e8750a'}"><input type="color" value="${h.em_color||'#e8750a'}" oninput="CFG.hero.em_color=this.value;this.parentNode.style.background=this.value;const em=s('v-hero-em');if(em)em.style.color=this.value;markUnsaved()"></div><span class="f-cval">${h.em_color||'#e8750a'}</span></div></div>
+      <div class="f-field"><div class="f-label">Color subtítulo</div><div class="f-color-row"><div class="f-cdot" style="background:${h.sub_color||'#cccccc'}"><input type="color" value="${h.sub_color||'#cccccc'}" oninput="CFG.hero.sub_color=this.value;this.parentNode.style.background=this.value;const sub=s('v-hero-sub');if(sub)sub.style.color=this.value;markUnsaved()"></div><span class="f-cval">${h.sub_color||'#ccc'}</span></div></div>
+      <div class="f-sec">Tipografía del hero</div>
+      <div class="f-field"><div class="f-label">Fuente del título</div>
+        <select class="f-input" id="hero-font" onchange="updHeroFont(this.value)">
+          <option value="" ${!h.font?'selected':''}>Global (igual que el sitio)</option>
+          <option value="Outfit" ${h.font==='Outfit'?'selected':''}>Outfit</option>
+          <option value="Big Shoulders Display" ${h.font==='Big Shoulders Display'?'selected':''}>Big Shoulders Display</option>
+          <option value="Barlow Condensed" ${h.font==='Barlow Condensed'?'selected':''}>Barlow Condensed</option>
+          <option value="Anton" ${h.font==='Anton'?'selected':''}>Anton</option>
+          <option value="Bebas Neue" ${h.font==='Bebas Neue'?'selected':''}>Bebas Neue</option>
+          <option value="Oswald" ${h.font==='Oswald'?'selected':''}>Oswald</option>
+          <option value="Montserrat" ${h.font==='Montserrat'?'selected':''}>Montserrat</option>
+          <option value="Playfair Display" ${h.font==='Playfair Display'?'selected':''}>Playfair Display</option>
+          <option value="Raleway" ${h.font==='Raleway'?'selected':''}>Raleway</option>
+        </select>
+        <div class="f-hint">La fuente se carga de Google Fonts automáticamente</div>
+      </div>
+      <div class="f-field"><div class="f-label">Tamaño del título</div>
+        <input type="range" min="18" max="60" step="1" value="${h.font_size||36}" style="width:100%;accent-color:#e8750a" oninput="CFG.hero.font_size=parseInt(this.value);document.getElementById('hero-fs-val').textContent=this.value+'px';const ht=s('v-hero-title');if(ht)ht.style.fontSize=this.value+'px';markUnsaved()">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Chico</span><span id="hero-fs-val" style="color:#e8750a;font-weight:700">${h.font_size||36}px</span><span>Grande</span></div>
+      </div>`);
   }
 
   else if(sec==='topbar'){
@@ -1115,6 +1140,37 @@ function editSec(sec,btn){
       <div class="f-field"><div class="f-label">Domingos</div><input class="f-input" id="cont-h3" value="${n.h_domingo||'Cerrado'}"></div>
       <div class="f-field"><div class="f-label">Feriados</div><input class="f-input" id="cont-h4" value="${n.h_feriado||'Cerrado'}"></div>`);
   }
+}
+
+function updHeroFont(font){
+  CFG.hero.font=font;
+  markUnsaved();
+  if(!font)return;
+  // Cargar fuente de Google Fonts si no está
+  const id='gf-hero-'+font.replace(/ /g,'-');
+  if(!document.getElementById(id)){
+    const lnk=document.createElement('link');
+    lnk.id=id;lnk.rel='stylesheet';
+    lnk.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(font)+':wght@400;700;800&display=swap';
+    document.head.appendChild(lnk);
+  }
+  const ht=s('v-hero-title');
+  if(ht)ht.style.fontFamily=font+',sans-serif';
+}
+
+function applyHeroStyles(){
+  const h=CFG.hero||{};
+  const ht=s('v-hero-title');
+  const em=s('v-hero-em');
+  const sub=s('v-hero-sub');
+  if(ht){
+    if(h.txt_color)ht.style.color=h.txt_color;
+    if(h.font_size)ht.style.fontSize=h.font_size+'px';
+    if(h.font)ht.style.fontFamily=h.font+',sans-serif';
+  }
+  if(em&&h.em_color)em.style.color=h.em_color;
+  if(sub&&h.sub_color)sub.style.color=h.sub_color;
+  if(h.font)updHeroFont(h.font);
 }
 
 function updHeroOverlay(){

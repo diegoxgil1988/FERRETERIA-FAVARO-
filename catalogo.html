@@ -786,6 +786,31 @@ async function init(){
         });
       }
       
+      // Aplicar colores y fuente del hero
+      if(hero.txt_color){
+        document.querySelectorAll('.slide-title').forEach(el=>el.style.color=hero.txt_color);
+      }
+      if(hero.em_color){
+        document.querySelectorAll('.slide-title em').forEach(el=>el.style.color=hero.em_color);
+        document.documentElement.style.setProperty('--ac-hero',hero.em_color);
+      }
+      if(hero.sub_color){
+        document.querySelectorAll('.slide-sub').forEach(el=>el.style.color=hero.sub_color);
+      }
+      if(hero.font||hero.font_size){
+        const font=hero.font;
+        const size=hero.font_size;
+        if(font){
+          // Cargar fuente de Google Fonts
+          const lnk=document.createElement('link');
+          lnk.rel='stylesheet';
+          lnk.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(font)+':wght@400;700;800&display=swap';
+          document.head.appendChild(lnk);
+          document.querySelectorAll('.slide-title').forEach(el=>el.style.fontFamily=font+',sans-serif');
+        }
+        if(size) document.querySelectorAll('.slide-title').forEach(el=>el.style.fontSize=size+'px');
+      }
+
       // Banners
       const banners=get('catalogo_banners')||[];
       const activeBanners=banners.filter(b=>b.activo!==false);
