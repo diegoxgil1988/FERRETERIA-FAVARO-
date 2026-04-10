@@ -672,6 +672,12 @@ function renderPromos(){
   renderPromosList();
 }
 
+function hexToRgba(hex,op){
+  const r=parseInt((hex||'#000000').slice(1,3),16)||0;
+  const g=parseInt((hex||'#000000').slice(3,5),16)||0;
+  const b=parseInt((hex||'#000000').slice(5,7),16)||0;
+  return 'rgba('+r+','+g+','+b+','+op+')';
+}
 function renderBannerActivo(){
   const container=s('v-banners-preview');
   if(container){
@@ -680,10 +686,13 @@ function renderBannerActivo(){
       container.innerHTML='<div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;background:#f5f0ea;border-radius:8px">Sin banners activos</div>';
     } else {
       container.innerHTML=activos.map(b=>{
-        const bgStyle=b.foto?"background-image:url("+JSON.stringify(b.foto)+");background-size:cover;background-position:center":"background:#374151";
+        const bgStyle=b.foto?'background-image:url('+JSON.stringify(b.foto)+');background-size:cover;background-position:center':'background:#374151';
+        const ovColor=b.overlay_color||'#000000';
+        const ovOp=b.overlay_opacity!=null?b.overlay_opacity:0.6;
+        const ovStyle='background:linear-gradient(to right,'+hexToRgba(ovColor,ovOp)+' 40%,'+hexToRgba(ovColor,ovOp*0.2)+' 100%)';
         return '<div class="c-banner" style="margin-bottom:8px;border-radius:8px;overflow:hidden">'+
           '<div class="c-bbg" style="'+bgStyle+'"></div>'+
-          '<div class="c-bov"></div>'+
+          '<div class="c-bov" style="'+ovStyle+'"></div>'+
           '<div class="c-bc">'+
             '<div class="c-btag" style="background:'+(b.tag_color||'#dc2626')+'">'+(b.tag||'')+'</div>'+
             '<div class="c-btitle">'+(b.titulo||'')+'</div>'+
@@ -701,11 +710,15 @@ function renderCats(){
   const grid=s('v-cats-grid');
   if(!grid)return;
   if(!activas.length)return;
-  grid.innerHTML=activas.map((c,i)=>`
-    <div class="c-cat" ${i===0?'style="grid-column:1/-1;aspect-ratio:16/7"':''}>
-      <div class="c-cat-bg" style="background-image:url('${c.foto||''}')"></div>
-      <div class="c-cat-ov"><div class="c-cat-name">${c.nombre}</div></div>
-    </div>`).join('');
+  grid.innerHTML=activas.map((c,i)=>{
+    const ovColor=c.overlay_color||'#000000';
+    const ovOp=c.overlay_opacity!=null?c.overlay_opacity:0.5;
+    const ovStyle='background:linear-gradient(to top,'+hexToRgba(ovColor,ovOp)+' 0%,'+hexToRgba(ovColor,ovOp*0.3)+' 60%,'+hexToRgba(ovColor,0)+' 100%)';
+    return '<div class="c-cat" '+(i===0?'style="grid-column:1/-1;aspect-ratio:16/7"':'')+'>'+
+      '<div class="c-cat-bg" style="background-image:url('+JSON.stringify(c.foto||'')+');background-size:cover;background-position:center"></div>'+
+      '<div class="c-cat-ov" style="'+ovStyle+'"><div class="c-cat-name">'+c.nombre+'</div></div>'+
+      '</div>';
+  }).join('');
   renderCatsList();
 }
 
