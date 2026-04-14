@@ -7376,7 +7376,11 @@ function agendaAgregarFiltrar(q){
   var drop = document.getElementById('agenda-agregar-drop');
   q = (q||'').toLowerCase().trim();
   if(!q){ drop.style.display='none'; return; }
-  var all = getProveedoresList ? getProveedoresList() : Object.keys(provData||{});
+  // Combine: registered provData + all unique proveedores from products
+  var fromProvData = Object.keys(provData||{});
+  var fromProducts = [];
+  (products||[]).forEach(function(p){ if(p.proveedor && fromProducts.indexOf(p.proveedor)<0 && fromProvData.indexOf(p.proveedor)<0) fromProducts.push(p.proveedor); });
+  var all = fromProvData.concat(fromProducts).sort();
   var filtered = all.filter(function(p){ return p.toLowerCase().includes(q); }).slice(0,8);
   if(!filtered.length){ drop.style.display='none'; return; }
   drop.innerHTML = filtered.map(function(p){
@@ -7391,6 +7395,11 @@ function agendaAgregarFiltrar(q){
     '</div>';
   }).join('');
   drop.style.display = 'block';
+  drop.querySelectorAll('[data-addprov]').forEach(function(el){
+    el.addEventListener('click', function(){
+      agendaSelProvAgregar(decodeURIComponent(el.getAttribute('data-addprov')));
+    });
+  });
 }
 
 function agendaSelProvAgregar(nombre){
