@@ -7422,6 +7422,21 @@ function agendaAbrirAgregarVisita(dow){
   document.getElementById('agenda-agregar-sel-prov').style.display = 'none';
   document.getElementById('agenda-agregar-monto').value = '';
   document.getElementById('agenda-agregar-notas').value = '';
+  // Reset freq to semanal
+  document.getElementById('agenda-agregar-freq').querySelectorAll('[data-freq]').forEach(function(fp){
+    var isSem = fp.getAttribute('data-freq')==='semanal';
+    fp.style.borderColor = isSem?'var(--acc)':'var(--border2)';
+    fp.style.color = isSem?'var(--acc)':'var(--muted)';
+    var dot=fp.querySelector('.agregar-dot'); if(dot){dot.style.borderColor=isSem?'var(--acc)':'var(--muted)';dot.style.background=isSem?'var(--acc)':'transparent';}
+    fp.onclick = function(){
+      document.getElementById('agenda-agregar-freq').querySelectorAll('[data-freq]').forEach(function(x){
+        x.style.borderColor='var(--border2)';x.style.color='var(--muted)';
+        var d=x.querySelector('.agregar-dot');if(d){d.style.borderColor='var(--muted)';d.style.background='transparent';}
+      });
+      fp.style.borderColor='var(--acc)';fp.style.color='var(--acc)';
+      var dot2=fp.querySelector('.agregar-dot');if(dot2){dot2.style.borderColor='var(--acc)';dot2.style.background='var(--acc)';}
+    };
+  });
   document.getElementById('agenda-modal-agregar').style.display = 'flex';
   setTimeout(function(){ document.getElementById('agenda-agregar-q').focus(); }, 100);
 }
@@ -7486,7 +7501,11 @@ function agendaConfirmarAgregar(){
   var dias = provData[nombre].agenda_dias||[];
   if(dias.indexOf(_agendaAddDow)<0) dias.push(_agendaAddDow);
   dias.sort();
+  var freqEl2 = document.getElementById('agenda-agregar-freq');
+  var freq2 = 'semanal';
+  if(freqEl2){ var fp2=freqEl2.querySelector('[data-freq][style*="var(--acc)"]'); if(fp2) freq2=fp2.getAttribute('data-freq'); }
   provData[nombre].agenda_dias = dias;
+  provData[nombre].agenda_frecuencia = freq2;
   provData[nombre].agenda_medio = document.getElementById('agenda-agregar-medio').value;
   var monto = parseInt(document.getElementById('agenda-agregar-monto').value)||0;
   if(monto) provData[nombre].agenda_monto = monto;
@@ -7529,7 +7548,7 @@ function agendaRenderWeek(){
     var d=new Date(ws); d.setDate(ws.getDate()+i);
     d.setHours(0,0,0,0);
     var isT=d.getTime()===today.getTime();
-    var dp=agendaProvForDow(i);
+    var dp=agendaProvForDow(i, d);
     var tot=agendaDayTotal(i);
     html+='<div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;'+(i===6?'border-right:none;':'')+'">'+
       '<div style="padding:8px 10px 6px;border-bottom:1px solid var(--border);text-align:center;flex-shrink:0;'+(isT?'background:rgba(245,158,11,.05);':'')+'">'+
@@ -7583,7 +7602,7 @@ function agendaRenderMonth(){
   for(var d=1;d<=dim;d++){
     var cur=new Date(ms.getFullYear(),ms.getMonth(),d); cur.setHours(0,0,0,0);
     var dow=agendaDow(cur); var isT=cur.getTime()===today.getTime();
-    var dp=agendaProvForDow(dow); var tot=agendaDayTotal(dow);
+    var dp=agendaProvForDow(dow, cur); var tot=agendaDayTotal(dow);
     html+='<div data-agendaday="'+d+'" style="border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 6px;overflow:hidden;cursor:pointer;transition:background .12s;'+(isT?'background:rgba(245,158,11,.06);':'')+'">'+
       '<div style="font-size:12px;font-weight:800;color:'+(isT?'var(--acc)':'var(--text)')+'">'+d+'</div>';
     dp.slice(0,2).forEach(function(p){
@@ -16717,6 +16736,20 @@ if ('serviceWorker' in navigator) {
         <div>
           <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MONTO APROX. ($)</div>
           <input type="number" id="agenda-agregar-monto" placeholder="Ej: 50000" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:7px;">FRECUENCIA</div>
+        <div id="agenda-agregar-freq" style="display:flex;gap:8px;">
+          <div data-freq="semanal" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--acc);color:var(--acc);font-size:11px;font-weight:700;cursor:pointer;">
+            <div class="agregar-dot" style="width:10px;height:10px;border-radius:50%;border:2px solid var(--acc);background:var(--acc);flex-shrink:0;"></div>Semanal
+          </div>
+          <div data-freq="quincenal" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border2);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;">
+            <div class="agregar-dot" style="width:10px;height:10px;border-radius:50%;border:2px solid var(--muted);background:transparent;flex-shrink:0;"></div>Quincenal
+          </div>
+          <div data-freq="mensual" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border2);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;">
+            <div class="agregar-dot" style="width:10px;height:10px;border-radius:50%;border:2px solid var(--muted);background:transparent;flex-shrink:0;"></div>Mensual
+          </div>
         </div>
       </div>
       <div>
