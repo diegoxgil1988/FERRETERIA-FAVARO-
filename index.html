@@ -7552,7 +7552,7 @@ function agendaRenderWeek(){
     var tot=agendaDayTotal(i);
     html+='<div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;'+(i===6?'border-right:none;':'')+'">'+
       '<div style="padding:8px 10px 6px;border-bottom:1px solid var(--border);text-align:center;flex-shrink:0;'+(isT?'background:rgba(245,158,11,.05);':'')+'">'+
-        '<div style="font-size:9px;font-weight:800;letter-spacing:.5px;color:'+(isT?'var(--acc)':'var(--muted)');+'">'+AGENDA_DIAS[i]+'</div>'+
+        '<div style="font-size:9px;font-weight:800;letter-spacing:.5px;color:'+(isT?'var(--acc)':'var(--muted)')+'">'+AGENDA_DIAS[i]+'</div>'+
         '<div style="font-size:20px;font-weight:900;line-height:1.1;margin:2px 0;color:'+(isT?'var(--acc)':'var(--text)')+'">'+d.getDate()+'</div>'+
         '<div style="font-size:10px;font-weight:800;color:'+(isT?'var(--acc)':'var(--muted)')+'">'+(tot>0?agendaFmt(tot):'—')+'</div>'+
       '</div>'+
@@ -7572,7 +7572,7 @@ function agendaRenderWeek(){
         (p.vencUrgente?'<div style="font-size:9px;color:'+(p.vencDias<=3?'var(--red)':'var(--acc)')+';margin-top:2px;">'+(p.vencDias<=3?'🔴':'⏰')+' Vence en '+p.vencDias+'d · ahorrás '+agendaFmt(p.ahorroTotal)+'</div>':'')+
       '</div>';
     });
-    if(!dp.length) html+='<div data-agendaaddday="'+i+'" style="font-size:10px;color:var(--muted);text-align:center;margin-top:16px;padding:0 6px;cursor:pointer;" onmouseover="this.style.color=\'var(--acc)\'" onmouseout="this.style.color=\'var(--muted)\'">+ Agregar visita</div>';
+    if(!dp.length) html+='<div style="font-size:10px;color:var(--s4);text-align:center;margin-top:16px;">—</div>';
     html+='</div></div>';
   }
   html+='</div>';
@@ -7581,9 +7581,6 @@ function agendaRenderWeek(){
     el.addEventListener('click',function(){ agendaOpenModal(decodeURIComponent(el.getAttribute('data-agenda-prov'))); });
     el.addEventListener('mouseover',function(){ el.style.opacity='.8'; });
     el.addEventListener('mouseout',function(){ el.style.opacity='1'; });
-  });
-  document.getElementById('agenda-content').querySelectorAll('[data-agendaaddday]').forEach(function(el){
-    el.addEventListener('click',function(){ agendaAbrirAgregarVisita(parseInt(el.getAttribute('data-agendaaddday'))); });
   });
 }
 
