@@ -80,7 +80,7 @@ header{
 .tab.inv-tab .tab-badge{background:var(--inv-d);color:var(--inv);}
 
 /* ── PAGES ── */
-.page{display:none;padding:16px 18px;box-sizing:border-box;width:100%;max-width:100%;}.page.active{display:block;}.page-full{padding:0 !important;}
+.page{display:none;padding:16px 18px;box-sizing:border-box;width:100%;max-width:100%;}.page.active{display:block;}.page-full{padding:0 !important;}#page-agenda.active{display:flex;}
 
 /* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:5px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:.8px;text-transform:uppercase;transition:all .15s;white-space:nowrap;}
@@ -2255,7 +2255,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   </div>
 </div><!-- /page-cuentas -->
 <!-- ═══════════ PAGE: AGENDA PROVEEDORES ═══════════ -->
-<div class="page page-full" id="page-agenda" style="padding:0;display:flex;flex-direction:column;overflow:hidden;">
+<div class="page page-full" id="page-agenda" style="padding:0;flex-direction:column;overflow:hidden;">
 
   <!-- Topbar -->
   <div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--s2);">
