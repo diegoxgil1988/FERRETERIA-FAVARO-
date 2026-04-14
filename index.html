@@ -2030,6 +2030,34 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
         </div>
       </div>
 
+      <!-- AGENDA VISITA -->
+      <div id="pv-agenda-block" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;">📅 AGENDA DE VISITA</div>
+          <button id="pv-agenda-save" style="background:var(--acc);border:none;border-radius:6px;padding:5px 14px;color:#000;font-size:11px;font-weight:800;cursor:pointer;">💾 Guardar</button>
+        </div>
+        <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:7px;">DÍAS DE VISITA</div>
+        <div id="pv-agenda-dias" style="display:flex;gap:6px;margin-bottom:12px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MEDIO DE PAGO</div>
+            <select id="pv-agenda-medio" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+              <option value="transfer">💳 Transferencia</option>
+              <option value="efectivo">💵 Efectivo</option>
+              <option value="cheque">🏦 Cheque</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MONTO APROX. ($)</div>
+            <input type="number" id="pv-agenda-monto" placeholder="Ej: 50000" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">NOTAS DE VISITA</div>
+          <input type="text" id="pv-agenda-notas" placeholder="Ej: Llega entre 9-11hs, pedir remito firmado..." style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
+        </div>
+      </div>
+
       <!-- Accesos rápidos -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
         <button id="pv-btn-factura" style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px 10px;color:var(--text);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:border-color .15s;">
@@ -7415,6 +7443,11 @@ function agendaRenderMonth(){
   for(var r=1;r<=rem;r++) html+='<div style="border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 6px;"><div style="font-size:12px;font-weight:800;color:var(--muted);">'+r+'</div></div>';
   html+='</div>';
   document.getElementById('agenda-content').innerHTML=html;
+  document.getElementById('agenda-content').querySelectorAll('[data-agendaday]').forEach(function(el){
+    el.addEventListener('click', function(){ agendaGoDay(parseInt(el.getAttribute('data-agendaday'))); });
+    el.addEventListener('mouseover', function(){ el.style.background='var(--s3)'; });
+    el.addEventListener('mouseout', function(){ el.style.background=''; });
+  });
 }
 
 function agendaRenderDay(){
@@ -7457,6 +7490,11 @@ function agendaRenderDay(){
   }
   html+='</div>';
   document.getElementById('agenda-content').innerHTML=html;
+  document.getElementById('agenda-content').querySelectorAll('[data-agendaprovday]').forEach(function(el){
+    el.addEventListener('click', function(){ agendaOpenModal(decodeURIComponent(el.getAttribute('data-agendaprovday'))); });
+    el.addEventListener('mouseover', function(){ el.style.borderColor='var(--acc)'; });
+    el.addEventListener('mouseout', function(){ el.style.borderColor='var(--border2)'; });
+  });
 }
 
 function agendaUpdateProgress(){
@@ -8577,6 +8615,59 @@ function provMostrarPerfil(nombre) {
         '</div>';
       }).join('')
     : '<div style="font-size:12px;color:var(--muted);">Sin movimientos registrados</div>';
+
+  // Populate agenda block
+  var agendaDiasEl = document.getElementById('pv-agenda-dias');
+  if (agendaDiasEl) {
+    var agDias = data.agenda_dias || [];
+    var agMedio = data.agenda_medio || 'transfer';
+    var agMonto = data.agenda_monto || 0;
+    var agNotas = data.agenda_notas || '';
+    var diasLabels = ['Lun','Mar','Mié','Jue','Vie','Sáb'];
+    agendaDiasEl.innerHTML = '';
+    diasLabels.forEach(function(dia, i){
+      var pill = document.createElement('div');
+      var activo = agDias.indexOf(i) >= 0;
+      pill.style.cssText = 'width:40px;height:40px;border-radius:8px;border:1.5px solid '+(activo?'var(--acc)':'var(--border2)')+';background:'+(activo?'var(--acc)':'var(--s3)')+';color:'+(activo?'#000':'var(--muted)')+';font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;';
+      pill.textContent = dia;
+      pill.setAttribute('data-dow', i);
+      pill.onclick = function(){
+        var on = this.style.background === 'var(--acc)';
+        this.style.background = on ? 'var(--s3)' : 'var(--acc)';
+        this.style.color = on ? 'var(--muted)' : '#000';
+        this.style.borderColor = on ? 'var(--border2)' : 'var(--acc)';
+      };
+      agendaDiasEl.appendChild(pill);
+    });
+    // Set medio
+    var medioSel = document.getElementById('pv-agenda-medio');
+    if (medioSel) { for(var i=0;i<medioSel.options.length;i++) if(medioSel.options[i].value===agMedio) medioSel.selectedIndex=i; }
+    var montoEl = document.getElementById('pv-agenda-monto');
+    if (montoEl) montoEl.value = agMonto || '';
+    var notasEl = document.getElementById('pv-agenda-notas');
+    if (notasEl) notasEl.value = agNotas;
+  }
+  // Save agenda config
+  var agendaSaveBtn = document.getElementById('pv-agenda-save');
+  if (agendaSaveBtn) {
+    agendaSaveBtn.onclick = function(){
+      if (!provData[nombre]) provData[nombre] = {};
+      var pills = document.getElementById('pv-agenda-dias').querySelectorAll('[data-dow]');
+      var dias = [];
+      pills.forEach(function(p){ if(p.style.background==='var(--acc)') dias.push(parseInt(p.getAttribute('data-dow'))); });
+      provData[nombre].agenda_dias = dias;
+      provData[nombre].agenda_medio = document.getElementById('pv-agenda-medio').value;
+      provData[nombre].agenda_monto = parseInt(document.getElementById('pv-agenda-monto').value)||0;
+      provData[nombre].agenda_notas = document.getElementById('pv-agenda-notas').value.trim();
+      if(sbUser){
+        sb.from('user_config').upsert(
+          {user_id:sbUser.id, key:'prov_fichas', value:JSON.stringify(provData)},
+          {onConflict:'user_id,key'}
+        ).then(function(){}).catch(function(){});
+      }
+      notify('✓ Agenda de '+nombre+' guardada','ok');
+    };
+  }
 
   // Attach button events
   var editBtn = document.getElementById('pv-edit-btn');
