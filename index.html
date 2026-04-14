@@ -862,6 +862,9 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div class="snav-item" id="snav-cuentas" onclick="switchTab('cuentas')" style="display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;">
     <span style="font-size:15px;">💳</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--muted);">Cta. Cte. Proveed.</span>
   </div>
+  <div class="snav-item" id="snav-agenda" onclick="switchTab('agenda')" style="display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;">
+    <span style="font-size:15px;">📅</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--muted);">Agenda Proveed.</span>
+  </div>
 
   <div style="padding:12px 10px 4px;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.8px;">ANÁLISIS</div>
   <div class="snav-item" id="snav-dashboard" onclick="switchTab('dashboard')" style="display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;">
@@ -2251,6 +2254,119 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     </div>
   </div>
 </div><!-- /page-cuentas -->
+<!-- ═══════════ PAGE: AGENDA PROVEEDORES ═══════════ -->
+<div class="page page-full" id="page-agenda" style="padding:0;display:flex;flex-direction:column;overflow:hidden;">
+
+  <!-- Topbar -->
+  <div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--s2);">
+    <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:15px;">📅 Agenda de Proveedores</div>
+    <div style="display:flex;background:var(--s3);border-radius:8px;padding:3px;gap:2px;">
+      <button onclick="agendaSetView('dia')" id="agenda-tab-dia" class="agenda-view-tab" style="padding:5px 14px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);font-family:inherit;">Día</button>
+      <button onclick="agendaSetView('semana')" id="agenda-tab-semana" class="agenda-view-tab" style="padding:5px 14px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;background:var(--acc);color:#000;font-family:inherit;">Semana</button>
+      <button onclick="agendaSetView('mes')" id="agenda-tab-mes" class="agenda-view-tab" style="padding:5px 14px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);font-family:inherit;">Mes</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+      <button onclick="agendaNavPrev()" style="background:var(--s3);border:1px solid var(--border2);border-radius:7px;width:30px;height:30px;color:var(--text);font-size:16px;cursor:pointer;">‹</button>
+      <div id="agenda-period-label" style="font-size:13px;font-weight:800;min-width:200px;text-align:center;"></div>
+      <button onclick="agendaNavNext()" style="background:var(--s3);border:1px solid var(--border2);border-radius:7px;width:30px;height:30px;color:var(--text);font-size:16px;cursor:pointer;">›</button>
+      <button onclick="agendaGoToday()" style="background:var(--s3);border:1.5px solid rgba(245,158,11,.4);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--acc);cursor:pointer;">Hoy</button>
+    </div>
+  </div>
+
+  <!-- Barra progreso semanal -->
+  <div id="agenda-prog-bar" style="padding:7px 20px;background:var(--s2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-shrink:0;">
+    <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;white-space:nowrap;">SEMANA</div>
+    <div style="flex:1;height:5px;background:var(--s4);border-radius:3px;overflow:hidden;">
+      <div id="agenda-prog-fill" style="height:100%;border-radius:3px;background:var(--green);transition:width .4s;width:0%;"></div>
+    </div>
+    <div id="agenda-prog-nums" style="font-size:10px;color:var(--muted);white-space:nowrap;"></div>
+  </div>
+
+  <!-- Banner sin configurar -->
+  <div id="agenda-banner" style="display:none;margin:8px 20px 0;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:7px 14px;display:none;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;">
+    <span id="agenda-banner-txt" style="font-size:11px;color:var(--acc);"></span>
+    <button onclick="document.getElementById('agenda-banner').style.display='none'" style="background:rgba(245,158,11,.15);border:none;border-radius:5px;padding:3px 10px;font-size:10px;font-weight:800;color:var(--acc);cursor:pointer;">Ok</button>
+  </div>
+
+  <!-- Content -->
+  <div id="agenda-content" style="flex:1;overflow:hidden;display:flex;flex-direction:column;"></div>
+
+</div><!-- /page-agenda -->
+
+<!-- MODAL AGENDA PROVEEDOR -->
+<div id="agenda-modal" style="display:none;position:fixed;inset:0;z-index:9300;background:rgba(0,0,0,.78);align-items:center;justify-content:center;">
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:14px;width:92%;max-width:460px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6);">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:15px;" id="agenda-modal-title"></div>
+      <button onclick="agendaCloseModal()" style="background:var(--s3);border:none;border-radius:6px;width:28px;height:28px;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <div style="padding:16px 18px;display:flex;flex-direction:column;gap:11px;">
+      <!-- Deuda -->
+      <div id="agenda-modal-deuda-box" style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:9px;color:var(--muted);font-weight:800;letter-spacing:.4px;margin-bottom:2px;">SALDO EN CTA. CTE.</div>
+          <div id="agenda-modal-deuda" style="font-size:18px;font-weight:900;"></div>
+        </div>
+        <button onclick="agendaIrCtaCte()" style="background:var(--s3);border:1px solid var(--border2);border-radius:7px;padding:7px 12px;font-size:10px;font-weight:700;color:var(--text);cursor:pointer;">Ver cuenta →</button>
+      </div>
+      <!-- Días -->
+      <div>
+        <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:7px;">DÍAS DE VISITA</div>
+        <div id="agenda-modal-dias" style="display:flex;gap:6px;"></div>
+      </div>
+      <!-- Medio + Monto -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MEDIO DE PAGO</div>
+          <select id="agenda-modal-medio" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+            <option value="transfer">💳 Transferencia</option>
+            <option value="efectivo">💵 Efectivo</option>
+            <option value="cheque">🏦 Cheque</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">
+            MONTO APROX. ($)
+            <button onclick="agendaUsarDeudaReal()" style="background:rgba(59,130,246,.15);border:none;border-radius:4px;padding:1px 7px;font-size:9px;font-weight:800;color:var(--blue);cursor:pointer;margin-left:4px;">Usar deuda real</button>
+          </div>
+          <input type="number" id="agenda-modal-monto" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+        </div>
+      </div>
+      <!-- Notas -->
+      <div>
+        <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">NOTAS</div>
+        <input type="text" id="agenda-modal-notas" placeholder="Ej: Llega entre 9-11hs..." style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+      </div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;">
+      <button onclick="agendaCloseModal()" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">Cancelar</button>
+      <button onclick="agendaRegistrarPago()" style="background:rgba(34,197,94,.15);border:1.5px solid var(--green);border-radius:8px;padding:10px 14px;font-size:11px;font-weight:800;color:var(--green);cursor:pointer;font-family:inherit;flex:1;" id="agenda-btn-pago">💰 Pagado hoy</button>
+      <button onclick="agendaGuardarConfig()" style="background:var(--acc);border:none;border-radius:8px;padding:10px 18px;font-size:11px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SELECCIÓN DE FACTURA AGENDA -->
+<div id="agenda-modal-fact" style="display:none;position:fixed;inset:0;z-index:9400;background:rgba(0,0,0,.8);align-items:center;justify-content:center;">
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:14px;width:92%;max-width:500px;overflow:hidden;max-height:85vh;display:flex;flex-direction:column;">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">APLICAR PAGO A FACTURA</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:14px;" id="agenda-fact-title"></div>
+      </div>
+      <button onclick="agendaCloseModalFact()" style="background:var(--s3);border:none;border-radius:6px;width:28px;height:28px;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <div id="agenda-fact-body" style="padding:16px 18px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;"></div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);flex-shrink:0;">
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <button onclick="agendaCloseModalFact()" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">Cancelar</button>
+        <button onclick="agendaConfirmarPago()" style="background:var(--green);border:none;border-radius:8px;padding:10px 18px;font-size:11px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;flex:1;">✓ Confirmar pago</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;">Marcá las facturas a cubrir. Si no marcás ninguna se registra como pago general.</div>
+    </div>
+  </div>
+</div>
+
 
 <!-- MODAL PAGO CTA CTE -->
 <!-- MODAL NUEVA FACTURA PROVEEDOR -->
@@ -4392,7 +4508,7 @@ function switchTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const snavMap = { 'catalogo':'cat', 'factura':'compras', 'inv':'compras', 'catalogo-web':'cat-web', 'presupuesto':'presup',
     'clientes':'clientes', 'pedidos':'pedidos', 'cuentas':'cuentas', 'stats':'stats', 'proveedores':'proveedores',
-    'dashboard':'dashboard', 'analisis':'analisis', 'vencimientos':'vencimientos', 'categorias':'categorias', 'carrito':'carrito', 'historial':'historial', 'ctaclientes':'ctaclientes', 'caja':'caja', 'remitos':'remitos', 'configpagos':'configpagos', 'devoluciones':'devoluciones', 'stock':'stock', 'comprobantes':'comprobantes', 'apariencia':'apariencia', 'promociones':'promociones', 'compras':'compras' };
+    'dashboard':'dashboard', 'analisis':'analisis', 'vencimientos':'vencimientos', 'categorias':'categorias', 'carrito':'carrito', 'historial':'historial', 'ctaclientes':'ctaclientes', 'caja':'caja', 'remitos':'remitos', 'configpagos':'configpagos', 'devoluciones':'devoluciones', 'stock':'stock', 'comprobantes':'comprobantes', 'apariencia':'apariencia', 'promociones':'promociones', 'compras':'compras', 'agenda':'agenda' };
   const activeNav = document.getElementById('snav-' + (snavMap[tab]||'cat'));
   if (activeNav) {
     activeNav.style.borderLeftColor = 'var(--acc)';
@@ -4427,6 +4543,7 @@ function switchTab(tab) {
   if (tab === 'comprobantes') { comprobantesInit(); }
   if (tab === 'promociones') { promoRenderLista(); }
   if (tab === 'compras') { ccRenderProvSelect(); }
+  if (tab === 'agenda') { agendaInit(); }
   if (tab === 'apariencia') {
     setTimeout(function(){
       // Sync logo preview
@@ -4443,6 +4560,7 @@ function switchTab(tab) {
   if (tab === 'comprobantes') { comprobantesInit(); }
   if (tab === 'promociones') { promoRenderLista(); }
   if (tab === 'compras') { ccRenderProvSelect(); }
+  if (tab === 'agenda') { agendaInit(); }
   if (tab === 'apariencia') {
     setTimeout(function(){
       // Sync logo preview
@@ -7161,6 +7279,438 @@ function printPresup() {
   ).then(function(){}).catch(function(){});
 }
 
+
+
+/* ════════════════════════════════════════
+   MÓDULO AGENDA PROVEEDORES
+════════════════════════════════════════ */
+var agendaView = 'semana';
+var agendaDate = new Date();
+var agendaCurrentProv = null;
+var AGENDA_DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+var AGENDA_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var AGENDA_MESES_C = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function agendaDow(d){ var x=d.getDay(); return x===0?6:x-1; }
+function agendaFmt(n){ return '$'+Math.round(Math.abs(n)).toLocaleString('es-AR'); }
+
+function agendaWeekStart(d){
+  var s=new Date(d); var x=d.getDay(); s.setDate(d.getDate()-(x===0?6:x-1)); return s;
+}
+
+function agendaProvForDow(i){
+  var hoyMs2 = new Date().setHours(0,0,0,0);
+  return (provData ? Object.keys(provData) : []).filter(function(k){
+    var p=provData[k]||{}; var dias=p.agenda_dias||[]; return dias.indexOf(i)>=0;
+  }).map(function(k){
+    var p=provData[k]||{};
+    // Check for upcoming vencimientos this week
+    var movs=(ctaData[k]&&ctaData[k].movimientos)||[];
+    var vencUrgente=false, vencDias=999, ahorroTotal=0;
+    movs.forEach(function(m){
+      if(m.tipo!=='compra'||!m.desc_pct||!m.desc_fecha_limite||m.desc_aplicado) return;
+      var limMs=parseDateAR(m.desc_fecha_limite).getTime();
+      var dr=Math.round((limMs-hoyMs2)/86400000);
+      if(dr>0&&dr<vencDias){ vencDias=dr; }
+      if(dr>=0&&dr<=7){ vencUrgente=true; ahorroTotal+=Math.round(Math.abs(m.monto)*m.desc_pct/100); }
+    });
+    return {
+      nombre:k, dias:p.agenda_dias||[], medio:p.agenda_medio||'transfer',
+      monto:p.agenda_monto||0, notas:p.agenda_notas||'',
+      deuda:ctaSaldo(k), vencUrgente:vencUrgente, vencDias:vencDias, ahorroTotal:ahorroTotal
+    };
+  });
+}
+
+function agendaDayTotal(i){ return agendaProvForDow(i).reduce(function(s,p){ return s+(p.monto||0); },0); }
+
+function agendaInit(){
+  agendaDate = new Date();
+  agendaRender();
+}
+
+function agendaRender(){
+  if(agendaView==='semana') agendaRenderWeek();
+  else if(agendaView==='mes') agendaRenderMonth();
+  else agendaRenderDay();
+  agendaUpdateProgress();
+  agendaCheckBanner();
+}
+
+function agendaRenderWeek(){
+  var ws=agendaWeekStart(agendaDate);
+  var we=new Date(ws); we.setDate(ws.getDate()+6);
+  document.getElementById('agenda-period-label').textContent =
+    ws.getDate()+' – '+we.getDate()+' '+AGENDA_MESES_C[ws.getMonth()]+' '+ws.getFullYear();
+  var today=new Date(); today.setHours(0,0,0,0);
+  var html='<div style="display:grid;grid-template-columns:repeat(7,1fr);flex:1;overflow:hidden;height:100%;">';
+  for(var i=0;i<7;i++){
+    var d=new Date(ws); d.setDate(ws.getDate()+i);
+    d.setHours(0,0,0,0);
+    var isT=d.getTime()===today.getTime();
+    var dp=agendaProvForDow(i);
+    var tot=agendaDayTotal(i);
+    html+='<div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;'+(i===6?'border-right:none;':'')+'">'+
+      '<div style="padding:8px 10px 6px;border-bottom:1px solid var(--border);text-align:center;flex-shrink:0;'+(isT?'background:rgba(245,158,11,.05);':'')+'">'+
+        '<div style="font-size:9px;font-weight:800;letter-spacing:.5px;color:'+(isT?'var(--acc)':'var(--muted)');+'">'+AGENDA_DIAS[i]+'</div>'+
+        '<div style="font-size:20px;font-weight:900;line-height:1.1;margin:2px 0;color:'+(isT?'var(--acc)':'var(--text)')+'">'+d.getDate()+'</div>'+
+        '<div style="font-size:10px;font-weight:800;color:'+(isT?'var(--acc)':'var(--muted)')+'">'+(tot>0?agendaFmt(tot):'—')+'</div>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:7px 6px;">';
+    dp.forEach(function(p){
+      var cl=p.medio==='efectivo'?'rgba(34,197,94,.07)':'rgba(59,130,246,.07)';
+      var bc=p.medio==='efectivo'?'var(--green)':'var(--blue)';
+      var ico=p.medio==='efectivo'?'💵':'💳';
+      html+='<div data-agenda-prov="'+encodeURIComponent(p.nombre)+'" style="background:'+cl+';border:1px solid rgba(100,120,180,.25);border-left:3px solid '+bc+';border-radius:8px;padding:8px 9px;margin-bottom:5px;cursor:pointer;transition:all .15s;">'+
+        '<div style="font-size:11px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(p.nombre)+'</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">'+
+          '<div style="font-size:11px;font-weight:900;color:var(--acc);">'+(p.monto>0?agendaFmt(p.monto):'—')+'</div>'+
+          '<div style="font-size:11px;">'+ico+'</div>'+
+        '</div>'+
+        (p.deuda<0?'<div style="font-size:9px;color:var(--red);margin-top:2px;">Debe '+agendaFmt(p.deuda)+'</div>':
+        '<div style="font-size:9px;color:var(--green);margin-top:2px;">✓ Al día</div>')+
+        (p.vencUrgente?'<div style="font-size:9px;color:'+(p.vencDias<=3?'var(--red)':'var(--acc)')+';margin-top:2px;">'+(p.vencDias<=3?'🔴':'⏰')+' Vence en '+p.vencDias+'d · ahorrás '+agendaFmt(p.ahorroTotal)+'</div>':'')+
+      '</div>';
+    });
+    if(!dp.length) html+='<div style="font-size:10px;color:var(--muted);text-align:center;margin-top:16px;padding:0 4px;">Sin visitas</div>';
+    html+='</div></div>';
+  }
+  html+='</div>';
+  document.getElementById('agenda-content').innerHTML=html;
+  document.getElementById('agenda-content').querySelectorAll('[data-agenda-prov]').forEach(function(el){
+    el.addEventListener('click',function(){ agendaOpenModal(decodeURIComponent(el.getAttribute('data-agenda-prov'))); });
+    el.addEventListener('mouseover',function(){ el.style.opacity='.8'; });
+    el.addEventListener('mouseout',function(){ el.style.opacity='1'; });
+  });
+}
+
+function agendaRenderMonth(){
+  var ms=new Date(agendaDate.getFullYear(),agendaDate.getMonth(),1);
+  document.getElementById('agenda-period-label').textContent = AGENDA_MESES[ms.getMonth()]+' '+ms.getFullYear();
+  var firstDow=agendaDow(ms);
+  var dim=new Date(ms.getFullYear(),ms.getMonth()+1,0).getDate();
+  var today=new Date(); today.setHours(0,0,0,0);
+  var html='<div style="display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:auto repeat(5,1fr);flex:1;overflow:hidden;height:100%;">';
+  AGENDA_DIAS.forEach(function(d){ html+='<div style="padding:7px;text-align:center;font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);">'+d+'</div>'; });
+  for(var b=0;b<firstDow;b++){
+    var prev=new Date(ms); prev.setDate(prev.getDate()-firstDow+b);
+    html+='<div style="border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 6px;"><div style="font-size:12px;font-weight:800;color:var(--muted);">'+prev.getDate()+'</div></div>';
+  }
+  for(var d=1;d<=dim;d++){
+    var cur=new Date(ms.getFullYear(),ms.getMonth(),d); cur.setHours(0,0,0,0);
+    var dow=agendaDow(cur); var isT=cur.getTime()===today.getTime();
+    var dp=agendaProvForDow(dow); var tot=agendaDayTotal(dow);
+    html+='<div data-agendaday="'+d+'" style="border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 6px;overflow:hidden;cursor:pointer;transition:background .12s;'+(isT?'background:rgba(245,158,11,.06);':'')+'">'+
+      '<div style="font-size:12px;font-weight:800;color:'+(isT?'var(--acc)':'var(--text)')+'">'+d+'</div>';
+    dp.slice(0,2).forEach(function(p){
+      var cl=p.medio==='efectivo'?'rgba(34,197,94,.15)':'rgba(59,130,246,.15)';
+      var tc=p.medio==='efectivo'?'var(--green)':'var(--blue)';
+      html+='<div style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:'+cl+';color:'+tc+';">'+esc(p.nombre)+'</div>';
+    });
+    if(dp.length>2) html+='<div style="font-size:9px;color:var(--muted);">+'+( dp.length-2)+' más</div>';
+    if(tot>0) html+='<div style="font-size:9px;font-weight:800;color:var(--muted);margin-top:1px;">'+agendaFmt(tot)+'</div>';
+    html+='</div>';
+  }
+  var used=firstDow+dim; var rem=used%7===0?0:7-used%7;
+  for(var r=1;r<=rem;r++) html+='<div style="border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 6px;"><div style="font-size:12px;font-weight:800;color:var(--muted);">'+r+'</div></div>';
+  html+='</div>';
+  document.getElementById('agenda-content').innerHTML=html;
+}
+
+function agendaRenderDay(){
+  var dow=agendaDow(agendaDate);
+  var diasFull=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  document.getElementById('agenda-period-label').textContent =
+    diasFull[dow]+' '+agendaDate.getDate()+' '+AGENDA_MESES[agendaDate.getMonth()];
+  var dp=agendaProvForDow(dow);
+  var totEf=0,totTr=0;
+  dp.forEach(function(p){ p.medio==='efectivo'?totEf+=p.monto:totTr+=p.monto; });
+  var tot=totEf+totTr;
+  var html='<div style="flex:1;overflow-y:auto;padding:14px 20px;">';
+  if(!dp.length){
+    html+='<div style="text-align:center;padding:60px;color:var(--muted);font-size:13px;">📭 Sin proveedores para este día</div>';
+  } else {
+    html+='<div style="background:var(--s3);border:1px solid var(--border2);border-radius:11px;padding:14px 18px;margin-bottom:14px;display:flex;gap:24px;align-items:center;">'+
+      '<div style="text-align:center;"><div style="font-size:20px;font-weight:900;color:var(--acc);">'+dp.length+'</div><div style="font-size:9px;color:var(--muted);font-weight:800;">PROVEEDORES</div></div>'+
+      '<div style="width:1px;height:36px;background:var(--border2);"></div>'+
+      '<div><div style="font-size:14px;font-weight:800;color:var(--green);">'+(totEf>0?agendaFmt(totEf):'$0')+'</div><div style="font-size:9px;color:var(--muted);">💵 EFECTIVO</div></div>'+
+      '<div><div style="font-size:14px;font-weight:800;color:var(--blue);">'+(totTr>0?agendaFmt(totTr):'$0')+'</div><div style="font-size:9px;color:var(--muted);">💳 TRANSFER.</div></div>'+
+      '<div style="margin-left:auto;text-align:right;"><div style="font-size:20px;font-weight:900;color:var(--acc);">'+agendaFmt(tot)+'</div><div style="font-size:9px;color:var(--muted);">TOTAL DÍA</div></div>'+
+    '</div>';
+    dp.forEach(function(p){
+      var bc=p.medio==='efectivo'?'var(--green)':'var(--blue)';
+      var ico=p.medio==='efectivo'?'💵 Efectivo':'💳 Transfer.';
+      html+='<div data-agendaprovday="'+encodeURIComponent(p.nombre)+'" style="background:var(--s3);border:1px solid var(--border2);border-left:4px solid '+bc+';border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">'+
+        '<div>'+
+          '<div style="font-size:14px;font-weight:800;">'+esc(p.nombre)+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+(p.notas||'Sin notas')+'</div>'+
+          (p.deuda<0?'<div style="font-size:12px;color:var(--red);font-weight:700;margin-top:5px;">Deuda: '+agendaFmt(p.deuda)+'</div>':
+          '<div style="font-size:11px;color:var(--green);margin-top:5px;">✓ Al día</div>')+
+        '</div>'+
+        '<div style="text-align:right;">'+
+          '<div style="font-size:20px;font-weight:900;color:var(--acc);">'+(p.monto>0?agendaFmt(p.monto):'—')+'</div>'+
+          '<div style="font-size:9px;color:var(--muted);">A PAGAR APROX.</div>'+
+          '<div style="font-size:11px;font-weight:800;color:'+bc+';margin-top:3px;">'+ico+'</div>'+
+        '</div>'+
+      '</div>';
+    });
+  }
+  html+='</div>';
+  document.getElementById('agenda-content').innerHTML=html;
+}
+
+function agendaUpdateProgress(){
+  var totSem=0; for(var i=0;i<6;i++) totSem+=agendaDayTotal(i);
+  // pagado esta semana = sum of pagos en cta cte esta semana
+  var ws=agendaWeekStart(new Date());
+  var we=new Date(ws); we.setDate(ws.getDate()+6);
+  var pagado=0;
+  Object.keys(ctaData||{}).forEach(function(prov){
+    var movs=(ctaData[prov]&&ctaData[prov].movimientos)||[];
+    movs.forEach(function(m){
+      if(m.tipo!=='pago') return;
+      var parts=(m.fecha||'').split('/');
+      if(parts.length!==3) return;
+      var md=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+      if(md>=ws&&md<=we) pagado+=Math.abs(m.monto||0);
+    });
+  });
+  var pct=totSem>0?Math.min(100,Math.round(pagado/totSem*100)):0;
+  var fill=document.getElementById('agenda-prog-fill');
+  var nums=document.getElementById('agenda-prog-nums');
+  if(fill) fill.style.width=pct+'%';
+  if(nums) nums.textContent=agendaFmt(pagado)+' pagado de '+agendaFmt(totSem)+' previstos ('+pct+'%)';
+}
+
+function agendaCheckBanner(){
+  var sinDias=Object.keys(provData||{}).filter(function(k){ var p=provData[k]||{}; return !(p.agenda_dias&&p.agenda_dias.length); });
+  var banner=document.getElementById('agenda-banner');
+  if(!banner) return;
+  if(sinDias.length){
+    document.getElementById('agenda-banner-txt').textContent = '⚠️ '+sinDias.length+' proveedor'+(sinDias.length>1?'es':'')+ ' sin días de visita configurados';
+    banner.style.display='flex';
+  } else {
+    banner.style.display='none';
+  }
+}
+
+function agendaSetView(v){
+  agendaView=v;
+  document.querySelectorAll('.agenda-view-tab').forEach(function(t){
+    var isActive=t.id==='agenda-tab-'+v;
+    t.style.background=isActive?'var(--acc)':'transparent';
+    t.style.color=isActive?'#000':'var(--muted)';
+  });
+  agendaRender();
+}
+
+function agendaNavPrev(){
+  if(agendaView==='semana') agendaDate.setDate(agendaDate.getDate()-7);
+  else if(agendaView==='mes') agendaDate.setMonth(agendaDate.getMonth()-1);
+  else agendaDate.setDate(agendaDate.getDate()-1);
+  agendaRender();
+}
+function agendaNavNext(){
+  if(agendaView==='semana') agendaDate.setDate(agendaDate.getDate()+7);
+  else if(agendaView==='mes') agendaDate.setMonth(agendaDate.getMonth()+1);
+  else agendaDate.setDate(agendaDate.getDate()+1);
+  agendaRender();
+}
+function agendaGoToday(){ agendaDate=new Date(); agendaRender(); }
+function agendaGoDay(d){ agendaDate=new Date(agendaDate.getFullYear(),agendaDate.getMonth(),d); agendaSetView('dia'); }
+
+// ── MODAL CONFIG ──
+function agendaOpenModal(nombre){
+  agendaCurrentProv = nombre;
+  var ficha = (provData&&provData[nombre])||{};
+  var dias = ficha.agenda_dias||[];
+  var saldo = ctaSaldo(nombre);
+  document.getElementById('agenda-modal-title').textContent = nombre;
+  var dEl=document.getElementById('agenda-modal-deuda');
+  dEl.textContent = saldo<0 ? '-'+agendaFmt(saldo) : '✓ Al día';
+  dEl.style.color = saldo<0?'var(--red)':'var(--green)';
+  var deudaBox=document.getElementById('agenda-modal-deuda-box');
+  if(deudaBox) deudaBox.style.borderColor=saldo<0?'rgba(239,68,68,.2)':'rgba(34,197,94,.2)';
+  document.getElementById('agenda-modal-monto').value = ficha.agenda_monto||0;
+  document.getElementById('agenda-modal-notas').value = ficha.agenda_notas||'';
+  var medioSel=document.getElementById('agenda-modal-medio');
+  var med=ficha.agenda_medio||'transfer';
+  for(var i=0;i<medioSel.options.length;i++) if(medioSel.options[i].value===med) medioSel.selectedIndex=i;
+  // Dias pills
+  var container=document.getElementById('agenda-modal-dias');
+  container.innerHTML='';
+  AGENDA_DIAS.slice(0,6).forEach(function(dia,i){
+    var pill=document.createElement('div');
+    pill.style.cssText='width:40px;height:40px;border-radius:8px;border:1.5px solid '+(dias.indexOf(i)>=0?'var(--acc)':'var(--border2)')+';background:'+(dias.indexOf(i)>=0?'var(--acc)':'var(--s3)')+';color:'+(dias.indexOf(i)>=0?'#000':'var(--muted)')+';font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;';
+    pill.textContent=dia;
+    pill.setAttribute('data-dow',i);
+    pill.onclick=function(){
+      var on=this.style.background==='var(--acc)';
+      this.style.background=on?'var(--s3)':'var(--acc)';
+      this.style.color=on?'var(--muted)':'#000';
+      this.style.borderColor=on?'var(--border2)':'var(--acc)';
+    };
+    container.appendChild(pill);
+  });
+  var pagoBtn=document.getElementById('agenda-btn-pago');
+  if(pagoBtn) pagoBtn.style.display=saldo<0?'block':'none';
+  document.getElementById('agenda-modal').style.display='flex';
+}
+
+function agendaCloseModal(){ document.getElementById('agenda-modal').style.display='none'; }
+
+function agendaUsarDeudaReal(){
+  var saldo=ctaSaldo(agendaCurrentProv||'');
+  document.getElementById('agenda-modal-monto').value=Math.abs(saldo);
+}
+
+function agendaGuardarConfig(){
+  var nombre=agendaCurrentProv;
+  if(!nombre) return;
+  if(!provData) provData={};
+  if(!provData[nombre]) provData[nombre]={};
+  var pills=document.getElementById('agenda-modal-dias').querySelectorAll('[data-dow]');
+  var dias=[];
+  pills.forEach(function(p){ if(p.style.background==='var(--acc)') dias.push(parseInt(p.getAttribute('data-dow'))); });
+  provData[nombre].agenda_dias=dias;
+  provData[nombre].agenda_medio=document.getElementById('agenda-modal-medio').value;
+  provData[nombre].agenda_monto=parseInt(document.getElementById('agenda-modal-monto').value)||0;
+  provData[nombre].agenda_notas=document.getElementById('agenda-modal-notas').value.trim();
+  // Save to Supabase
+  if(sbUser){
+    sb.from('user_config').upsert(
+      {user_id:sbUser.id, key:'prov_fichas', value:JSON.stringify(provData)},
+      {onConflict:'user_id,key'}
+    ).then(function(){}).catch(function(){});
+  }
+  agendaCloseModal();
+  agendaRender();
+  notify('✓ Agenda de '+nombre+' guardada','ok');
+}
+
+// ── PAGO FLOW ──
+function agendaRegistrarPago(){
+  var nombre=agendaCurrentProv;
+  if(!nombre) return;
+  var monto=parseInt(document.getElementById('agenda-modal-monto').value)||0;
+  if(!monto){ notify('Ingresá un monto','err'); return; }
+  agendaCloseModal();
+  agendaAbrirSeleccionFactura(nombre, monto);
+}
+
+function agendaAbrirSeleccionFactura(nombre, monto){
+  var movs=(ctaData[nombre]&&ctaData[nombre].movimientos)||[];
+  var facturas=movs.filter(function(m){ return m.tipo==='compra' && Math.abs(m.monto)>0; }).slice(0,8);
+  document.getElementById('agenda-fact-title').textContent=nombre;
+  var body=document.getElementById('agenda-fact-body');
+  var html='<div><div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MONTO A PAGAR</div>'+
+    '<input type="number" id="agenda-fact-monto" value="'+monto+'" oninput="agendaActualizarDist()" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:9px 12px;color:var(--text);font-size:15px;font-weight:800;font-family:inherit;">'+
+  '</div>';
+  if(!facturas.length){
+    html+='<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);text-align:center;">Sin facturas registradas.<br>Se registrará como pago general.</div>';
+  } else {
+    html+='<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;">FACTURAS PENDIENTES — Seleccioná a cuál aplicar</div>';
+    facturas.forEach(function(f,i){
+      // Vencimiento info
+      var vencHTML = '';
+      var urgente = false;
+      if(f.desc_pct && f.desc_fecha_limite && !f.desc_aplicado){
+        var limMs = parseDateAR(f.desc_fecha_limite).getTime();
+        var hoyMs2 = new Date().setHours(0,0,0,0);
+        var diasRest = Math.round((limMs - hoyMs2)/86400000);
+        var ahorro = Math.round(Math.abs(f.monto)*f.desc_pct/100);
+        if(diasRest > 0){
+          var col = diasRest<=3?'var(--red)':diasRest<=7?'var(--acc)':'var(--green)';
+          var ico2 = diasRest<=3?'🔴':'⏰';
+          urgente = diasRest<=7;
+          vencHTML = '<div style="margin-top:6px;background:rgba(34,197,94,.07);border-radius:5px;padding:4px 8px;font-size:10px;font-weight:700;color:'+col+';">'+ico2+' Desc. '+f.desc_pct+'% antes del '+f.desc_fecha_limite+' · quedan '+diasRest+' día'+(diasRest!==1?'s':'')+' · ahorrás '+agendaFmt(ahorro)+'</div>';
+        } else if(diasRest<=0){
+          vencHTML = '<div style="margin-top:6px;font-size:10px;color:var(--muted);">✗ Desc. '+f.desc_pct+'% vencido el '+f.desc_fecha_limite+'</div>';
+        }
+      }
+      var borderU = urgente?'var(--acc)':'var(--border2)';
+      html+='<div class="agenda-fact-row" data-idx="'+i+'" data-monto="'+Math.abs(f.monto)+'" onclick="agendaToggleFact(this)" style="background:var(--s3);border:1.5px solid '+borderU+';border-radius:9px;padding:11px 14px;cursor:pointer;transition:all .15s;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+          '<div>'+
+            '<div style="font-size:12px;font-weight:800;">'+esc(f.descripcion||'Compra')+'</div>'+
+            '<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+f.fecha+'</div>'+
+          '</div>'+
+          '<div style="text-align:right;">'+
+            '<div style="font-size:14px;font-weight:900;color:var(--red);">-'+agendaFmt(f.monto)+'</div>'+
+            '<div style="font-size:10px;color:var(--muted);">pendiente</div>'+
+          '</div>'+
+        '</div>'+
+        vencHTML+
+        '<div class="agenda-fact-aplicado" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);">'+
+          '<div style="display:flex;justify-content:space-between;"><span style="font-size:10px;color:var(--muted);">APLICO</span>'+
+          '<span class="agenda-fact-val" style="font-size:13px;font-weight:900;color:var(--green);"></span></div>'+
+        '</div>'+
+      '</div>';
+    });
+    html+='<div style="background:var(--s4);border-radius:8px;padding:9px 14px;display:flex;justify-content:space-between;">'+
+      '<span style="font-size:11px;color:var(--muted);">Distribuido</span>'+
+      '<span id="agenda-fact-dist" style="font-size:13px;font-weight:900;color:var(--green);">$0</span>'+
+    '</div>';
+  }
+  body.innerHTML=html;
+  window._agendaPagoNombre=nombre;
+  document.getElementById('agenda-modal-fact').style.display='flex';
+}
+
+function agendaToggleFact(row){
+  var on=row.getAttribute('data-sel')==='1';
+  row.setAttribute('data-sel',on?'0':'1');
+  row.style.borderColor=on?'var(--border2)':'var(--green)';
+  row.style.background=on?'var(--s3)':'rgba(34,197,94,.06)';
+  row.querySelector('.agenda-fact-aplicado').style.display=on?'none':'block';
+  agendaActualizarDist();
+}
+
+function agendaActualizarDist(){
+  var monto=parseInt(document.getElementById('agenda-fact-monto').value)||0;
+  var rows=document.querySelectorAll('.agenda-fact-row[data-sel="1"]');
+  var total=0;
+  rows.forEach(function(r){ total+=parseInt(r.getAttribute('data-monto'))||0; });
+  var resto=monto;
+  rows.forEach(function(r,i){
+    var saldo=parseInt(r.getAttribute('data-monto'))||0;
+    var ap=i===rows.length-1?Math.min(resto,saldo):Math.min(Math.round(monto*saldo/(total||1)),saldo);
+    resto-=ap;
+    r.querySelector('.agenda-fact-val').textContent=agendaFmt(ap);
+  });
+  var distEl=document.getElementById('agenda-fact-dist');
+  if(distEl) distEl.textContent=agendaFmt(Math.min(monto,total||monto));
+}
+
+function agendaConfirmarPago(){
+  var nombre=window._agendaPagoNombre;
+  var monto=parseInt(document.getElementById('agenda-fact-monto').value)||0;
+  if(!monto||!nombre){ agendaCloseModalFact(); return; }
+  var medio=document.getElementById('agenda-modal-medio');
+  var medioVal=medio?medio.value:'efectivo';
+  var medioLabel=medioVal==='efectivo'?'Efectivo':medioVal==='transfer'?'Transferencia':'Cheque';
+  var rows=document.querySelectorAll('.agenda-fact-row[data-sel="1"]');
+  var desc='Pago desde Agenda — '+medioLabel;
+  if(rows.length===1) desc='Pago desde Agenda — '+(rows[0].querySelector('div > div > div').textContent||'Factura')+' — '+medioLabel;
+  else if(rows.length>1) desc='Pago desde Agenda ('+rows.length+' facturas) — '+medioLabel;
+  // Register in ctaData
+  if(!ctaData[nombre]) ctaData[nombre]={movimientos:[]};
+  ctaData[nombre].movimientos.unshift({
+    id:String(genId()), tipo:'pago',
+    fecha:new Date().toLocaleDateString('es-AR'),
+    descripcion:desc,
+    monto:Math.abs(monto)
+  });
+  saveCta();
+  agendaCloseModalFact();
+  agendaRender();
+  // Refresh cta if open
+  if(ctaSelectedProv===nombre) ctaSelect(nombre);
+  notify('✓ Pago de '+agendaFmt(monto)+' registrado en Cta. Cte. — '+nombre,'ok');
+}
+
+function agendaCloseModalFact(){ document.getElementById('agenda-modal-fact').style.display='none'; }
+function agendaIrCtaCte(){ agendaCloseModal(); switchTab('cuentas'); if(agendaCurrentProv){ setTimeout(function(){ ctaSelect(agendaCurrentProv); },200); } }
 
 /* ════ INIT ════ */
 
