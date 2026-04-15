@@ -8607,6 +8607,12 @@ function openPagoModal(prov) {
   document.getElementById('pago-desc').value = '';
   // Build invoice list
   var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
+  // Initialize saldo_pendiente on compras that don't have it yet
+  movs.forEach(function(m){
+    if(m.tipo==='compra' && m.saldo_pendiente===undefined){
+      m.saldo_pendiente = Math.abs(m.monto||0);
+    }
+  });
   var facturas = movs.filter(function(m){
     return m.tipo==='compra' && pagoSaldoPendiente(m) > 0;
   });
@@ -8693,9 +8699,10 @@ function savePago() {
     if(aplica <= 0) return;
     resto -= aplica;
     // Update the invoice saldo_pendiente
-    var fact = movs.find(function(m){ return m.id===fid; });
+    var fact = movs.find(function(m){ return String(m.id)===String(fid); });
     if(fact){
-      fact.saldo_pendiente = Math.max(0, pagoSaldoPendiente(fact) - aplica);
+      if(fact.saldo_pendiente===undefined) fact.saldo_pendiente = Math.abs(fact.monto||0);
+      fact.saldo_pendiente = Math.max(0, fact.saldo_pendiente - aplica);
       fact.pagos_aplicados = (fact.pagos_aplicados||0) + aplica;
     }
     aplicaciones.push({
