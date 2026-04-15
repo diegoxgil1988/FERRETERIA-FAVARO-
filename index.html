@@ -2065,6 +2065,10 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
             <input type="number" id="pv-agenda-monto" placeholder="Ej: 50000" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12px;font-family:inherit;">
           </div>
         </div>
+        <div id="pv-agenda-inicio-wrap" style="display:none;margin-top:6px;">
+          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">FECHA DE INICIO (quincenal/mensual)</div>
+          <input type="date" id="pv-agenda-inicio" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+        </div>
         <div style="margin-top:10px;">
           <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">NOTAS DE VISITA</div>
           <input type="text" id="pv-agenda-notas" placeholder="Ej: Llega entre 9-11hs, pedir remito firmado..." style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
@@ -7352,20 +7356,53 @@ function pvAgendaUpdateResumen(){
 }
 
 /* ── HELPER: saber si un proveedor aparece en una semana dada ── */
+/* ── FRECUENCIA basada en fecha de inicio + intervalo en días ── */
+function _daysDiff(d1, d2){
+  var a = new Date(d1); a.setHours(0,0,0,0);
+  var b = new Date(d2); b.setHours(0,0,0,0);
+  return Math.round((b.getTime()-a.getTime())/86400000);
+}
+
 function agendaDebeAparecer(provNombre, weekDate){
   var ficha = (provData&&provData[provNombre])||{};
   var freq = ficha.agenda_frecuencia || 'semanal';
   if(freq === 'semanal') return true;
-  // Número de semana ISO del año
-  var d = new Date(weekDate);
-  d.setHours(0,0,0,0);
-  d.setDate(d.getDate() + 3 - (d.getDay()+6)%7);
-  var week1 = new Date(d.getFullYear(),0,4);
-  var weekNum = 1 + Math.round(((d.getTime()-week1.getTime())/86400000 - 3 + (week1.getDay()+6)%7)/7);
-  if(freq === 'quincenal') return weekNum % 2 === 1; // semanas impares
+
+  // Fecha de inicio guardada (ISO string YYYY-MM-DD)
+  var inicioStr = ficha.agenda_fecha_inicio;
+  if(!inicioStr) return true; // sin fecha de inicio → mostrar siempre
+
+  var inicio = new Date(inicioStr); inicio.setHours(0,0,0,0);
+  var fecha   = new Date(weekDate);  fecha.setHours(0,0,0,0);
+  var diff = _daysDiff(inicio, fecha);
+
+  if(freq === 'quincenal'){
+    // Aparece si hay un múltiplo de 14 en los 7 días de esa semana
+    // (la semana que contiene weekDate)
+    var ws = new Date(fecha);
+    var dow = fecha.getDay(); ws.setDate(fecha.getDate()-(dow===0?6:dow-1));
+    for(var k=0;k<7;k++){
+      var candidate = new Date(ws); candidate.setDate(ws.getDate()+k);
+      var d2 = _daysDiff(inicio, candidate);
+      if(d2 >= 0 && d2 % 14 === 0) return true;
+    }
+    return false;
+  }
+
   if(freq === 'mensual'){
-    // Solo aparece en la primera semana del mes donde cae el día
-    return d.getDate() <= 7;
+    // Aparece en el mes donde cae un múltiplo de ~30d (mismo día del mes que inicio)
+    var diaDelMes = inicio.getDate();
+    // Buscar en la semana si algún día coincide con diaDelMes del mes
+    var ws2 = new Date(fecha);
+    var dow2 = fecha.getDay(); ws2.setDate(fecha.getDate()-(dow2===0?6:dow2-1));
+    for(var k2=0;k2<7;k2++){
+      var cand2 = new Date(ws2); cand2.setDate(ws2.getDate()+k2);
+      // Mismo día del mes (o último día disponible si el mes es más corto)
+      var lastDayOfMonth = new Date(cand2.getFullYear(), cand2.getMonth()+1, 0).getDate();
+      var targetDay = Math.min(diaDelMes, lastDayOfMonth);
+      if(cand2.getDate() === targetDay) return true;
+    }
+    return false;
   }
   return true;
 }
@@ -7506,6 +7543,13 @@ function agendaConfirmarAgregar(){
   if(freqEl2){ var fp2=freqEl2.querySelector('[data-freq][style*="var(--acc)"]'); if(fp2) freq2=fp2.getAttribute('data-freq'); }
   provData[nombre].agenda_dias = dias;
   provData[nombre].agenda_frecuencia = freq2;
+  if(freq2 === 'quincenal' || freq2 === 'mensual'){
+    if(!provData[nombre].agenda_fecha_inicio){
+      provData[nombre].agenda_fecha_inicio = new Date().toISOString().split('T')[0];
+    }
+  } else {
+    delete provData[nombre].agenda_fecha_inicio;
+  }
   provData[nombre].agenda_medio = document.getElementById('agenda-agregar-medio').value;
   var monto = parseInt(document.getElementById('agenda-agregar-monto').value)||0;
   if(monto) provData[nombre].agenda_monto = monto;
@@ -8841,10 +8885,24 @@ function provMostrarPerfil(nombre) {
           fp.style.borderColor='var(--acc)'; fp.style.color='var(--acc)';
           var dot2=fp.querySelector('.freq-dot'); if(dot2){dot2.style.borderColor='var(--acc)';dot2.style.background='var(--acc)';}
           pvAgendaUpdateResumen();
+          // Show/hide fecha inicio
+          var fv = fp.getAttribute('data-freq');
+          var iw = document.getElementById('pv-agenda-inicio-wrap');
+          var ie = document.getElementById('pv-agenda-inicio');
+          if(iw){ iw.style.display = (fv==='quincenal'||fv==='mensual') ? 'block' : 'none'; }
+          if(ie && !ie.value) ie.value = new Date().toISOString().split('T')[0];
         };
       });
     }
     pvAgendaUpdateResumen();
+    // Show/hide fecha inicio based on freq
+    var inicioWrap = document.getElementById('pv-agenda-inicio-wrap');
+    var inicioEl   = document.getElementById('pv-agenda-inicio');
+    if(inicioWrap){
+      var showInicio = agFreq === 'quincenal' || agFreq === 'mensual';
+      inicioWrap.style.display = showInicio ? 'block' : 'none';
+      if(inicioEl) inicioEl.value = data.agenda_fecha_inicio || new Date().toISOString().split('T')[0];
+    }
     // Set medio
     var medioSel = document.getElementById('pv-agenda-medio');
     if (medioSel) { for(var i=0;i<medioSel.options.length;i++) if(medioSel.options[i].value===agMedio) medioSel.selectedIndex=i; }
@@ -8866,6 +8924,12 @@ function provMostrarPerfil(nombre) {
       if(freqEl){ var fp=freqEl.querySelector('[data-freq][style*="var(--acc)"]'); if(fp) freq=fp.getAttribute('data-freq'); }
       provData[nombre].agenda_dias = dias;
       provData[nombre].agenda_frecuencia = freq;
+      if(freq === 'quincenal' || freq === 'mensual'){
+        var inicioInput = document.getElementById('pv-agenda-inicio');
+        provData[nombre].agenda_fecha_inicio = (inicioInput && inicioInput.value) || new Date().toISOString().split('T')[0];
+      } else {
+        delete provData[nombre].agenda_fecha_inicio;
+      }
       provData[nombre].agenda_medio = document.getElementById('pv-agenda-medio').value;
       provData[nombre].agenda_monto = parseInt(document.getElementById('pv-agenda-monto').value)||0;
       provData[nombre].agenda_notas = document.getElementById('pv-agenda-notas').value.trim();
