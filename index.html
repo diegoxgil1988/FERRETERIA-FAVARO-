@@ -2458,27 +2458,47 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   </div>
 </div>
 
-<div id="modal-pago" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
-  <div style="background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:24px;width:90%;max-width:400px;">
-    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;margin-bottom:18px;">
-      + Registrar Pago
-      <button onclick="document.getElementById('modal-pago').style.display='none'" style="float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
+<div id="modal-pago" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.78);align-items:center;justify-content:center;">
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:14px;width:92%;max-width:500px;max-height:88vh;overflow-y:auto;">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--s2);z-index:1;">
+      <div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:1px;" id="pago-prov-lbl"></div>
+        <div style="font-family:'Syne',sans-serif;font-weight:900;font-size:15px;">💰 Registrar Pago</div>
+      </div>
+      <button onclick="document.getElementById('modal-pago').style.display='none'" style="background:var(--s3);border:none;border-radius:6px;width:28px;height:28px;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <div><label style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:4px;">PROVEEDOR</label>
-        <input id="pago-prov-nombre" readonly style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--muted);font-size:13px;box-sizing:border-box;"></div>
-      <div><label style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:4px;">MONTO *</label>
-        <input id="pago-monto" type="number" placeholder="0" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;box-sizing:border-box;"></div>
-      <div><label style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:4px;">FORMA DE PAGO</label>
-        <select id="pago-forma" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;box-sizing:border-box;">
-          <option>Efectivo</option><option>Transferencia</option><option>Cheque</option><option>Tarjeta</option>
-        </select></div>
-      <div><label style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:4px;">DESCRIPCIÓN</label>
-        <input id="pago-desc" placeholder="Ej: Pago parcial, cuota 1..." style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;box-sizing:border-box;"></div>
+    <div style="padding:14px 18px;display:flex;flex-direction:column;gap:12px;">
+      <input id="pago-prov-nombre" type="hidden">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MONTO *</div>
+          <input id="pago-monto" type="number" placeholder="0" oninput="pagoDistribuir()" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:9px 11px;color:var(--text);font-size:16px;font-weight:800;font-family:inherit;box-sizing:border-box;text-align:right;">
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">FORMA DE PAGO</div>
+          <select id="pago-forma" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:9px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+            <option>💵 Efectivo</option><option>💳 Transferencia</option><option>🏦 Cheque</option><option>💳 Tarjeta</option>
+          </select>
+        </div>
+      </div>
+      <!-- Facturas pendientes -->
+      <div>
+        <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:7px;">FACTURAS PENDIENTES — seleccioná a cuáles aplicar</div>
+        <div id="pago-facturas-list"></div>
+      </div>
+      <!-- Distribución total -->
+      <div style="background:var(--s4);border-radius:8px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;color:var(--muted);">Distribuido en facturas</span>
+        <span id="pago-dist-total" style="font-size:14px;font-weight:900;color:var(--green);">$0</span>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">DESCRIPCIÓN (opcional)</div>
+        <input id="pago-desc" placeholder="Ej: Pago parcial, cuota 1..." style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
+      </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button onclick="savePago()" style="flex:1;background:var(--green);border:none;border-radius:7px;padding:11px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">✓ Registrar Pago</button>
-      <button onclick="document.getElementById('modal-pago').style.display='none'" style="background:var(--s3);border:1px solid var(--border2);border-radius:7px;padding:11px 16px;color:var(--muted);font-size:12px;cursor:pointer;">Cancelar</button>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;">
+      <button onclick="document.getElementById('modal-pago').style.display='none'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">Cancelar</button>
+      <button onclick="savePago()" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:10px 18px;font-size:11px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;">✓ Registrar Pago</button>
     </div>
   </div>
 </div>
@@ -8511,18 +8531,29 @@ function ctaSelect(prov) {
     }
     var borderLeft = (isCompra && m.desc_pct > 0 && m.desc_fecha_limite && !m.desc_aplicado && Math.round((parseDateAR(m.desc_fecha_limite).getTime()-hoyMs)/86400000)>0) ? '3px solid var(--green)' : 'none';
     var movIdx = movs.indexOf(m);
-    var movIdx = movs.indexOf(m);
     var tieneItemsProv=(m.items&&m.items.length)||(m.detalle&&m.detalle.length);
-    return '<div style="border-left:' + borderLeft + ';background:var(--s3);border-radius:7px;padding:9px 12px;margin-bottom:6px;">' +
-      '<div style="display:grid;grid-template-columns:90px 1fr auto 80px 28px 28px;gap:8px;align-items:start;">' +
-        '<div style="font-size:11px;color:var(--muted);">' + m.fecha + '</div>' +
-        '<div><div style="font-size:12px;font-weight:600;">' + (m.descripcion||'') + '</div>' + descHTML + '</div>' +
-        '<div style="font-size:13px;font-weight:800;color:' + (isCompra?'var(--red)':'var(--green)') + ';">' + (isCompra?'-':'+') + '$' + Math.abs(m.monto).toLocaleString('es-AR') + '</div>' +
-        '<span style="background:' + (isCompra?'rgba(239,68,68,.12)':'rgba(34,197,94,.12)') + ';color:' + (isCompra?'var(--red)':'var(--green)') + ';font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-align:center;">' + (isCompra?'COMPRA':'PAGO') + '</span>' +
-        '<button data-detprov="'+encodeURIComponent(prov)+'" data-detidx="'+movIdx+'" title="Ver detalle" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:11px;padding:3px 5px;color:'+(tieneItemsProv?'var(--acc)':'var(--muted)')+';">'+(tieneItemsProv?'📋':'·')+'</button>' +
-        '<button onclick="ctaEliminarMov(decodeURIComponent(\'' + encodeURIComponent(prov) + '\'),' + movIdx + ')" title="Eliminar" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px;">🗑</button>' +
-      '</div>' +
-    '</div>';
+    var progressHTML='';
+    if(isCompra){
+      var montoFact=Math.abs(m.monto||0),pagadoFact=m.pagos_aplicados||0,pendienteFact=pagoSaldoPendiente(m);
+      var pct=montoFact>0?Math.round(pagadoFact/montoFact*100):0;
+      var eColor=pendienteFact<=0?'var(--green)':pagadoFact>0?'var(--acc)':'var(--red)';
+      var eTxt=pendienteFact<=0?'PAGADA':pagadoFact>0?'PARCIAL $'+formatNum(pendienteFact)+' pend.':'PENDIENTE';
+      progressHTML='<div style="margin-top:6px;"><span style="color:'+eColor+';font-size:9px;font-weight:800;">'+eTxt+'</span> <span style="font-size:9px;color:var(--muted);">$'+formatNum(pagadoFact)+'/'+formatNum(montoFact)+'</span><div style="height:4px;background:var(--s4);border-radius:2px;margin-top:3px;"><div style="height:100%;background:'+eColor+';width:'+pct+'%;"></div></div></div>';
+    }
+    var aplicHTML='';
+    if(!isCompra&&m.aplicaciones&&m.aplicaciones.length){
+      aplicHTML='<div style="font-size:10px;margin-top:4px;">'+m.aplicaciones.map(function(a){var aOk=a.aplicado>=(a.monto_fact-1);return '<div>-> '+esc(a.desc||'')+'$'+formatNum(a.aplicado)+(aOk?' OK':' parcial')+'</div>';}).join('')+'</div>';
+    }
+    var signo=isCompra?'-':'+';
+    return '<div style="border-left:'+borderLeft+';background:var(--s3);border-radius:7px;padding:9px 12px;margin-bottom:6px;">'
+      +'<div style="display:grid;grid-template-columns:90px 1fr auto 80px 28px 28px;gap:8px;align-items:start;">'
+      +'<div style="font-size:11px;color:var(--muted);">'+m.fecha+'</div>'
+      +'<div><div style="font-size:12px;font-weight:600;">'+(m.descripcion||'')+'</div>'+descHTML+aplicHTML+'</div>'
+      +'<div style="font-size:13px;font-weight:800;color:'+(isCompra?'var(--red)':'var(--green)')+';">'+signo+'$'+Math.abs(m.monto).toLocaleString('es-AR')+'</div>'
+      +'<span style="background:'+(isCompra?'rgba(239,68,68,.12)':'rgba(34,197,94,.12)')+';color:'+(isCompra?'var(--red)':'var(--green)')+';font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-align:center;">'+(isCompra?'COMPRA':'PAGO')+'</span>'
+      +'<button data-detprov="'+encodeURIComponent(prov)+'" data-detidx="'+movIdx+'" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:11px;padding:3px 5px;color:var(--acc);">📋</button>'
+      +'<button onclick="ctaEliminarMov(decodeURIComponent(\''+encodeURIComponent(prov)+'\'),'+movIdx+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px;">🗑</button>'
+      +'</div>'+progressHTML+'</div>';
   }).join('') : '<div style="font-size:12px;color:var(--muted);padding:12px 0;">Sin movimientos aún</div>';
 
   var alertaDescHTML = descuentosDisponibles.length > 0 ?
@@ -8571,30 +8602,128 @@ function ctaSelect(prov) {
 
 function openPagoModal(prov) {
   document.getElementById('pago-prov-nombre').value = prov;
+  document.getElementById('pago-prov-lbl').textContent = prov.toUpperCase();
   document.getElementById('pago-monto').value = '';
   document.getElementById('pago-desc').value = '';
+  // Build invoice list
+  var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
+  var facturas = movs.filter(function(m){
+    return m.tipo==='compra' && pagoSaldoPendiente(m) > 0;
+  });
+  var list = document.getElementById('pago-facturas-list');
+  if(!facturas.length){
+    list.innerHTML = '<div style="text-align:center;padding:14px;background:var(--s3);border-radius:8px;font-size:12px;color:var(--muted);">Sin facturas pendientes — se registrará como pago general.</div>';
+  } else {
+    list.innerHTML = facturas.map(function(f){
+      var pendiente = pagoSaldoPendiente(f);
+      return '<div class="pago-fact-row" data-id="'+f.id+'" data-pendiente="'+pendiente+'" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .15s;" onclick="pagoToggleFact(this)">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+          '<div><div style="font-size:12px;font-weight:800;">'+esc(f.descripcion||'Compra')+'</div>'+
+          '<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+f.fecha+'</div></div>'+
+          '<div style="font-size:14px;font-weight:900;color:var(--red);">-'+formatNum(pendiente)+'</div>'+
+        '</div>'+
+        '<div class="pago-fact-aplicado" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);justify-content:space-between;align-items:center;">'+
+          '<span style="font-size:10px;color:var(--muted);">SE APLICA</span>'+
+          '<span class="pago-fact-val" style="font-size:13px;font-weight:900;color:var(--green);"></span>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('pago-dist-total').textContent = '$0';
   document.getElementById('modal-pago').style.display = 'flex';
+}
+
+function pagoSaldoPendiente(mov){
+  // saldo_pendiente stored on movement, or fall back to full monto
+  if(mov.saldo_pendiente !== undefined) return mov.saldo_pendiente;
+  return Math.abs(mov.monto||0);
+}
+
+function pagoToggleFact(row){
+  row.classList.toggle('pago-sel');
+  var sel = row.classList.contains('pago-sel');
+  row.style.borderColor = sel?'var(--green)':'var(--border2)';
+  row.style.background = sel?'rgba(34,197,94,.05)':'var(--s3)';
+  var apl = row.querySelector('.pago-fact-aplicado');
+  if(apl) apl.style.display = sel?'flex':'none';
+  pagoDistribuir();
+}
+
+function pagoDistribuir(){
+  var monto = parseFloat(document.getElementById('pago-monto').value)||0;
+  var rows = document.querySelectorAll('.pago-fact-row.pago-sel');
+  var resto = monto;
+  rows.forEach(function(row){
+    var pendiente = parseFloat(row.getAttribute('data-pendiente'))||0;
+    var aplica = Math.min(resto, pendiente);
+    resto -= aplica;
+    var valEl = row.querySelector('.pago-fact-val');
+    if(valEl){
+      valEl.textContent = '$'+formatNum(aplica);
+      valEl.style.color = aplica>=pendiente?'var(--green)':'var(--acc)';
+    }
+  });
+  // Total distributed
+  var totalSel = Array.from(document.querySelectorAll('.pago-fact-row.pago-sel'))
+    .reduce(function(s,r){ return s+parseFloat(r.getAttribute('data-pendiente')); },0);
+  var dist = Math.min(monto, totalSel);
+  document.getElementById('pago-dist-total').textContent = '$'+formatNum(dist);
 }
 
 function savePago() {
   var prov = document.getElementById('pago-prov-nombre').value;
   var monto = parseFloat(document.getElementById('pago-monto').value);
   if (!monto || monto <= 0) { notify('Ingresá un monto válido', 'err'); return; }
-  var forma = document.getElementById('pago-forma').value;
-  var desc = document.getElementById('pago-desc').value.trim() || forma;
+  var forma = document.getElementById('pago-forma').value.replace(/[💵💳🏦]/g,'').trim();
+  var desc = document.getElementById('pago-desc').value.trim() || ('Pago — '+forma);
+  var today = new Date().toLocaleDateString('es-AR');
+
   if (!ctaData[prov]) ctaData[prov] = { movimientos: [] };
-  ctaData[prov].movimientos.unshift({
+  var movs = ctaData[prov].movimientos;
+
+  // Collect selected invoices and distribute payment
+  var rows = document.querySelectorAll('.pago-fact-row.pago-sel');
+  var aplicaciones = [];
+  var resto = monto;
+
+  rows.forEach(function(row){
+    var fid = row.getAttribute('data-id');
+    var pendiente = parseFloat(row.getAttribute('data-pendiente'))||0;
+    var aplica = Math.min(resto, pendiente);
+    if(aplica <= 0) return;
+    resto -= aplica;
+    // Update the invoice saldo_pendiente
+    var fact = movs.find(function(m){ return m.id===fid; });
+    if(fact){
+      fact.saldo_pendiente = Math.max(0, pagoSaldoPendiente(fact) - aplica);
+      fact.pagos_aplicados = (fact.pagos_aplicados||0) + aplica;
+    }
+    aplicaciones.push({
+      fact_id: fid,
+      desc: fact ? (fact.descripcion||'Factura') : 'Factura',
+      monto_fact: Math.abs(fact?fact.monto:0),
+      aplicado: aplica,
+      pagado_total: fact ? fact.pagos_aplicados : aplica
+    });
+  });
+
+  // Register payment movement
+  var movPago = {
     id: String(genId()),
     tipo: 'pago',
-    fecha: new Date().toLocaleDateString('es-AR'),
+    fecha: today,
     descripcion: desc,
-    monto: Math.abs(monto)
-  });
+    monto: Math.abs(monto),
+    forma: forma,
+    aplicaciones: aplicaciones
+  };
+  movs.unshift(movPago);
+
   saveCta();
   document.getElementById('modal-pago').style.display = 'none';
   ctaRenderProvList();
   ctaSelect(prov);
-  notify('✓ Pago registrado', 'ok');
+  notify('✓ Pago de $'+formatNum(monto)+' registrado', 'ok');
 }
 
 /* ════════════════════════════════════════
