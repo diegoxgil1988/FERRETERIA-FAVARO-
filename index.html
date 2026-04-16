@@ -8695,6 +8695,7 @@ function pagoDistribuir(){
 }
 
 function savePago() {
+  notify('savePago iniciado','ok');
   var prov = document.getElementById('pago-prov-nombre').value;
   var monto = parseFloat(document.getElementById('pago-monto').value);
   if (!monto || monto <= 0) { notify('Ingresá un monto válido', 'err'); return; }
