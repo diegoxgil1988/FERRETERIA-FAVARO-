@@ -8622,9 +8622,14 @@ function openPagoModal(prov) {
   } else {
     // Sort oldest-first so distribution flows correctly
     var facturasOrdenadas = facturas.slice().reverse();
-    list.innerHTML = facturasOrdenadas.map(function(f){
+    // Store indexed map of fact objects for direct access
+    _pagoFactMap = {};
+    facturasOrdenadas.forEach(function(f, idx){
+      _pagoFactMap[idx] = f;
+    });
+    list.innerHTML = facturasOrdenadas.map(function(f, idx){
       var pendiente = pagoSaldoPendiente(f);
-      return '<div class="pago-fact-row" data-id="'+f.id+'" data-pendiente="'+pendiente+'" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .15s;" onclick="pagoToggleFact(this)">'+
+      return '<div class="pago-fact-row" data-idx="'+idx+'" data-pendiente="'+pendiente+'" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .15s;" onclick="pagoToggleFact(this)">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;">'+
           '<div><div style="font-size:12px;font-weight:800;">'+esc(f.descripcion||'Compra')+'</div>'+
           '<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+f.fecha+'</div></div>'+
@@ -8638,7 +8643,7 @@ function openPagoModal(prov) {
     }).join('');
   }
   document.getElementById('pago-dist-total').textContent = '$0';
-  _pagoSelIds = []; // reset selections
+  _pagoSelIdx = []; _pagoFactMap = {}; // reset selections
   document.getElementById('modal-pago').style.display = 'flex';
 }
 
@@ -8647,21 +8652,24 @@ function pagoSaldoPendiente(mov){
   return Math.abs(mov.monto||0);
 }
 
-// Tracks selected invoice IDs in order of DOM position (oldest-first after sort)
-var _pagoSelIds = [];
+// Map of idx → fact object for direct access (set in openPagoModal)
+var _pagoFactMap = {};
+// Set of selected indices
+var _pagoSelIdx = [];
 
 function pagoToggleFact(row){
-  var fid = String(row.getAttribute('data-id'));
-  var idx = _pagoSelIds.indexOf(fid);
-  if(idx >= 0){
-    _pagoSelIds.splice(idx, 1);
+  var idx = parseInt(row.getAttribute('data-idx'));
+  var pos = _pagoSelIdx.indexOf(idx);
+  if(pos >= 0){
+    _pagoSelIdx.splice(pos, 1);
     row.classList.remove('pago-sel');
     row.style.borderColor = 'var(--border2)';
     row.style.background = 'var(--s3)';
     var apl = row.querySelector('.pago-fact-aplicado');
     if(apl) apl.style.display = 'none';
   } else {
-    _pagoSelIds.push(fid);
+    _pagoSelIdx.push(idx);
+    _pagoSelIdx.sort(function(a,b){return a-b;}); // keep ordered
     row.classList.add('pago-sel');
     row.style.borderColor = 'var(--green)';
     row.style.background = 'rgba(34,197,94,.05)';
@@ -8673,15 +8681,13 @@ function pagoToggleFact(row){
 
 function pagoDistribuir(){
   var monto = parseFloat(document.getElementById('pago-monto').value)||0;
-  // Distribute in DOM order (oldest-first since facturas are sorted that way)
   var list = document.getElementById('pago-facturas-list');
   var allRows = list ? list.querySelectorAll('.pago-fact-row') : [];
   var resto = monto;
   var totalDist = 0;
   allRows.forEach(function(row){
-    var fid = String(row.getAttribute('data-id'));
-    var isSel = _pagoSelIds.indexOf(fid) >= 0;
-    if(!isSel) return;
+    var idx = parseInt(row.getAttribute('data-idx'));
+    if(_pagoSelIdx.indexOf(idx) < 0) return;
     var pendiente = parseFloat(row.getAttribute('data-pendiente'))||0;
     var aplica = Math.min(resto, pendiente);
     resto -= aplica;
@@ -8706,38 +8712,36 @@ function savePago() {
   if (!ctaData[prov]) ctaData[prov] = { movimientos: [] };
   var movs = ctaData[prov].movimientos;
 
-  // Collect selected invoices - use both _pagoSelIds AND DOM class as fallback
+  // Use _pagoSelIdx with direct object references from _pagoFactMap
   var listEl = document.getElementById('pago-facturas-list');
   var domRows = listEl ? listEl.querySelectorAll('.pago-fact-row') : [];
-  // Rebuild selection list from DOM if _pagoSelIds is somehow empty
-  if(_pagoSelIds.length === 0){
-    domRows.forEach(function(r){ if(r.classList.contains('pago-sel')) _pagoSelIds.push(String(r.getAttribute('data-id'))); });
+  // Fallback: rebuild from DOM classes if state was lost
+  if(_pagoSelIdx.length === 0){
+    domRows.forEach(function(r){
+      if(r.classList.contains('pago-sel')) _pagoSelIdx.push(parseInt(r.getAttribute('data-idx')));
+    });
+    _pagoSelIdx.sort(function(a,b){return a-b;});
   }
   var aplicaciones = [];
   var resto = monto;
 
-  domRows.forEach(function(row){
-    var fid = String(row.getAttribute('data-id'));
-    // Check both _pagoSelIds AND CSS class
-    var isSelected = (_pagoSelIds.indexOf(fid) >= 0) || row.classList.contains('pago-sel');
-    if(!isSelected) return; // not selected
-    var pendiente = parseFloat(row.getAttribute('data-pendiente'))||0;
+  _pagoSelIdx.forEach(function(idx){
+    var fact = _pagoFactMap[idx]; // direct object reference
+    if(!fact) return;
+    var pendiente = pagoSaldoPendiente(fact);
     var aplica = Math.min(resto, pendiente);
     if(aplica <= 0) return;
     resto -= aplica;
-    // Update the invoice saldo_pendiente
-    var fact = movs.find(function(m){ return String(m.id)===String(fid); });
-    if(fact){
-      if(fact.saldo_pendiente===undefined) fact.saldo_pendiente = Math.abs(fact.monto||0);
-      fact.saldo_pendiente = Math.max(0, fact.saldo_pendiente - aplica);
-      fact.pagos_aplicados = (fact.pagos_aplicados||0) + aplica;
-    }
+    // Update the invoice saldo_pendiente directly on the object
+    if(fact.saldo_pendiente===undefined) fact.saldo_pendiente = Math.abs(fact.monto||0);
+    fact.saldo_pendiente = Math.max(0, fact.saldo_pendiente - aplica);
+    fact.pagos_aplicados = (fact.pagos_aplicados||0) + aplica;
     aplicaciones.push({
-      fact_id: fid,
-      desc: fact ? (fact.descripcion||'Factura') : 'Factura',
-      monto_fact: Math.abs(fact?fact.monto:0),
+      fact_id: fact.id,
+      desc: fact.descripcion||'Factura',
+      monto_fact: Math.abs(fact.monto||0),
       aplicado: aplica,
-      pagado_total: fact ? fact.pagos_aplicados : aplica
+      pagado_total: fact.pagos_aplicados
     });
   });
 
