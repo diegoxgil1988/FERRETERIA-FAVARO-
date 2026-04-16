@@ -8601,6 +8601,8 @@ function ctaSelect(prov) {
 
 
 function openPagoModal(prov) {
+  // Reset selection state FIRST before populating
+  _pagoSelIdx = []; _pagoFactMap = {};
   document.getElementById('pago-prov-nombre').value = prov;
   document.getElementById('pago-prov-lbl').textContent = prov.toUpperCase();
   document.getElementById('pago-monto').value = '';
@@ -8643,7 +8645,6 @@ function openPagoModal(prov) {
     }).join('');
   }
   document.getElementById('pago-dist-total').textContent = '$0';
-  _pagoSelIdx = []; _pagoFactMap = {}; // reset selections
   document.getElementById('modal-pago').style.display = 'flex';
 }
 
