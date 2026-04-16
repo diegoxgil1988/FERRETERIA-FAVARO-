@@ -8620,7 +8620,9 @@ function openPagoModal(prov) {
   if(!facturas.length){
     list.innerHTML = '<div style="text-align:center;padding:14px;background:var(--s3);border-radius:8px;font-size:12px;color:var(--muted);">Sin facturas pendientes — se registrará como pago general.</div>';
   } else {
-    list.innerHTML = facturas.map(function(f){
+    // Sort oldest-first so distribution flows correctly
+    var facturasOrdenadas = facturas.slice().reverse();
+    list.innerHTML = facturasOrdenadas.map(function(f){
       var pendiente = pagoSaldoPendiente(f);
       return '<div class="pago-fact-row" data-id="'+f.id+'" data-pendiente="'+pendiente+'" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .15s;" onclick="pagoToggleFact(this)">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;">'+
@@ -8636,44 +8638,61 @@ function openPagoModal(prov) {
     }).join('');
   }
   document.getElementById('pago-dist-total').textContent = '$0';
+  _pagoSelIds = []; // reset selections
   document.getElementById('modal-pago').style.display = 'flex';
 }
 
 function pagoSaldoPendiente(mov){
-  // saldo_pendiente stored on movement, or fall back to full monto
   if(mov.saldo_pendiente !== undefined) return mov.saldo_pendiente;
   return Math.abs(mov.monto||0);
 }
 
+// Tracks selected invoice IDs in order of DOM position (oldest-first after sort)
+var _pagoSelIds = [];
+
 function pagoToggleFact(row){
-  row.classList.toggle('pago-sel');
-  var sel = row.classList.contains('pago-sel');
-  row.style.borderColor = sel?'var(--green)':'var(--border2)';
-  row.style.background = sel?'rgba(34,197,94,.05)':'var(--s3)';
-  var apl = row.querySelector('.pago-fact-aplicado');
-  if(apl) apl.style.display = sel?'flex':'none';
+  var fid = String(row.getAttribute('data-id'));
+  var idx = _pagoSelIds.indexOf(fid);
+  if(idx >= 0){
+    _pagoSelIds.splice(idx, 1);
+    row.classList.remove('pago-sel');
+    row.style.borderColor = 'var(--border2)';
+    row.style.background = 'var(--s3)';
+    var apl = row.querySelector('.pago-fact-aplicado');
+    if(apl) apl.style.display = 'none';
+  } else {
+    _pagoSelIds.push(fid);
+    row.classList.add('pago-sel');
+    row.style.borderColor = 'var(--green)';
+    row.style.background = 'rgba(34,197,94,.05)';
+    var apl2 = row.querySelector('.pago-fact-aplicado');
+    if(apl2) apl2.style.display = 'flex';
+  }
   pagoDistribuir();
 }
 
 function pagoDistribuir(){
   var monto = parseFloat(document.getElementById('pago-monto').value)||0;
-  var rows = document.querySelectorAll('.pago-fact-row.pago-sel');
+  // Distribute in DOM order (oldest-first since facturas are sorted that way)
+  var list = document.getElementById('pago-facturas-list');
+  var allRows = list ? list.querySelectorAll('.pago-fact-row') : [];
   var resto = monto;
-  rows.forEach(function(row){
+  var totalDist = 0;
+  allRows.forEach(function(row){
+    var fid = String(row.getAttribute('data-id'));
+    var isSel = _pagoSelIds.indexOf(fid) >= 0;
+    if(!isSel) return;
     var pendiente = parseFloat(row.getAttribute('data-pendiente'))||0;
     var aplica = Math.min(resto, pendiente);
     resto -= aplica;
+    totalDist += aplica;
     var valEl = row.querySelector('.pago-fact-val');
     if(valEl){
       valEl.textContent = '$'+formatNum(aplica);
-      valEl.style.color = aplica>=pendiente?'var(--green)':'var(--acc)';
+      valEl.style.color = aplica >= pendiente ? 'var(--green)' : 'var(--acc)';
     }
   });
-  // Total distributed
-  var totalSel = Array.from(document.querySelectorAll('.pago-fact-row.pago-sel'))
-    .reduce(function(s,r){ return s+parseFloat(r.getAttribute('data-pendiente')); },0);
-  var dist = Math.min(monto, totalSel);
-  document.getElementById('pago-dist-total').textContent = '$'+formatNum(dist);
+  document.getElementById('pago-dist-total').textContent = '$'+formatNum(totalDist);
 }
 
 function savePago() {
@@ -8687,13 +8706,15 @@ function savePago() {
   if (!ctaData[prov]) ctaData[prov] = { movimientos: [] };
   var movs = ctaData[prov].movimientos;
 
-  // Collect selected invoices and distribute payment
-  var rows = document.querySelectorAll('.pago-fact-row.pago-sel');
+  // Collect selected invoices in DOM order (oldest-first) using _pagoSelIds
+  var listEl = document.getElementById('pago-facturas-list');
+  var domRows = listEl ? listEl.querySelectorAll('.pago-fact-row') : [];
   var aplicaciones = [];
   var resto = monto;
 
-  rows.forEach(function(row){
-    var fid = row.getAttribute('data-id');
+  domRows.forEach(function(row){
+    var fid = String(row.getAttribute('data-id'));
+    if(_pagoSelIds.indexOf(fid) < 0) return; // not selected
     var pendiente = parseFloat(row.getAttribute('data-pendiente'))||0;
     var aplica = Math.min(resto, pendiente);
     if(aplica <= 0) return;
