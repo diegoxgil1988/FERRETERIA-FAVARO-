@@ -894,6 +894,9 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   <div class="snav-item" id="snav-promociones" onclick="switchTab('promociones')" style="display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;">
     <span style="font-size:15px;">🏷</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--muted);">Promociones</span>
   </div>
+  <div class="snav-item" id="snav-reportes" onclick="switchTab('reportes')" style="display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;">
+    <span style="font-size:15px;">📄</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--muted);">Reportes PDF</span>
+  </div>
 </nav>
 
 <!-- CONTENT AREA -->
@@ -2761,6 +2764,59 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   </div>
 </div><!-- /page-comprobantes -->
 
+<!-- ═══════════ PAGE: REPORTES PDF ═══════════ -->
+<div class="page" id="page-reportes" style="padding:0;display:flex;min-height:100%;">
+  <!-- Sidebar izquierdo tipos -->
+  <div style="width:260px;flex-shrink:0;background:var(--s2);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:6px;">
+    <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.8px;padding:0 6px;margin-bottom:6px;">TIPO DE REPORTE</div>
+    <div class="rep-tipo-btn active" data-tipo="cta_prov" onclick="repSetTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;">
+      <span style="font-size:16px;">🧾</span><div><div style="font-size:11px;font-weight:800;">Cta. Cte. Proveedor</div><div style="font-size:10px;color:var(--muted);">Facturas, pagos y saldo</div></div>
+    </div>
+    <div class="rep-tipo-btn" data-tipo="cta_cli" onclick="repSetTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;">
+      <span style="font-size:16px;">👤</span><div><div style="font-size:11px;font-weight:800;">Cta. Cte. Cliente</div><div style="font-size:10px;color:var(--muted);">Deuda y movimientos</div></div>
+    </div>
+    <div class="rep-tipo-btn" data-tipo="caja" onclick="repSetTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;">
+      <span style="font-size:16px;">💰</span><div><div style="font-size:11px;font-weight:800;">Caja Diaria</div><div style="font-size:10px;color:var(--muted);">Cierre del día</div></div>
+    </div>
+    <div class="rep-tipo-btn" data-tipo="dashboard" onclick="repSetTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;">
+      <span style="font-size:16px;">📊</span><div><div style="font-size:11px;font-weight:800;">Dashboard</div><div style="font-size:10px;color:var(--muted);">Ventas, compras, margen</div></div>
+    </div>
+    <div class="rep-tipo-btn" data-tipo="catalogo" onclick="repSetTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;">
+      <span style="font-size:16px;">📦</span><div><div style="font-size:11px;font-weight:800;">Catálogo / Lista precios</div><div style="font-size:10px;color:var(--muted);">Configurable por columnas</div></div>
+    </div>
+  </div>
+  <!-- Panel derecho filtros + preview -->
+  <div style="flex:1;overflow-y:auto;padding:24px;">
+    <div id="rep-titulo" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:900;margin-bottom:18px;">🧾 Cuenta Corriente — Proveedor</div>
+    <!-- Filtros dinámicos -->
+    <div id="rep-filtros" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;"></div>
+    <!-- Columnas (solo catálogo) -->
+    <div id="rep-cols-wrap" style="display:none;margin-bottom:16px;">
+      <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">COLUMNAS A INCLUIR</div>
+      <div id="rep-cols-grid" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+    </div>
+    <!-- Botón generar -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+      <button onclick="repGenerar()" style="background:var(--acc);border:none;border-radius:8px;padding:10px 24px;font-size:12px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;">🔄 Generar reporte</button>
+    </div>
+    <!-- Preview area -->
+    <div id="rep-preview-wrap" style="display:none;">
+      <div style="background:var(--s2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;">
+        <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;">VISTA PREVIA</span>
+          <div style="display:flex;gap:8px;">
+            <button onclick="repImprimir()" style="background:var(--s4);border:1px solid var(--border2);border-radius:7px;padding:8px 16px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">🖨 Imprimir / PDF</button>
+          </div>
+        </div>
+        <div style="padding:16px;background:#6b7280;display:flex;justify-content:center;">
+          <div id="rep-pdf-content" style="background:#fff;width:100%;max-width:720px;border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;font-size:13px;color:#222;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /page-reportes -->
+
 <!-- ═══════════ PAGE: APARIENCIA ═══════════ -->
 <div class="page" id="page-apariencia" style="max-width:680px;">
   <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px;">✨ Apariencia</div>
@@ -4573,7 +4629,7 @@ function switchTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const snavMap = { 'catalogo':'cat', 'factura':'compras', 'inv':'compras', 'catalogo-web':'cat-web', 'presupuesto':'presup',
     'clientes':'clientes', 'pedidos':'pedidos', 'cuentas':'cuentas', 'stats':'stats', 'proveedores':'proveedores',
-    'dashboard':'dashboard', 'analisis':'analisis', 'vencimientos':'vencimientos', 'categorias':'categorias', 'carrito':'carrito', 'historial':'historial', 'ctaclientes':'ctaclientes', 'caja':'caja', 'remitos':'remitos', 'configpagos':'configpagos', 'devoluciones':'devoluciones', 'stock':'stock', 'comprobantes':'comprobantes', 'apariencia':'apariencia', 'promociones':'promociones', 'compras':'compras', 'agenda':'agenda' };
+    'dashboard':'dashboard', 'analisis':'analisis', 'vencimientos':'vencimientos', 'categorias':'categorias', 'carrito':'carrito', 'historial':'historial', 'ctaclientes':'ctaclientes', 'caja':'caja', 'remitos':'remitos', 'configpagos':'configpagos', 'devoluciones':'devoluciones', 'stock':'stock', 'comprobantes':'comprobantes', 'apariencia':'apariencia', 'promociones':'promociones', 'compras':'compras', 'agenda':'agenda', 'reportes':'reportes' };
   const activeNav = document.getElementById('snav-' + (snavMap[tab]||'cat'));
   if (activeNav) {
     activeNav.style.borderLeftColor = 'var(--acc)';
@@ -4609,6 +4665,7 @@ function switchTab(tab) {
   if (tab === 'promociones') { promoRenderLista(); }
   if (tab === 'compras') { ccRenderProvSelect(); }
   if (tab === 'agenda') { agendaInit(); }
+  if (tab === 'reportes') { repInit(); }
   if (tab === 'apariencia') {
     setTimeout(function(){
       // Sync logo preview
@@ -8760,6 +8817,303 @@ function savePago() {
   notify('✓ Pago de $'+formatNum(monto)+' registrado', 'ok');
 }
 
+
+/* ════════════════════════════════════════
+   MÓDULO REPORTES PDF
+════════════════════════════════════════ */
+var repTipoActual = 'cta_prov';
+
+function repSetTipo(el){
+  document.querySelectorAll('.rep-tipo-btn').forEach(function(b){
+    b.style.background='transparent'; b.style.borderColor='transparent';
+    var lbl=b.querySelector('div div:first-child'); if(lbl) lbl.style.color='var(--text)';
+  });
+  el.style.background='rgba(245,158,11,.08)'; el.style.borderColor='rgba(245,158,11,.3)';
+  repTipoActual = el.getAttribute('data-tipo');
+  repRenderFiltros();
+  document.getElementById('rep-preview-wrap').style.display='none';
+  var titulos = {
+    cta_prov:'🧾 Cuenta Corriente — Proveedor',
+    cta_cli:'👤 Cuenta Corriente — Cliente',
+    caja:'💰 Cierre de Caja Diaria',
+    dashboard:'📊 Reporte Dashboard',
+    catalogo:'📦 Catálogo / Lista de Precios'
+  };
+  document.getElementById('rep-titulo').textContent = titulos[repTipoActual]||'';
+}
+
+function repRenderFiltros(){
+  var f = document.getElementById('rep-filtros');
+  var colsWrap = document.getElementById('rep-cols-wrap');
+  if(!f) return;
+  colsWrap.style.display = repTipoActual==='catalogo'?'block':'none';
+  var html = '';
+  var fldStyle = 'width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;';
+  var lblStyle = 'font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:5px;';
+  var wrap = function(lbl,inp){ return '<div><label style="'+lblStyle+'">'+lbl+'</label>'+inp+'</div>'; };
+
+  if(repTipoActual==='cta_prov'){
+    var provOpts = getProveedoresList ? getProveedoresList().map(function(p){ return '<option>'+esc(p)+'</option>'; }).join('') : '';
+    html += wrap('PROVEEDOR','<select id="rf-prov" style="'+fldStyle+'"><option value="">Todos los proveedores</option>'+provOpts+'</select>');
+    html += wrap('DESDE','<input type="date" id="rf-desde" style="'+fldStyle+'" value="'+repFechaDefault(30)+'">');
+    html += wrap('HASTA','<input type="date" id="rf-hasta" style="'+fldStyle+'" value="'+repFechaDefault(0)+'">');
+    html += wrap('INCLUIR','<select id="rf-incluir" style="'+fldStyle+'"><option value="all">Facturas y pagos</option><option value="pendientes">Solo facturas pendientes</option><option value="pagos">Solo pagos</option></select>');
+    html += wrap('TÍTULO','<input type="text" id="rf-titulo" style="'+fldStyle+'" value="Estado de cuenta — Proveedores">');
+  } else if(repTipoActual==='cta_cli'){
+    var cliOpts = (clientes||[]).map(function(c){ return '<option>'+esc(c.nombre)+'</option>'; }).join('');
+    html += wrap('CLIENTE','<select id="rf-cli" style="'+fldStyle+'"><option value="">Todos los clientes</option>'+cliOpts+'</select>');
+    html += wrap('DESDE','<input type="date" id="rf-desde" style="'+fldStyle+'" value="'+repFechaDefault(30)+'">');
+    html += wrap('HASTA','<input type="date" id="rf-hasta" style="'+fldStyle+'" value="'+repFechaDefault(0)+'">');
+    html += wrap('TÍTULO','<input type="text" id="rf-titulo" style="'+fldStyle+'" value="Estado de cuenta — Clientes">');
+  } else if(repTipoActual==='caja'){
+    html += wrap('FECHA','<input type="date" id="rf-fecha" style="'+fldStyle+'" value="'+repFechaDefault(0)+'">');
+    html += wrap('TÍTULO','<input type="text" id="rf-titulo" style="'+fldStyle+'" value="Cierre de Caja">');
+  } else if(repTipoActual==='dashboard'){
+    html += wrap('DESDE','<input type="date" id="rf-desde" style="'+fldStyle+'" value="'+repFechaDefault(30)+'">');
+    html += wrap('HASTA','<input type="date" id="rf-hasta" style="'+fldStyle+'" value="'+repFechaDefault(0)+'">');
+    html += wrap('TÍTULO','<input type="text" id="rf-titulo" style="'+fldStyle+'" value="Reporte General">');
+  } else if(repTipoActual==='catalogo'){
+    var catOpts = (categorias_data||[]).map(function(c){ return '<option>'+esc(typeof c==='string'?c:(c.nombre||c))+'</option>'; }).join('');
+    var provOpts2 = getProveedoresList ? getProveedoresList().map(function(p){ return '<option>'+esc(p)+'</option>'; }).join('') : '';
+    html += wrap('CATEGORÍA','<select id="rf-cat" style="'+fldStyle+'"><option value="">Todas</option>'+catOpts+'</select>');
+    html += wrap('PROVEEDOR','<select id="rf-prov" style="'+fldStyle+'"><option value="">Todos</option>'+provOpts2+'</select>');
+    html += wrap('ORDENAR POR','<select id="rf-orden" style="'+fldStyle+'"><option value="nombre">Nombre A-Z</option><option value="precio">Precio</option><option value="cod">Código</option></select>');
+    html += wrap('TÍTULO','<input type="text" id="rf-titulo" style="'+fldStyle+'" value="Lista de Precios">');
+    // Render column pills
+    var cols = [{k:'cod',l:'Código'},{k:'nombre',l:'Nombre'},{k:'marca',l:'Marca'},{k:'proveedor',l:'Proveedor'},{k:'precio',l:'Precio'},{k:'costo',l:'Costo'},{k:'stock',l:'Stock'},{k:'categoria',l:'Categoría'}];
+    var colsHtml = cols.map(function(c){
+      var on = ['nombre','precio'].indexOf(c.k)>=0;
+      return '<div class="rep-col-pill'+(on?' on':'')+'" data-col="'+c.k+'" onclick="repToggleCol(this)" style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:7px;border:1.5px solid '+(on?'var(--acc)':'var(--border2)')+';background:'+(on?'rgba(245,158,11,.06)':'var(--s3)')+';color:'+(on?'var(--acc)':'var(--muted)')+';font-size:11px;font-weight:700;cursor:pointer;"><div style="width:13px;height:13px;border-radius:3px;border:1.5px solid '+(on?'var(--acc)':'var(--muted)')+';background:'+(on?'var(--acc)':'transparent')+';display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;">'+(on?'✓':'')+'</div>'+c.l+'</div>';
+    }).join('');
+    document.getElementById('rep-cols-grid').innerHTML = colsHtml;
+  }
+  f.innerHTML = html;
+}
+
+function repToggleCol(el){
+  var on = el.classList.contains('on');
+  el.classList.toggle('on', !on);
+  el.style.borderColor = !on?'var(--acc)':'var(--border2)';
+  el.style.background = !on?'rgba(245,158,11,.06)':'var(--s3)';
+  el.style.color = !on?'var(--acc)':'var(--muted)';
+  var ch = el.querySelector('div'); if(ch){ ch.style.borderColor=!on?'var(--acc)':'var(--muted)'; ch.style.background=!on?'var(--acc)':'transparent'; ch.textContent=!on?'✓':''; }
+}
+
+function repFechaDefault(daysBack){
+  var d = new Date(); d.setDate(d.getDate()-daysBack);
+  return d.toISOString().split('T')[0];
+}
+
+function repGetVal(id){ var el=document.getElementById(id); return el?el.value:''; }
+
+function repGenerar(){
+  var html = '';
+  if(repTipoActual==='cta_prov') html = repBuildCtaProv();
+  else if(repTipoActual==='cta_cli') html = repBuildCtaCli();
+  else if(repTipoActual==='caja') html = repBuildCaja();
+  else if(repTipoActual==='dashboard') html = repBuildDash();
+  else if(repTipoActual==='catalogo') html = repBuildCatalogo();
+  if(!html){ notify('Sin datos para el período seleccionado','err'); return; }
+  document.getElementById('rep-pdf-content').innerHTML = html;
+  document.getElementById('rep-preview-wrap').style.display='block';
+  document.getElementById('rep-preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function repImprimir(){
+  var el = document.getElementById('rep-pdf-content');
+  if(!el) return;
+  var biz = (appearConfig&&appearConfig.bizName)||'Ferretería Favaro';
+  var titulo = repGetVal('rf-titulo')||biz;
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titulo+'</title><style>'+
+    'body{font-family:Arial,sans-serif;margin:0;padding:0;color:#222;font-size:12px;}'+
+    'table{width:100%;border-collapse:collapse;}th,td{padding:7px 9px;border-bottom:1px solid #eee;}th{background:#f5f5f5;font-size:10px;font-weight:700;color:#555;}'+
+    '.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;display:inline-block;}'+
+    '.pagada{background:#dcfce7;color:#16a34a;}.parcial{background:#fef3c7;color:#d97706;}.pendiente{background:#fee2e2;color:#dc2626;}'+
+    '@media print{body{margin:0;}}'+
+    '</style></head><body>'+el.innerHTML+'</body></html>';
+  var w=window.open('','_blank');w.document.write(html);w.document.close();w.onload=function(){w.print();};
+}
+
+function repBizHeader(tipo){
+  var biz=(appearConfig&&appearConfig.bizName)||'Ferretería Favaro';
+  var logoHTML = '<div style="width:48px;height:48px;background:#f59e0b;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000;flex-shrink:0;">'+(biz[0]||'F')+'</div>';
+  var titulo = repGetVal('rf-titulo')||tipo;
+  return '<div style="background:#0c0e14;padding:18px 22px;display:flex;align-items:center;gap:14px;">'+
+    logoHTML+
+    '<div style="color:#fff;"><div style="font-size:16px;font-weight:900;font-family:Arial;">'+biz+'</div><div style="font-size:11px;color:#666;margin-top:2px;">Sistema de Gestión</div></div>'+
+    '<div style="margin-left:auto;text-align:right;color:#fff;"><div style="font-size:9px;color:#666;font-weight:700;letter-spacing:.5px;">'+tipo.toUpperCase()+'</div><div style="font-size:11px;font-weight:700;margin-top:2px;">'+new Date().toLocaleDateString('es-AR')+'</div></div>'+
+  '</div>'+
+  '<div style="background:#f59e0b;height:3px;"></div>';
+}
+
+function repBuildCtaProv(){
+  var provSel = repGetVal('rf-prov');
+  var desde = repGetVal('rf-desde');
+  var hasta = repGetVal('rf-hasta');
+  var incluir = repGetVal('rf-incluir')||'all';
+  var provs = provSel ? [provSel] : (getProveedoresList?getProveedoresList():[]);
+  if(!provs.length) return '';
+  var rows = '';
+  var totalDeuda=0, totalPagado=0, totalPendFacts=0;
+  provs.forEach(function(prov){
+    var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
+    var movsF = movs.filter(function(m){
+      if(!m.fecha) return true;
+      var p=m.fecha.split('/'); var dFecha = p.length===3?p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'):'';
+      var ok = (!desde||dFecha>=desde) && (!hasta||dFecha<=hasta);
+      if(!ok) return false;
+      if(incluir==='pendientes') return m.tipo==='compra'&&pagoSaldoPendiente(m)>0;
+      if(incluir==='pagos') return m.tipo==='pago';
+      return true;
+    });
+    if(!movsF.length && provs.length>1) return;
+    var saldo=ctaSaldo(prov);
+    totalDeuda+=saldo;
+    movsF.forEach(function(m){ if(m.tipo==='pago') totalPagado+=m.monto; if(m.tipo==='compra'&&pagoSaldoPendiente(m)>0) totalPendFacts++; });
+    if(provs.length>1){
+      rows += '<tr style="background:#f8f9fb;"><td colspan="5" style="padding:10px;font-weight:800;font-size:13px;color:#1a1a2e;">'+esc(prov)+'</td><td style="padding:10px;text-align:right;font-weight:900;font-size:14px;color:'+(saldo<0?'#ef4444':'#22c55e')+';">'+(saldo<0?'-':'+')+'$'+Math.abs(saldo).toLocaleString('es-AR')+'</td></tr>';
+    }
+    movsF.slice().reverse().forEach(function(m){
+      var isC=m.tipo==='compra';
+      var pend=pagoSaldoPendiente(m);
+      var pagado=m.pagos_aplicados||0;
+      var montoAbs=Math.abs(m.monto||0);
+      var pct=montoAbs>0?Math.round(pagado/montoAbs*100):0;
+      var badge=isC?(pend<=0?'<span class="badge pagada">✓ PAGADA</span>':pagado>0?'<span class="badge parcial">PARCIAL '+pct+'%</span>':'<span class="badge pendiente">PENDIENTE</span>'):'<span class="badge pagada">PAGO</span>';
+      var pendStr=isC?'$'+pend.toLocaleString('es-AR'):'—';
+      rows+='<tr><td>'+m.fecha+'</td><td>'+(provs.length>1?'':'')+esc(m.descripcion||'')+'</td><td style="text-align:right;font-weight:700;color:'+(isC?'#ef4444':'#22c55e')+';">'+(isC?'-':'+')+' $'+montoAbs.toLocaleString('es-AR')+'</td><td style="text-align:center;">'+badge+'</td><td style="text-align:right;color:'+(pend>0?'#ef4444':'#888')+';">'+pendStr+'</td></tr>';
+    });
+  });
+  if(!rows) return '';
+  var encabezado = repBizHeader('Cta. Cte. Proveedor');
+  var kpis = provSel?'<div style="display:flex;gap:12px;margin:16px 22px;"><div style="flex:1;background:#f8f9fb;border-left:3px solid #f59e0b;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">SALDO ACTUAL</div><div style="font-size:18px;font-weight:900;color:'+(totalDeuda<0?'#ef4444':'#22c55e')+';margin-top:2px;">'+(totalDeuda<0?'-':'+')+'$'+Math.abs(totalDeuda).toLocaleString('es-AR')+'</div></div><div style="flex:1;background:#f8f9fb;border-left:3px solid #22c55e;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">TOTAL PAGADO</div><div style="font-size:18px;font-weight:900;color:#22c55e;margin-top:2px;">+$'+totalPagado.toLocaleString('es-AR')+'</div></div><div style="flex:1;background:#f8f9fb;border-left:3px solid #ef4444;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">FACTS. PENDIENTES</div><div style="font-size:18px;font-weight:900;color:#f59e0b;margin-top:2px;">'+totalPendFacts+'</div></div></div>':'';
+  return encabezado+kpis+
+    '<div style="padding:0 22px 22px;">'+
+    '<div style="font-size:9px;font-weight:700;color:#888;letter-spacing:.5px;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid #eee;">MOVIMIENTOS</div>'+
+    '<table><thead><tr><th>FECHA</th><th>DESCRIPCIÓN</th><th style="text-align:right;">MONTO</th><th style="text-align:center;">ESTADO</th><th style="text-align:right;">PENDIENTE</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div style="margin-top:14px;padding-top:14px;border-top:2px solid #f59e0b;display:flex;justify-content:space-between;align-items:center;">'+
+      '<span style="font-size:11px;color:#888;">Generado el '+new Date().toLocaleDateString('es-AR')+' · Ferretería Favaro</span>'+
+      '<div><span style="font-size:11px;color:#888;">DEUDA TOTAL: </span><span style="font-size:18px;font-weight:900;color:'+(totalDeuda<0?'#ef4444':'#22c55e')+';">'+(totalDeuda<0?'-':'+')+'$'+Math.abs(totalDeuda).toLocaleString('es-AR')+'</span></div>'+
+    '</div></div>';
+}
+
+function repBuildCtaCli(){
+  var cliSel = repGetVal('rf-cli');
+  var desde = repGetVal('rf-desde');
+  var hasta = repGetVal('rf-hasta');
+  var clis = cliSel ? [cliSel] : Object.keys(ctaCliData||{});
+  if(!clis.length) return '';
+  var rows=''; var totalDeuda=0;
+  clis.forEach(function(cli){
+    var movs=((ctaCliData[cli]&&ctaCliData[cli].movimientos)||[]).filter(function(m){
+      if(!m.fecha) return true;
+      var p=m.fecha.split('/'); var dF=p.length===3?p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'):'';
+      return (!desde||dF>=desde)&&(!hasta||dF<=hasta);
+    });
+    if(!movs.length&&clis.length>1) return;
+    var saldo=ctaCliSaldo(cli); totalDeuda+=saldo;
+    if(clis.length>1) rows+='<tr style="background:#f8f9fb;"><td colspan="4" style="padding:9px;font-weight:800;color:#1a1a2e;">'+esc(cli)+'<span style="margin-left:12px;font-weight:900;color:'+(saldo<0?'#ef4444':'#22c55e')+';">'+(saldo<0?'-':'+')+'$'+Math.abs(saldo).toLocaleString('es-AR')+'</span></td></tr>';
+    movs.slice().reverse().forEach(function(m){
+      var isV=m.tipo==='venta';
+      rows+='<tr><td>'+m.fecha+'</td><td>'+esc(m.descripcion||'')+'</td><td style="text-align:right;font-weight:700;color:'+(isV?'#ef4444':'#22c55e')+';">'+(isV?'-':'+')+' $'+Math.abs(m.monto||0).toLocaleString('es-AR')+'</td><td style="text-align:center;"><span class="badge '+(isV?'pendiente':'pagada')+'">'+(isV?'VENTA':'PAGO')+'</span></td></tr>';
+    });
+  });
+  if(!rows) return '';
+  var saldoTotal=ctaCliSaldo?ctaCliSaldo(cliSel):totalDeuda;
+  var kpi=cliSel?'<div style="margin:14px 22px;padding:10px 14px;background:#f8f9fb;border-left:3px solid #f59e0b;border-radius:6px;display:flex;justify-content:space-between;"><div><div style="font-size:9px;color:#888;font-weight:700;">CLIENTE</div><div style="font-size:15px;font-weight:900;">'+esc(cliSel)+'</div></div><div style="text-align:right;"><div style="font-size:9px;color:#888;font-weight:700;">SALDO</div><div style="font-size:18px;font-weight:900;color:'+(saldoTotal<0?'#ef4444':'#22c55e')+';">'+(saldoTotal<0?'-':'+')+'$'+Math.abs(saldoTotal).toLocaleString('es-AR')+'</div></div></div>':'';
+  return repBizHeader('Cta. Cte. Cliente')+kpi+'<div style="padding:0 22px 22px;"><table><thead><tr><th>FECHA</th><th>DESCRIPCIÓN</th><th style="text-align:right;">MONTO</th><th style="text-align:center;">TIPO</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+function repBuildCaja(){
+  var fecha = repGetVal('rf-fecha')||new Date().toLocaleDateString('es-AR');
+  // Convert ISO to DD/MM/YYYY for comparison
+  var p=fecha.split('-'); var fechaAR=p.length===3?p[2]+'/'+p[1]+'/'+p[0]:fecha;
+  var cajaData = window.cajaData||[];
+  var movsDia = cajaData.filter(function(m){ return m.fecha===fechaAR; });
+  var ingresos=0,egresos=0;
+  movsDia.forEach(function(m){ if(m.tipo==='ingreso') ingresos+=m.monto; else egresos+=m.monto; });
+  var rows = movsDia.map(function(m){
+    var isE=m.tipo==='egreso';
+    return '<tr><td>'+m.hora+'</td><td>'+esc(m.descripcion||'')+'</td><td>'+esc(m.categoria||'')+'</td><td style="text-align:right;font-weight:700;color:'+(isE?'#ef4444':'#22c55e')+';">'+(isE?'-':'+')+' $'+Math.abs(m.monto||0).toLocaleString('es-AR')+'</td></tr>';
+  }).join('');
+  var kpi='<div style="display:flex;gap:12px;margin:14px 22px;"><div style="flex:1;background:#f8f9fb;border-left:3px solid #22c55e;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">INGRESOS</div><div style="font-size:16px;font-weight:900;color:#22c55e;">+$'+ingresos.toLocaleString('es-AR')+'</div></div><div style="flex:1;background:#f8f9fb;border-left:3px solid #ef4444;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">EGRESOS</div><div style="font-size:16px;font-weight:900;color:#ef4444;">-$'+egresos.toLocaleString('es-AR')+'</div></div><div style="flex:1;background:#f8f9fb;border-left:3px solid #f59e0b;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">RESULTADO</div><div style="font-size:16px;font-weight:900;color:#f59e0b;">$'+(ingresos-egresos).toLocaleString('es-AR')+'</div></div></div>';
+  return repBizHeader('Caja Diaria — '+fechaAR)+kpi+'<div style="padding:0 22px 22px;">'+
+    (rows?'<table><thead><tr><th>HORA</th><th>DESCRIPCIÓN</th><th>CATEGORÍA</th><th style="text-align:right;">MONTO</th></tr></thead><tbody>'+rows+'</tbody></table>':
+     '<div style="text-align:center;padding:30px;color:#888;">Sin movimientos para esta fecha</div>')+
+    '</div>';
+}
+
+function repBuildDash(){
+  var desde=repGetVal('rf-desde'); var hasta=repGetVal('rf-hasta');
+  var ventas=(ventasHistorial||[]).filter(function(v){
+    if(!v.fecha) return true;
+    var p=v.fecha.split('/'); var dF=p.length===3?p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'):'';
+    return (!desde||dF>=desde)&&(!hasta||dF<=hasta);
+  });
+  var totalVentas=ventas.reduce(function(s,v){return s+(v.total||0);},0);
+  var totalCompras=0;
+  Object.keys(ctaData||{}).forEach(function(prov){
+    (ctaData[prov].movimientos||[]).forEach(function(m){
+      if(m.tipo!=='compra') return;
+      var p=(m.fecha||'').split('/'); var dF=p.length===3?p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'):'';
+      if((!desde||dF>=desde)&&(!hasta||dF<=hasta)) totalCompras+=Math.abs(m.monto||0);
+    });
+  });
+  var margen=totalVentas>0?Math.round((totalVentas-totalCompras)/totalVentas*100):0;
+  var kpi='<div style="display:flex;gap:12px;margin:14px 22px;"><div style="flex:1;background:#f8f9fb;border-left:3px solid #22c55e;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">VENTAS</div><div style="font-size:16px;font-weight:900;color:#22c55e;">$'+totalVentas.toLocaleString('es-AR')+'</div></div><div style="flex:1;background:#f8f9fb;border-left:3px solid #ef4444;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">COMPRAS</div><div style="font-size:16px;font-weight:900;color:#ef4444;">$'+totalCompras.toLocaleString('es-AR')+'</div></div><div style="flex:1;background:#f8f9fb;border-left:3px solid #f59e0b;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">MARGEN BRUTO</div><div style="font-size:16px;font-weight:900;color:#f59e0b;">'+margen+'%</div></div><div style="flex:1;background:#f8f9fb;border-left:3px solid #3b82f6;border-radius:6px;padding:10px 14px;"><div style="font-size:9px;color:#888;font-weight:700;">Nº VENTAS</div><div style="font-size:16px;font-weight:900;color:#3b82f6;">'+ventas.length+'</div></div></div>';
+  var ventasRows=ventas.slice(0,50).map(function(v){
+    return '<tr><td>'+v.fecha+'</td><td>'+esc(v.cliente||'Consumidor Final')+'</td><td>'+esc(v.medio||'')+'</td><td style="text-align:right;font-weight:700;color:#22c55e;">$'+(v.total||0).toLocaleString('es-AR')+'</td></tr>';
+  }).join('');
+  return repBizHeader('Reporte Dashboard')+kpi+'<div style="padding:0 22px 22px;"><div style="font-size:9px;font-weight:700;color:#888;letter-spacing:.5px;margin-bottom:8px;padding-top:14px;border-top:1px solid #eee;">VENTAS DEL PERÍODO</div>'+
+    (ventasRows?'<table><thead><tr><th>FECHA</th><th>CLIENTE</th><th>MEDIO</th><th style="text-align:right;">TOTAL</th></tr></thead><tbody>'+ventasRows+'</tbody></table>':'<div style="color:#888;text-align:center;padding:20px;">Sin ventas en el período</div>')+
+    '</div>';
+}
+
+function repBuildCatalogo(){
+  var catF=repGetVal('rf-cat'); var provF=repGetVal('rf-prov'); var orden=repGetVal('rf-orden')||'nombre';
+  var cols=Array.from(document.querySelectorAll('.rep-col-pill.on')).map(function(el){return el.getAttribute('data-col');});
+  if(!cols.length) cols=['nombre','precio'];
+  var prods=(products||[]).filter(function(p){
+    if(catF && p.categoria!==catF) return false;
+    if(provF && p.proveedor!==provF) return false;
+    return true;
+  }).sort(function(a,b){
+    if(orden==='precio') return (a.precio||0)-(b.precio||0);
+    if(orden==='cod') return (a.cod_interno||'').localeCompare(b.cod_interno||'');
+    return (a.nombre||'').localeCompare(b.nombre||'');
+  });
+  if(!prods.length) return '';
+  var colLabels={cod:'Código',nombre:'Nombre',marca:'Marca',proveedor:'Proveedor',precio:'Precio',costo:'Costo',stock:'Stock',categoria:'Categoría'};
+  var thead='<tr>'+cols.map(function(c){return '<th style="text-align:'+(c==='precio'||c==='costo'||c==='stock'?'right':'left')+';">'+colLabels[c]+'</th>';}).join('')+'</tr>';
+  var tbody=prods.map(function(p,i){
+    var bg=i%2===0?'':'background:#fafafa;';
+    var tds=cols.map(function(c){
+      var v='—'; var align='left';
+      if(c==='cod') v=p.cod_interno||p.cod_proveedor||'—';
+      else if(c==='nombre') v=esc(p.nombre||'');
+      else if(c==='marca') v=esc(p.marca||'—');
+      else if(c==='proveedor') v=esc(p.proveedor||'—');
+      else if(c==='precio'){ v='$'+(p.precio||0).toLocaleString('es-AR'); align='right'; }
+      else if(c==='costo'){ v='$'+(p.costo||0).toLocaleString('es-AR'); align='right'; }
+      else if(c==='stock'){ v=p.stock!==undefined?p.stock:'—'; align='right'; }
+      else if(c==='categoria') v=esc(p.categoria||'—');
+      return '<td style="text-align:'+align+';">'+v+'</td>';
+    }).join('');
+    return '<tr style="'+bg+'">'+tds+'</tr>';
+  }).join('');
+  var titulo=repGetVal('rf-titulo')||'Lista de Precios';
+  var sub=(catF?'Categoría: '+catF:'')+(provF?' · Proveedor: '+provF:'')+(catF||provF?'':' · Todos los productos')+' · '+prods.length+' artículos';
+  return repBizHeader('Catálogo')+
+    '<div style="padding:14px 22px 6px;"><div style="font-size:15px;font-weight:900;color:#1a1a2e;">'+titulo+'</div><div style="font-size:11px;color:#888;margin-top:2px;">'+sub+'</div></div>'+
+    '<div style="padding:0 22px 22px;"><table><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'+
+    '<div style="margin-top:12px;padding-top:10px;border-top:1px solid #eee;font-size:10px;color:#aaa;text-align:right;">Generado el '+new Date().toLocaleDateString('es-AR')+' · Ferretería Favaro</div>'+
+    '</div>';
+}
+
+// Init when tab opens
+function repInit(){
+  repSetTipo(document.querySelector('.rep-tipo-btn.active'));
+}
 /* ════════════════════════════════════════
    MÓDULO ESTADÍSTICAS
 ════════════════════════════════════════ */
