@@ -8695,7 +8695,6 @@ function pagoDistribuir(){
 }
 
 function savePago() {
-  notify('savePago iniciado','ok');
   var prov = document.getElementById('pago-prov-nombre').value;
   var monto = parseFloat(document.getElementById('pago-monto').value);
   if (!monto || monto <= 0) { notify('Ingresá un monto válido', 'err'); return; }
@@ -8741,7 +8740,6 @@ function savePago() {
       pagado_total: fact.pagos_aplicados
     });
   });
-  notify('Debug: '+dbg, aplicaciones.length?'ok':'err');
 
   // Register payment movement
   var movPago = {
@@ -12763,28 +12761,7 @@ function guardarFacturaProv() {
   notify('✓ Factura registrada' + (descPct > 0 ? ' · Desc. ' + descPct + '% disponible hasta ' + descLim : ''), 'ok');
 }
 
-// Enhanced savePago — apply descuento if selected
-var _origSavePago = savePago;
-savePago = function() {
-  var prov  = document.getElementById('pago-prov-nombre').value;
-  var monto = parseFloat(document.getElementById('pago-monto').value);
-  if (!monto || monto <= 0) { notify('Ingresá un monto válido', 'err'); return; }
-  var forma = document.getElementById('pago-forma').value;
-  var desc  = document.getElementById('pago-desc').value.trim() || forma;
-  if (!ctaData[prov]) ctaData[prov] = { movimientos: [] };
-  ctaData[prov].movimientos.unshift({
-    id: String(genId()),
-    tipo: 'pago',
-    fecha: new Date().toLocaleDateString('es-AR'),
-    descripcion: desc,
-    monto: Math.abs(monto)
-  });
-  saveCta();
-  document.getElementById('modal-pago').style.display = 'none';
-  ctaRenderProvList();
-  ctaSelect(prov);
-  notify('✓ Pago registrado', 'ok');
-};
+// savePago handled by main function above
 
 /* ════════════════════════════════════════
    IMPORTAR / EXPORTAR PROVEEDORES
