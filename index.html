@@ -6285,7 +6285,7 @@ footer{text-align:center;padding:30px 20px;background:#222;color:#888;font-size:
 <!-- MODAL ADMIN / LIMPIAR DATOS -->
 <div id="modal-admin" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.85);align-items:center;justify-content:center;">
   <div style="background:var(--s2);border:1px solid var(--red);border-radius:14px;padding:28px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto;">
-    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-weight:800;font-size:18px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
       🗑 Limpiar datos del sistema
       <button onclick="document.getElementById('modal-admin').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">✕</button>
     </div>
@@ -6300,7 +6300,7 @@ footer{text-align:center;padding:30px 20px;background:#222;color:#888;font-size:
             <div style="font-size:13px;font-weight:800;color:var(--red);">🗑 Reset completo</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px;">Borra absolutamente todo — productos, clientes, ventas, etc.</div>
           </div>
-          <button onclick="resetSistemaCompleto()" style="background:var(--red);border:none;border-radius:7px;padding:8px 16px;color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;cursor:pointer;flex-shrink:0;margin-left:12px;">Borrar todo</button>
+          <button onclick="resetSistemaCompleto()" style="background:var(--red);border:none;border-radius:7px;padding:8px 16px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;flex-shrink:0;margin-left:12px;">Borrar todo</button>
         </div>
       </div>
 
@@ -6388,7 +6388,7 @@ footer{text-align:center;padding:30px 20px;background:#222;color:#888;font-size:
     <!-- Header -->
     <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
       <div>
-        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;">⚠ Revisión antes de importar</div>
+        <div style="font-size:17px;font-weight:800;">⚠ Revisión antes de importar</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px;" id="rev-subtitle">Revisá los conflictos detectados antes de confirmar</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
@@ -6435,7 +6435,7 @@ footer{text-align:center;padding:30px 20px;background:#222;color:#888;font-size:
         <button onclick="revResolverTodos()" style="background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:8px 14px;color:var(--text);font-size:11px;font-weight:700;cursor:pointer;">🔁 Resolver todos automáticamente</button>
         <button onclick="revExportarReporte()" style="background:var(--s3);border:1.5px solid var(--green);border-radius:7px;padding:8px 14px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;">↓ Exportar reporte</button>
         <button onclick="document.getElementById('modal-import-review').style.display='none'" style="background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:8px 14px;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;">← Volver</button>
-        <button onclick="revConfirmar()" id="rev-btn-confirmar" style="margin-left:auto;background:var(--acc);border:none;border-radius:7px;padding:8px 22px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">✓ Confirmar e importar</button>
+        <button onclick="revConfirmar()" id="rev-btn-confirmar" style="margin-left:auto;background:var(--acc);border:none;border-radius:7px;padding:8px 22px;color:#000;font-weight:800;font-size:12px;cursor:pointer;">✓ Confirmar e importar</button>
       </div>
     </div>
   </div>
@@ -6445,7 +6445,7 @@ footer{text-align:center;padding:30px 20px;background:#222;color:#888;font-size:
 <!-- MODAL IMPORTAR PROVEEDORES -->
 <div id="modal-import-prov" style="display:none;position:fixed;inset:0;z-index:9200;background:rgba(0,0,0,.8);align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;">
   <div style="background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:640px;margin:0 auto;">
-    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:17px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-weight:800;font-size:17px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
       📥 Importar Proveedores
       <button onclick="document.getElementById('modal-import-prov').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">✕</button>
     </div>
@@ -6473,7 +6473,7 @@ footer{text-align:center;padding:30px 20px;background:#222;color:#888;font-size:
       <div id="iprov-map-grid" style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;"></div>
       <div style="background:var(--s3);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--muted);" id="iprov-preview-info"></div>
       <div style="display:flex;gap:8px;">
-        <button onclick="iprovConfirmar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;cursor:pointer;" id="iprov-btn-confirmar">✓ Importar</button>
+        <button onclick="iprovConfirmar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-weight:800;font-size:12px;cursor:pointer;" id="iprov-btn-confirmar">✓ Importar</button>
         <button onclick="document.getElementById('modal-import-prov').style.display='none'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:11px 16px;color:var(--muted);font-size:12px;cursor:pointer;">Cancelar</button>
       </div>
     </div>
@@ -8848,6 +8848,220 @@ function savePago() {
 }
 
 
+
+/* ════════════════════════════════════════
+   ESCÁNER DE DUPLICADOS
+════════════════════════════════════════ */
+var _dupGrupos = []; // [{key, nombre, proveedor, items:[{prod, keepIdx}]}]
+
+function dupCerrar(){ document.getElementById('modal-duplicados').style.display='none'; }
+function dupBackup(){ autoBackup(); notify('💾 Backup guardado','ok'); }
+function abrirEscanerDuplicados(){
+  _dupGrupos = [];
+  document.getElementById('modal-duplicados').style.display = 'flex';
+  dupSetStep(1);
+  dupRenderStep1();
+}
+
+function dupSetStep(n){
+  [1,2,3].forEach(function(i){
+    var el = document.getElementById('dup-step-'+i);
+    if(!el) return;
+    var num = document.getElementById('dup-s'+i+'-num');
+    if(i < n){ el.style.opacity='1'; num.style.background='var(--green)'; num.style.color='#000'; num.textContent='✓'; }
+    else if(i === n){ el.style.opacity='1'; num.style.background='var(--acc)'; num.style.color='#000'; num.textContent=String(i); }
+    else { el.style.opacity='.4'; num.style.background='var(--s4)'; num.style.color='var(--muted)'; num.textContent=String(i); }
+  });
+}
+
+function dupRenderStep1(){
+  var body = document.getElementById('dup-body');
+  body.innerHTML =
+    '<div style="text-align:center;padding:30px 20px;">'+
+    '<div style="font-size:36px;margin-bottom:14px;">🔍</div>'+
+    '<div style="font-size:15px;font-weight:800;margin-bottom:8px;">Listo para escanear</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:24px;">Se analizarán <strong>'+products.length.toLocaleString('es-AR')+'</strong> productos buscando duplicados por nombre + proveedor</div>'+
+    '<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:12px 16px;font-size:11px;color:var(--muted);text-align:left;margin-bottom:20px;">'+
+    '• Dos productos son duplicados si tienen el <strong>mismo nombre y el mismo proveedor</strong><br>'+
+    '• Por defecto se conserva el que tiene el <strong>código interno más alto</strong> (importado más recientemente)<br>'+
+    '• Podés cambiar la selección grupo por grupo antes de eliminar'+
+    '</div>'+
+    '<button onclick="dupEscanear()" style="background:var(--acc);border:none;border-radius:9px;padding:12px 32px;font-size:13px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;">🔍 Iniciar escaneo</button>'+
+    '</div>';
+}
+
+function dupEscanear(){
+  var body = document.getElementById('dup-body');
+  body.innerHTML = '<div style="padding:24px;"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Analizando catálogo...</div>'+
+    '<div style="height:6px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;background:linear-gradient(90deg,var(--acc),var(--green));border-radius:3px;transition:width .3s;" id="dup-bar" style="width:0%"></div></div></div>';
+
+  setTimeout(function(){
+    var bar = document.getElementById('dup-bar');
+    if(bar) bar.style.width='60%';
+  }, 100);
+
+  setTimeout(function(){
+    var bar = document.getElementById('dup-bar');
+    if(bar) bar.style.width='100%';
+    setTimeout(function(){
+      // Build groups
+      var groups = {};
+      products.forEach(function(p){
+        var key = (p.nombre||'').trim().toUpperCase() + '|||' + (p.proveedor||'').trim().toUpperCase();
+        if(!groups[key]) groups[key] = [];
+        groups[key].push(p);
+      });
+      _dupGrupos = [];
+      Object.keys(groups).forEach(function(key){
+        var items = groups[key];
+        if(items.length < 2) return;
+        // Sort: keep the one with highest cod_interno (numerically)
+        items.sort(function(a,b){
+          var na = parseInt((a.cod_interno||'').replace(/\D/g,''))||0;
+          var nb = parseInt((b.cod_interno||'').replace(/\D/g,''))||0;
+          return nb - na; // highest first = index 0 = keep
+        });
+        var parts = key.split('|||');
+        _dupGrupos.push({key:key, nombre:parts[0], proveedor:parts[1], items:items, keepIdx:0});
+      });
+      dupSetStep(2);
+      dupRenderStep2();
+    }, 300);
+  }, 1200);
+}
+
+function dupRenderStep2(){
+  var body = document.getElementById('dup-body');
+  var totalElim = _dupGrupos.reduce(function(s,g){ return s + g.items.length - 1; }, 0);
+
+  var kpis = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">'+
+    '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:3px;">GRUPOS DUPLICADOS</div><div style="font-size:20px;font-weight:900;color:var(--red);">'+_dupGrupos.length.toLocaleString('es-AR')+'</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:3px;">A ELIMINAR</div><div style="font-size:20px;font-weight:900;color:var(--red);">'+totalElim.toLocaleString('es-AR')+'</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:3px;">QUEDARÁN</div><div style="font-size:20px;font-weight:900;color:var(--green);">'+(products.length-totalElim).toLocaleString('es-AR')+'</div></div>'+
+  '</div>';
+
+  var alertHTML = '<div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--red);margin-bottom:14px;">⚠️ <strong>Revisá antes de continuar.</strong> Se conserva el código más reciente por defecto. Clickeá cualquier fila para cambiar cuál conservar.</div>';
+
+  var autoBtn = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">'+
+    '<button onclick="dupAutoSelect()" style="background:var(--s3);border:1px solid var(--border2);border-radius:7px;padding:7px 14px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">⚡ Auto-seleccionar más nuevos</button>'+
+  '</div>';
+
+  // Show first 50 groups
+  var show = _dupGrupos.slice(0, 50);
+  var gruposHTML = show.map(function(g, gi){
+    return dupRenderGrupo(g, gi);
+  }).join('');
+
+  var moreHTML = _dupGrupos.length > 50 ?
+    '<div style="text-align:center;padding:14px;background:var(--s3);border-radius:8px;font-size:12px;color:var(--muted);">... y '+(_dupGrupos.length-50)+' grupos más</div>' : '';
+
+  var footer = '<div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px;">'+
+    '<button onclick="dupCerrar()" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">Cancelar</button>'+
+    '<button onclick="dupRenderStep3()" style="background:var(--red);border:none;border-radius:8px;padding:10px 20px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;">Continuar → Confirmar limpieza</button>'+
+  '</div>';
+
+  body.innerHTML = kpis + alertHTML + autoBtn + gruposHTML + moreHTML + footer;
+}
+
+function dupRenderGrupo(g, gi){
+  var rows = g.items.map(function(p, pi){
+    var isKeep = pi === g.keepIdx;
+    var codNum = parseInt((p.cod_interno||'').replace(/\D/g,''))||0;
+    return '<div onclick="dupToggleKeep('+gi+','+pi+')" style="display:grid;grid-template-columns:36px 100px 1fr 80px 60px 80px;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;background:'+(isKeep?'rgba(34,197,94,.04)':'rgba(239,68,68,.03)')+';">'+
+      '<div style="width:18px;height:18px;border-radius:50%;border:2px solid '+(isKeep?'var(--green)':'var(--red)')+';background:'+(isKeep?'var(--green)':'transparent')+';display:flex;align-items:center;justify-content:center;font-size:9px;color:#000;font-weight:900;">'+(isKeep?'✓':'')+'</div>'+
+      '<span style="font-family:monospace;font-size:11px;color:'+(isKeep?'var(--green)':'var(--muted)')+';">'+esc(p.cod_interno||'—')+'</span>'+
+      '<span style="font-size:11px;font-weight:'+(isKeep?'700':'400')+';">'+esc(p.nombre||'')+'</span>'+
+      '<span style="font-size:11px;font-weight:700;color:'+(isKeep?'var(--green)':'var(--muted)')+';">$'+(p.precio||0).toLocaleString('es-AR')+'</span>'+
+      '<span style="font-size:10px;color:var(--muted);">'+(p.margen||0)+'%</span>'+
+      '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;background:'+(isKeep?'rgba(34,197,94,.15)':'rgba(239,68,68,.12)')+';color:'+(isKeep?'var(--green)':'var(--red)')+';">'+(isKeep?'✓ CONSERVAR':'🗑 ELIMINAR')+'</span>'+
+    '</div>';
+  }).join('');
+
+  return '<div style="background:var(--s3);border-radius:9px;margin-bottom:8px;overflow:hidden;border:1px solid var(--border2);">'+
+    '<div style="padding:9px 14px;background:rgba(239,68,68,.05);border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px;">'+
+      '<span style="background:rgba(239,68,68,.15);color:var(--red);font-size:9px;font-weight:800;padding:2px 8px;border-radius:4px;">'+g.items.length+' versiones</span>'+
+      '<span style="font-size:12px;font-weight:800;flex:1;">'+esc(g.nombre)+'</span>'+
+      '<span style="font-size:10px;color:var(--muted);">'+esc(g.proveedor)+'</span>'+
+    '</div>'+
+    rows+
+  '</div>';
+}
+
+function dupToggleKeep(gi, pi){
+  if(_dupGrupos[gi]) _dupGrupos[gi].keepIdx = pi;
+  // Re-render just this group
+  var body = document.getElementById('dup-body');
+  var grupos = body.querySelectorAll('.dup-grupo-wrap');
+  // Simpler: re-render all
+  var scrollY = document.getElementById('modal-duplicados').scrollTop;
+  dupRenderStep2();
+  document.getElementById('modal-duplicados').scrollTop = scrollY;
+}
+
+function dupAutoSelect(){
+  _dupGrupos.forEach(function(g){
+    // Keep index 0 (already sorted highest cod first in dupEscanear)
+    g.keepIdx = 0;
+  });
+  var scrollY = document.getElementById('modal-duplicados').scrollTop;
+  dupRenderStep2();
+  document.getElementById('modal-duplicados').scrollTop = scrollY;
+  notify('⚡ Seleccionados los más recientes en todos los grupos','ok');
+}
+
+function dupRenderStep3(){
+  dupSetStep(3);
+  var body = document.getElementById('dup-body');
+  var totalElim = _dupGrupos.reduce(function(s,g){ return s + g.items.length - 1; }, 0);
+
+  body.innerHTML =
+    '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:14px 16px;margin-bottom:16px;">'+
+    '⚠️ <strong>Estás por eliminar '+totalElim.toLocaleString('es-AR')+' productos.</strong> Esta acción no se puede deshacer fácilmente. Se recomienda hacer un backup antes.'+
+    '</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">'+
+      '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;"><span style="font-size:12px;">Grupos a limpiar</span><strong>'+_dupGrupos.length.toLocaleString('es-AR')+'</strong></div>'+
+      '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;"><span style="font-size:12px;">Productos a eliminar</span><strong style="color:var(--red);">'+totalElim.toLocaleString('es-AR')+'</strong></div>'+
+      '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;"><span style="font-size:12px;">Productos que quedarán</span><strong style="color:var(--green);">'+(products.length-totalElim).toLocaleString('es-AR')+'</strong></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;">'+
+      '<button onclick="dupSetStep(2);dupRenderStep2()" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">← Volver a revisar</button>'+
+      '<button onclick="dupBackup()" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;font-family:inherit;">💾 Backup primero</button>'+
+      '<button onclick="dupEjecutarLimpieza()" style="background:var(--red);border:none;border-radius:8px;padding:10px 20px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;">🗑 Eliminar '+totalElim.toLocaleString('es-AR')+' duplicados</button>'+
+    '</div>';
+}
+
+function dupEjecutarLimpieza(){
+  var idsAEliminar = new Set();
+  _dupGrupos.forEach(function(g){
+    g.items.forEach(function(p, pi){
+      if(pi !== g.keepIdx) idsAEliminar.add(p.id);
+    });
+  });
+  var totalAntes = products.length;
+  products = products.filter(function(p){ return !idsAEliminar.has(p.id); });
+  var eliminados = totalAntes - products.length;
+
+  // Save to Supabase
+  if(sbUser){
+    sb.from('user_config').upsert(
+      {user_id:sbUser.id, key:'products', value:JSON.stringify(products)},
+      {onConflict:'user_id,key'}
+    ).then(function(){}).catch(function(){});
+  }
+
+  // Refresh UI
+  renderTable();
+  var body = document.getElementById('dup-body');
+  body.innerHTML =
+    '<div style="text-align:center;padding:32px 20px;">'+
+    '<div style="font-size:48px;margin-bottom:14px;">✅</div>'+
+    '<div style="font-size:18px;font-weight:900;margin-bottom:8px;color:var(--green);">Limpieza completada</div>'+
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;"><strong style="color:var(--green);">'+eliminados.toLocaleString('es-AR')+'</strong> productos eliminados. El catálogo quedó con <strong>'+products.length.toLocaleString('es-AR')+'</strong> productos.</div>'+
+    '<button onclick="dupCerrar()" style="background:var(--green);border:none;border-radius:8px;padding:11px 28px;font-size:12px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;">✓ Cerrar</button>'+
+    '</div>';
+
+  notify('✓ '+eliminados.toLocaleString('es-AR')+' duplicados eliminados','ok');
+}
 /* ════════════════════════════════════════
    MÓDULO REPORTES PDF
 ════════════════════════════════════════ */
@@ -8960,7 +9174,7 @@ function repImprimir(){
     '.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;display:inline-block;}'+
     '.pagada{background:#dcfce7;color:#16a34a;}.parcial{background:#fef3c7;color:#d97706;}.pendiente{background:#fee2e2;color:#dc2626;}'+
     '@media print{body{margin:0;}}'+
-    '</style></head><body>'+el.innerHTML+'</body></html>';
+'</body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();w.onload=function(){w.print();};
 }
 
@@ -9842,7 +10056,7 @@ function dashKpi(label, val, sub, valColor, accentColor) {
   return '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:15px 18px;position:relative;overflow:hidden;">'+
     '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:'+accentColor+';"></div>'+
     '<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.6px;margin-bottom:6px;">'+label+'</div>'+
-    '<div style="font-family:\'Syne\',sans-serif;font-size:24px;font-weight:800;color:'+valColor+';">'+val+'</div>'+
+    '<div style="font-size:24px;font-weight:800;color:'+valColor+';">'+val+'</div>'+
     '<div style="font-size:11px;color:var(--muted);margin-top:4px;">'+sub+'</div>'+
   '</div>';
 }
@@ -9858,7 +10072,7 @@ function dashCard(title, body, footer) {
 function dashStatBox(label, val) {
   return '<div style="background:var(--s3);border-radius:7px;padding:11px 13px;">'+
     '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;">'+label+'</div>'+
-    '<div style="font-family:\'Syne\',sans-serif;font-size:18px;font-weight:800;">'+val+'</div>'+
+    '<div style="font-size:18px;font-weight:800;">'+val+'</div>'+
   '</div>';
 }
 
@@ -10222,7 +10436,7 @@ function vencRenderKpis() {
 function vencKpi(label, val, color) {
   return '<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">'+
     '<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">'+label+'</div>'+
-    '<div style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:'+color+';">'+val+'</div>'+
+    '<div style="font-size:22px;font-weight:800;color:'+color+';">'+val+'</div>'+
   '</div>';
 }
 
@@ -10478,7 +10692,7 @@ function catMostrarDetalle(catId, subId) {
       '</div>'+
       '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">'+
         dashStatBox('PRODUCTOS', nProds) +
-        '<div style="background:var(--s3);border-radius:7px;padding:11px 13px;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">MARGEN PROM.</div><div style="font-family:\'Syne\',sans-serif;font-size:18px;font-weight:800;color:'+mc+';">'+mProm+'%</div></div>' +
+        '<div style="background:var(--s3);border-radius:7px;padding:11px 13px;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">MARGEN PROM.</div><div style="font-size:18px;font-weight:800;color:'+mc+';">'+mProm+'%</div></div>' +
         dashStatBox('SUBCATEGORÍAS', (cat.subs||[]).length) +
       '</div>'+
     '</div>'+
@@ -11939,7 +12153,7 @@ function stockPanelRenderKpis(){
     return '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;cursor:pointer;">'+
       '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:'+accent+';"></div>'+
       '<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:4px;">'+label+'</div>'+
-      '<div style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:'+col+';">'+val+'</div>'+
+      '<div style="font-size:22px;font-weight:800;color:'+col+';">'+val+'</div>'+
     '</div>';
   }
   kpis.innerHTML =
@@ -11988,7 +12202,7 @@ function stockPanelRender(){
     return '<tr>'+
       '<td style="padding:9px 12px;font-weight:600;">'+(p.nombre||'').slice(0,44)+'</td>'+
       '<td style="padding:9px 12px;font-size:11px;color:var(--muted);">'+(p.proveedor||'—')+'</td>'+
-      '<td style="padding:9px 12px;text-align:center;"><span style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:'+ec[0]+';">'+p.stock+'</span></td>'+
+      '<td style="padding:9px 12px;text-align:center;"><span style="font-size:16px;font-weight:800;color:'+ec[0]+';">'+p.stock+'</span></td>'+
       '<td style="padding:9px 12px;text-align:center;font-size:12px;color:var(--muted);">'+(p.stock_minimo||'—')+'</td>'+
       '<td style="padding:9px 12px;"><div style="height:5px;background:var(--s4);border-radius:3px;"><div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:3px;transition:width .3s;"></div></div></td>'+
       '<td style="padding:9px 12px;text-align:center;"><span style="background:rgba(0,0,0,.2);color:'+ec[1]+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid '+ec[1]+';">'+ec[2]+'</span></td>'+
@@ -13481,7 +13695,7 @@ function compSeleccionar(id){
   var editor = document.getElementById('comp-editor');
   if (!editor) return;
   editor.innerHTML =
-    '<div style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:800;margin-bottom:14px;">'+tipo.label+'</div>'+
+    '<div style="font-size:14px;font-weight:800;margin-bottom:14px;">'+tipo.label+'</div>'+
 
     // Logo
     '<div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;">'+
@@ -13575,7 +13789,7 @@ function compSeleccionar(id){
         '</div>'+
       '</div>'+
     '</div>'+
-    '<button onclick="compGuardar()" style="width:100%;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-family:\'Syne\',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">💾 Guardar configuración</button>';
+    '<button onclick="compGuardar()" style="width:100%;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-weight:800;font-size:12px;cursor:pointer;">💾 Guardar configuración</button>';
 
   // Init formato buttons
   setTimeout(function(){
@@ -14350,7 +14564,7 @@ function promoRenderModal(p) {
     '</div>'+
 
     '<div style="display:flex;gap:8px;">'+
-    '<button onclick="promoGuardar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-family:\'Syne\',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">💾 Guardar</button>'+
+    '<button onclick="promoGuardar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-weight:800;font-size:12px;cursor:pointer;">💾 Guardar</button>'+
     '<button onclick="promoCloseModal()" style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:11px 16px;color:var(--muted);font-size:12px;cursor:pointer;">Cancelar</button>'+
     '</div>';
 
@@ -14690,7 +14904,7 @@ function ccAbrirNuevo(nombreSugerido) {
       '<input id="ccn-marca" placeholder="Ej: Bosch" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;box-sizing:border-box;"></div>'+
     '</div>'+
     '<div style="display:flex;gap:8px;margin-top:4px;">'+
-    '<button onclick="ccNuevoAgregar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-family:\'Syne\',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">➕ Agregar al carrito</button>'+
+    '<button onclick="ccNuevoAgregar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-weight:800;font-size:12px;cursor:pointer;">➕ Agregar al carrito</button>'+
     '<button onclick="document.getElementById(\'ov-cc-nuevo\').style.display=\'none\'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:11px 16px;color:var(--muted);font-size:12px;cursor:pointer;">Cancelar</button>'+
     '</div></div>';
   document.getElementById('ov-cc-nuevo').style.display = 'block';
@@ -16378,14 +16592,14 @@ function cajaRenderCerrada(){
   v.innerHTML='<div style="max-width:520px;margin:0 auto;">'+
     '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:28px;text-align:center;margin-bottom:14px;">'+
       '<div style="font-size:40px;margin-bottom:12px;">🏦</div>'+
-      '<div style="font-family:\'Syne\',sans-serif;font-size:18px;font-weight:800;margin-bottom:6px;">Caja cerrada</div>'+
+      '<div style="font-size:18px;font-weight:800;margin-bottom:6px;">Caja cerrada</div>'+
       '<div style="font-size:12px;color:var(--muted);margin-bottom:20px;">'+new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})+'</div>'+
       '<div style="margin-bottom:16px;">'+
         '<label style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:6px;">FONDO INICIAL (efectivo en caja)</label>'+
         '<input id="caja-fondo-input" type="number" placeholder="Ej: 50000" style="width:100%;font-size:16px;text-align:center;padding:12px;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;color:var(--text);box-sizing:border-box;">'+
         '<div style="font-size:11px;color:var(--muted);margin-top:4px;">El efectivo con el que abrís el día</div>'+
       '</div>'+
-      '<button onclick="cajaAbrir()" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:14px;color:#000;font-family:\'Syne\',sans-serif;font-weight:800;font-size:14px;cursor:pointer;">✓ Abrir caja del día</button>'+
+      '<button onclick="cajaAbrir()" style="width:100%;background:var(--green);border:none;border-radius:9px;padding:14px;color:#000;font-weight:800;font-size:14px;cursor:pointer;">✓ Abrir caja del día</button>'+
     '</div>'+
     '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">'+
       '<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">ÚLTIMOS CIERRES</div>'+
@@ -16444,7 +16658,7 @@ function cajaRenderAbierta(){
     return '<div style="background:var(--s2);border:1px solid '+(isCtaCte?'var(--red)':'var(--border)')+';border-radius:9px;padding:13px;text-align:center;">'+
       '<div style="font-size:20px;margin-bottom:5px;">'+cfg.ico+'</div>'+
       '<div style="font-size:11px;font-weight:700;margin-bottom:3px;">'+cfg.label+'</div>'+
-      '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:'+(isCtaCte?'var(--red)':'var(--text)')+';">$'+formatNum(bm.total)+'</div>'+
+      '<div style="font-size:16px;font-weight:800;color:'+(isCtaCte?'var(--red)':'var(--text)')+';">$'+formatNum(bm.total)+'</div>'+
       '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+bm.count+' transac.</div>'+
     '</div>';
   }).join('');
@@ -16455,7 +16669,7 @@ function cajaRenderAbierta(){
   v.innerHTML=
     '<div style="background:rgba(34,197,94,.08);border:1.5px solid var(--green);border-radius:10px;padding:11px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">'+
       '<div style="display:flex;align-items:center;gap:10px;"><div style="width:9px;height:9px;border-radius:50%;background:var(--green);"></div>'+
-      '<span style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:13px;color:var(--green);">CAJA ABIERTA</span>'+
+      '<span style="font-weight:800;font-size:13px;color:var(--green);">CAJA ABIERTA</span>'+
       '<span style="font-size:11px;color:var(--muted);">desde las '+cajaActual.horaApertura+' · Fondo: $'+formatNum(cajaActual.fondoInicial)+'</span></div>'+
       '<button onclick="cajaCerrar()" style="background:var(--red);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;">⬛ Cerrar caja</button>'+
     '</div>'+
@@ -16591,7 +16805,7 @@ function remMostrarEditor(id){
     '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;">'+
     desdePresupHTML+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'+
-      '<div><div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;">'+r.numero+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">'+r.fecha+'</div></div>'+
+      '<div><div style="font-size:16px;font-weight:800;">'+r.numero+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">'+r.fecha+'</div></div>'+
       '<div style="display:flex;gap:8px;align-items:center;">'+
         '<select id="rem-estado" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;">'+
           ['borrador','pendiente','entregado'].map(function(s){ return '<option value="'+s+'"'+(r.estado===s?' selected':'')+'>'+{borrador:'📝 Borrador',pendiente:'⏳ Pendiente',entregado:'✅ Entregado'}[s]+'</option>'; }).join('')+
@@ -16624,10 +16838,10 @@ function remMostrarEditor(id){
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">'+
       '<span style="font-size:11px;color:var(--muted);">El remito impreso incluye línea de firma del receptor</span>'+
       '<div style="text-align:right;"><div style="font-size:10px;color:var(--muted);">TOTAL</div>'+
-        '<div id="rem-total-display" style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:var(--acc);">$'+formatNum(total)+'</div></div>'+
+        '<div id="rem-total-display" style="font-size:20px;font-weight:800;color:var(--acc);">$'+formatNum(total)+'</div></div>'+
     '</div>'+
     '<div style="display:flex;gap:8px;margin-top:12px;">'+
-      '<button onclick="remGuardar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-family:\'Syne\',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">💾 Guardar remito</button>'+
+      '<button onclick="remGuardar()" style="flex:1;background:var(--acc);border:none;border-radius:8px;padding:11px;color:#000;font-weight:800;font-size:12px;cursor:pointer;">💾 Guardar remito</button>'+
       '<button onclick="remEliminar()" style="background:rgba(239,68,68,.1);border:1px solid var(--red);border-radius:8px;padding:11px 16px;color:var(--red);font-size:11px;cursor:pointer;">🗑</button>'+
     '</div>'+
     '</div>';
@@ -16766,6 +16980,36 @@ function remWA(id){
   else { navigator.clipboard&&navigator.clipboard.writeText(msg); notify('Mensaje copiado al portapapeles','ok'); }
 }
 </script>
+<!-- MODAL ESCÁNER DUPLICADOS -->
+<div id="modal-duplicados" style="display:none;position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.85);align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px;">
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:860px;overflow:hidden;">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:900;">🔍 Escáner de Productos Duplicados</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Detecta productos con mismo nombre y proveedor</div>
+      </div>
+      <button onclick="document.getElementById('modal-duplicados').style.display='none'" style="background:var(--s3);border:none;border-radius:6px;width:28px;height:28px;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <!-- Steps indicator -->
+    <div style="display:flex;background:var(--s3);border-bottom:1px solid var(--border);">
+      <div id="dup-step-1" style="flex:1;padding:10px 14px;display:flex;align-items:center;gap:8px;border-right:1px solid var(--border);">
+        <div id="dup-s1-num" style="width:22px;height:22px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000;flex-shrink:0;">1</div>
+        <div style="font-size:11px;font-weight:700;">Escanear</div>
+      </div>
+      <div id="dup-step-2" style="flex:1;padding:10px 14px;display:flex;align-items:center;gap:8px;border-right:1px solid var(--border);opacity:.4;">
+        <div id="dup-s2-num" style="width:22px;height:22px;border-radius:50%;background:var(--s4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:var(--muted);flex-shrink:0;">2</div>
+        <div style="font-size:11px;font-weight:700;">Revisar</div>
+      </div>
+      <div id="dup-step-3" style="flex:1;padding:10px 14px;display:flex;align-items:center;gap:8px;opacity:.4;">
+        <div id="dup-s3-num" style="width:22px;height:22px;border-radius:50%;background:var(--s4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:var(--muted);flex-shrink:0;">3</div>
+        <div style="font-size:11px;font-weight:700;">Limpiar</div>
+      </div>
+    </div>
+    <!-- Body dinámico -->
+    <div id="dup-body" style="padding:20px;"></div>
+  </div>
+</div>
+
 </div><!-- /main-content -->
 </div><!-- /sidebar+main layout -->
 
@@ -17164,6 +17408,14 @@ if ('serviceWorker' in navigator) {
       <div style="background:var(--s3);border-radius:9px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
         <div><div style="font-size:12px;font-weight:700;">📋 Movimientos de stock</div><div style="font-size:10px;color:var(--muted);">Historial de entradas y salidas de stock</div></div>
         <button onclick="limpiarSeccion('stock_mov')" style="background:rgba(239,68,68,.1);border:1.5px solid var(--red);border-radius:6px;padding:6px 14px;color:var(--red);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;margin-left:12px;">Borrar</button>
+      </div>
+
+    </div>
+
+      <!-- Escáner duplicados -->
+      <div style="background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.3);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:12px;font-weight:800;color:var(--acc);">🔍 Escáner de duplicados</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Detecta y elimina productos repetidos del catálogo</div></div>
+        <button onclick="document.getElementById('modal-admin').style.display='none';abrirEscanerDuplicados();" style="background:var(--acc);border:none;border-radius:7px;padding:8px 16px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;cursor:pointer;flex-shrink:0;margin-left:12px;">Escanear</button>
       </div>
 
     </div>
