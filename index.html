@@ -8659,7 +8659,7 @@ function ctaSelect(prov) {
 
 function openPagoModal(prov) {
   // Reset selection state FIRST before populating
-  _pagoSelIdx = []; _pagoFactMap = {};
+  _pagoSelOrder = []; _pagoFactMap = {};
   document.getElementById('pago-prov-nombre').value = prov;
   document.getElementById('pago-prov-lbl').textContent = prov.toUpperCase();
   document.getElementById('pago-monto').value = '';
@@ -8691,9 +8691,11 @@ function openPagoModal(prov) {
           '<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+f.fecha+'</div></div>'+
           '<div style="font-size:14px;font-weight:900;color:var(--red);">-'+formatNum(pendiente)+'</div>'+
         '</div>'+
+        '<div style="position:relative;">'+
         '<div class="pago-fact-aplicado" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);justify-content:space-between;align-items:center;">'+
           '<span style="font-size:10px;color:var(--muted);">SE APLICA</span>'+
           '<span class="pago-fact-val" style="font-size:13px;font-weight:900;color:var(--green);"></span>'+
+        '</div>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -8710,34 +8712,66 @@ function pagoSaldoPendiente(mov){
 // Map of idx → fact object for direct access (set in openPagoModal)
 var _pagoFactMap = {};
 // Set of selected indices
-var _pagoSelIdx = [];
+// Tracks selection ORDER (array of movidx in click order)
+var _pagoSelOrder = [];
 
 function pagoToggleFact(row){
+  var movidx = row.getAttribute('data-movidx');
   var sel = row.classList.contains('pago-sel');
   if(sel){
+    // Deselect: remove from order array
+    _pagoSelOrder = _pagoSelOrder.filter(function(x){ return x !== movidx; });
     row.classList.remove('pago-sel');
     row.style.borderColor = 'var(--border2)';
     row.style.background = 'var(--s3)';
     var apl = row.querySelector('.pago-fact-aplicado');
     if(apl) apl.style.display = 'none';
+    // Update order numbers on remaining selected rows
+    pagoActualizarNumeros();
   } else {
+    // Select: add to order array
+    _pagoSelOrder.push(movidx);
     row.classList.add('pago-sel');
     row.style.borderColor = 'var(--green)';
     row.style.background = 'rgba(34,197,94,.05)';
     var apl2 = row.querySelector('.pago-fact-aplicado');
     if(apl2) apl2.style.display = 'flex';
+    // Show selection order badge
+    var num = row.querySelector('.pago-sel-num');
+    if(num) num.textContent = _pagoSelOrder.length;
   }
   pagoDistribuir();
+}
+
+function pagoActualizarNumeros(){
+  // Re-number the badges after a deselection
+  var list = document.getElementById('pago-facturas-list');
+  if(!list) return;
+  list.querySelectorAll('.pago-fact-row.pago-sel').forEach(function(row){
+    var movidx = row.getAttribute('data-movidx');
+    var pos = _pagoSelOrder.indexOf(movidx);
+    var num = row.querySelector('.pago-sel-num');
+    if(num) num.textContent = pos >= 0 ? (pos+1) : '';
+  });
 }
 
 function pagoDistribuir(){
   var monto = parseFloat(document.getElementById('pago-monto').value)||0;
   var list = document.getElementById('pago-facturas-list');
-  var allRows = list ? list.querySelectorAll('.pago-fact-row') : [];
+  if(!list){ document.getElementById('pago-dist-total').textContent = '$0'; return; }
+  var allRows = list.querySelectorAll('.pago-fact-row');
+  // Reset all to $0 first
+  allRows.forEach(function(row){
+    var valEl = row.querySelector('.pago-fact-val');
+    if(valEl && !row.classList.contains('pago-sel')){ valEl.textContent = '$0'; }
+    if(valEl && row.classList.contains('pago-sel')){ valEl.textContent = '$0'; valEl.style.color='var(--muted)'; }
+  });
+  // Distribute in SELECTION ORDER
   var resto = monto;
   var totalDist = 0;
-  allRows.forEach(function(row){
-    if(!row.classList.contains('pago-sel')) return;
+  _pagoSelOrder.forEach(function(movidx){
+    var row = list.querySelector('[data-movidx="'+movidx+'"]');
+    if(!row) return;
     var pendiente = parseFloat(row.getAttribute('data-pendiente'))||0;
     var aplica = Math.min(resto, pendiente);
     resto -= aplica;
