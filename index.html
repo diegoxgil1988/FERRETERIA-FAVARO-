@@ -8981,7 +8981,20 @@ function repBuildCtaProv(){
       var pct=montoAbs>0?Math.round(pagado/montoAbs*100):0;
       var badge=isC?(pend<=0?'<span class="badge pagada">✓ PAGADA</span>':pagado>0?'<span class="badge parcial">PARCIAL '+pct+'%</span>':'<span class="badge pendiente">PENDIENTE</span>'):'<span class="badge pagada">PAGO</span>';
       var pendStr=isC?'$'+pend.toLocaleString('es-AR'):'—';
-      rows+='<tr><td>'+m.fecha+'</td><td>'+(provs.length>1?'':'')+esc(m.descripcion||'')+'</td><td style="text-align:right;font-weight:700;color:'+(isC?'#ef4444':'#22c55e')+';">'+(isC?'-':'+')+' $'+montoAbs.toLocaleString('es-AR')+'</td><td style="text-align:center;">'+badge+'</td><td style="text-align:right;color:'+(pend>0?'#ef4444':'#888')+';">'+pendStr+'</td></tr>';
+      // Aplicaciones detail for pago rows
+      var aplDetail='';
+      if(!isC && m.aplicaciones && m.aplicaciones.length){
+        aplDetail='<div style="margin-top:4px;padding-left:8px;border-left:2px solid #f59e0b;">'+
+          m.aplicaciones.map(function(a){
+            var aOk=a.aplicado>=(a.monto_fact-1);
+            return '<div style="font-size:10px;color:#666;display:flex;justify-content:space-between;padding:2px 0;">'+
+              '<span>→ '+esc(a.desc||'Factura')+'</span>'+
+              '<span style="font-weight:700;color:'+(aOk?'#16a34a':'#d97706')+';">$'+Math.round(a.aplicado).toLocaleString('es-AR')+(aOk?' ✓':' parcial')+'</span>'+
+            '</div>';
+          }).join('')+
+        '</div>';
+      }
+      rows+='<tr><td>'+m.fecha+'</td><td>'+esc(m.descripcion||'')+aplDetail+'</td><td style="text-align:right;font-weight:700;color:'+(isC?'#ef4444':'#22c55e')+';">'+(isC?'-':'+')+' $'+montoAbs.toLocaleString('es-AR')+'</td><td style="text-align:center;">'+badge+'</td><td style="text-align:right;color:'+(pend>0?'#ef4444':'#888')+';">'+pendStr+'</td></tr>';
     });
   });
   if(!rows) return '';
