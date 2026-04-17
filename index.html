@@ -6375,6 +6375,12 @@ footer{text-align:center;padding:30px 20px;background:#222;color:#888;font-size:
 
     </div>
 
+      <!-- Escáner duplicados -->
+      <div style="background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.3);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:12px;font-weight:800;color:var(--acc);">🔍 Escáner de duplicados</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Detecta y elimina productos repetidos del catálogo</div></div>
+        <button onclick="document.getElementById('modal-admin').style.display='none';abrirEscanerDuplicados();" style="background:var(--acc);border:none;border-radius:7px;padding:8px 16px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;cursor:pointer;flex-shrink:0;margin-left:12px;">Escanear</button>
+      </div>
+
     <div style="margin-top:16px;text-align:center;">
       <button onclick="document.getElementById('modal-admin').style.display='none'" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:10px 24px;color:var(--muted);font-size:12px;cursor:pointer;">Cerrar</button>
     </div>
