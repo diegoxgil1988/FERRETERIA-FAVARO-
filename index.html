@@ -2295,7 +2295,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
         <div id="cta-deuda-total" style="font-size:20px;font-weight:800;color:var(--red);">$0</div>
       </div>
     </div>
-    <div id="cta-detail">
+    <div id="cta-detail" style="overflow-y:auto;">
       <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;">
         Seleccioná un proveedor para ver los movimientos
       </div>
@@ -8599,7 +8599,7 @@ function ctaSelect(prov) {
     }
     var aplicHTML='';
     if(!isCompra&&m.aplicaciones&&m.aplicaciones.length){
-      aplicHTML='<div style="font-size:10px;margin-top:4px;">'+m.aplicaciones.map(function(a){var aOk=a.aplicado>=(a.monto_fact-1);return '<div>-> '+esc(a.desc||'')+'$'+formatNum(a.aplicado)+(aOk?' OK':' parcial')+'</div>';}).join('')+'</div>';
+      aplicHTML='<div style="font-size:10px;margin-top:4px;">'+m.aplicaciones.map(function(a){var aOk=a.aplicado>=(a.monto_fact-1);return '<div>→ '+esc(a.desc||'')+' $'+formatNum(a.aplicado)+(aOk?' OK':' parcial')+'</div>';}).join('')+'</div>';
     }
     var signo=isCompra?'-':'+';
     return '<div style="border-left:'+borderLeft+';background:var(--s3);border-radius:7px;padding:9px 12px;margin-bottom:6px;">'
@@ -8798,25 +8798,21 @@ function savePago() {
 
   // Read selected rows directly from DOM, access ctaData using data-movidx
   var listEl = document.getElementById('pago-facturas-list');
-  var selRows = listEl ? listEl.querySelectorAll('.pago-fact-row.pago-sel') : [];
-  // Fallback: also check all rows with pago-sel class anywhere in document
-  if(!selRows || selRows.length === 0){
-    selRows = document.querySelectorAll('#pago-facturas-list .pago-fact-row.pago-sel');
+  // Fallback: if _pagoSelOrder is empty, collect from DOM
+  if(_pagoSelOrder.length === 0 && listEl){
+    listEl.querySelectorAll('.pago-fact-row.pago-sel').forEach(function(r){
+      _pagoSelOrder.push(r.getAttribute('data-movidx'));
+    });
   }
   var aplicaciones = [];
   var resto = monto;
-  var dbg = 'rows:'+selRows.length+' movs:'+movs.length;
 
-  selRows.forEach(function(row){
-    var movidx = parseInt(row.getAttribute('data-movidx'));
-    dbg += ' idx:'+movidx;
-    if(isNaN(movidx)) { dbg += '(NaN)'; return; }
-    var fact = movs[movidx]; // DIRECT access by array index
-    if(!fact){ dbg += '(nofact)'; return; }
-    if(fact.tipo !== 'compra'){ dbg += '('+fact.tipo+')'; return; }
+  // Distribute in SELECTION ORDER
+  _pagoSelOrder.forEach(function(movidx){
+    var fact = movs[parseInt(movidx)]; // DIRECT object reference by array index
+    if(!fact || fact.tipo !== 'compra') return;
     var pendiente = pagoSaldoPendiente(fact);
     var aplica = Math.min(resto, pendiente);
-    dbg += ' aplica:$'+Math.round(aplica);
     if(aplica <= 0) return;
     resto -= aplica;
     // Update fact directly (same object as in ctaData)
@@ -9022,7 +9018,7 @@ function repBuildCtaProv(){
           m.aplicaciones.map(function(a){
             var aOk=a.aplicado>=(a.monto_fact-1);
             return '<div style="font-size:10px;color:#666;display:flex;justify-content:space-between;padding:2px 0;">'+
-              '<span>→ '+esc(a.desc||'Factura')+'</span>'+
+              '<span>→ '+esc(a.desc||'Factura')+'</span> '+
               '<span style="font-weight:700;color:'+(aOk?'#16a34a':'#d97706')+';">$'+Math.round(a.aplicado).toLocaleString('es-AR')+(aOk?' ✓':' parcial')+'</span>'+
             '</div>';
           }).join('')+
