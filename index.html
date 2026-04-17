@@ -9039,16 +9039,26 @@ function dupRenderStep3(){
 }
 
 function dupEjecutarLimpieza(){
+  // Debug: check state
+  var dbg = 'grupos:'+_dupGrupos.length;
+  if(_dupGrupos.length > 0){
+    var g0 = _dupGrupos[0];
+    dbg += ' items:'+g0.items.length+' keepIdx:'+g0.keepIdx;
+    if(g0.items.length > 0) dbg += ' id0:'+g0.items[0].id+' type:'+typeof g0.items[0].id;
+  }
+  dbg += ' products:'+products.length;
+  notify('Debug: '+dbg, 'ok');
+  
   var idsAEliminar = new Set();
   _dupGrupos.forEach(function(g){
     g.items.forEach(function(p, pi){
       if(pi !== g.keepIdx){
-        // Store both string and number versions to handle type mismatches
         idsAEliminar.add(String(p.id));
         idsAEliminar.add(p.id);
       }
     });
   });
+  notify('A eliminar: '+idsAEliminar.size+' ids', idsAEliminar.size>0?'ok':'err');
   var totalAntes = products.length;
   products = products.filter(function(p){ 
     return !idsAEliminar.has(p.id) && !idsAEliminar.has(String(p.id));
