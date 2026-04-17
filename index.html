@@ -9059,9 +9059,16 @@ function dupEjecutarLimpieza(){
     });
   });
   notify('A eliminar: '+idsAEliminar.size+' ids', idsAEliminar.size>0?'ok':'err');
+  // Debug: check what id field products use
+  var sample = products[0];
+  var sampleKeys = sample ? Object.keys(sample).filter(function(k){ return k.toLowerCase().includes('id') || k==='cod_interno'; }).join(',') : 'none';
+  var sampleId = sample ? (sample.id+' / '+sample.cod_interno) : 'none';
+  notify('Sample product id fields: '+sampleKeys+' = '+sampleId, 'ok');
   var totalAntes = products.length;
-  products = products.filter(function(p){ 
-    return !idsAEliminar.has(p.id) && !idsAEliminar.has(String(p.id));
+  // Try filtering by multiple possible id fields
+  products = products.filter(function(p){
+    var pid = p.id; var spid = String(p.id);
+    return !idsAEliminar.has(pid) && !idsAEliminar.has(spid);
   });
   var eliminados = totalAntes - products.length;
   if(eliminados === 0){
