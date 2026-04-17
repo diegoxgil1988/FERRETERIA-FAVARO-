@@ -9042,12 +9042,22 @@ function dupEjecutarLimpieza(){
   var idsAEliminar = new Set();
   _dupGrupos.forEach(function(g){
     g.items.forEach(function(p, pi){
-      if(pi !== g.keepIdx) idsAEliminar.add(p.id);
+      if(pi !== g.keepIdx){
+        // Store both string and number versions to handle type mismatches
+        idsAEliminar.add(String(p.id));
+        idsAEliminar.add(p.id);
+      }
     });
   });
   var totalAntes = products.length;
-  products = products.filter(function(p){ return !idsAEliminar.has(p.id); });
+  products = products.filter(function(p){ 
+    return !idsAEliminar.has(p.id) && !idsAEliminar.has(String(p.id));
+  });
   var eliminados = totalAntes - products.length;
+  if(eliminados === 0){
+    notify('No se eliminó ningún producto — verificá la selección','err');
+    return;
+  }
 
   // Save to Supabase
   if(sbUser){
