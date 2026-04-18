@@ -2473,7 +2473,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     </div>
     <div style="padding:14px 18px;display:flex;flex-direction:column;gap:12px;">
       <input id="pago-prov-nombre" type="hidden">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
         <div>
           <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MONTO *</div>
           <input id="pago-monto" type="number" placeholder="0" oninput="pagoDistribuir()" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:9px 11px;color:var(--text);font-size:16px;font-weight:800;font-family:inherit;box-sizing:border-box;text-align:right;">
@@ -2483,6 +2483,10 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
           <select id="pago-forma" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:9px 10px;color:var(--text);font-size:12px;font-family:inherit;">
             <option>💵 Efectivo</option><option>💳 Transferencia</option><option>🏦 Cheque</option><option>💳 Tarjeta</option>
           </select>
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">FECHA</div>
+          <input id="pago-fecha" type="date" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:9px 10px;color:var(--text);font-size:12px;font-family:inherit;">
         </div>
       </div>
       <!-- Facturas pendientes -->
@@ -8672,6 +8676,7 @@ function openPagoModal(prov) {
   document.getElementById('pago-prov-lbl').textContent = prov.toUpperCase();
   document.getElementById('pago-monto').value = '';
   document.getElementById('pago-desc').value = '';
+  document.getElementById('pago-fecha').value = new Date().toISOString().split('T')[0];
   // Build invoice list
   var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
   // Initialize saldo_pendiente on compras that don't have it yet
@@ -8799,7 +8804,10 @@ function savePago() {
   if (!monto || monto <= 0) { notify('Ingresá un monto válido', 'err'); return; }
   var forma = document.getElementById('pago-forma').value.replace(/[💵💳🏦]/g,'').trim();
   var desc = document.getElementById('pago-desc').value.trim() || ('Pago — '+forma);
-  var today = new Date().toLocaleDateString('es-AR');
+  var pagoFechaInput = document.getElementById('pago-fecha').value;
+  var today = pagoFechaInput
+    ? (function(){ var p=pagoFechaInput.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; })()
+    : new Date().toLocaleDateString('es-AR');
 
   if (!ctaData[prov]) ctaData[prov] = { movimientos: [] };
   var movs = ctaData[prov].movimientos;
