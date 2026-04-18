@@ -9047,8 +9047,6 @@ function dupEjecutarLimpieza(){
     if(g0.items.length > 0) dbg += ' id0:'+g0.items[0].id+' type:'+typeof g0.items[0].id;
   }
   dbg += ' products:'+products.length;
-  notify('Debug: '+dbg, 'ok');
-  
   var idsAEliminar = new Set();
   _dupGrupos.forEach(function(g){
     g.items.forEach(function(p, pi){
@@ -9058,17 +9056,21 @@ function dupEjecutarLimpieza(){
       }
     });
   });
-  notify('A eliminar: '+idsAEliminar.size+' ids', idsAEliminar.size>0?'ok':'err');
-  // Debug: check what id field products use
-  var sample = products[0];
-  var sampleKeys = sample ? Object.keys(sample).filter(function(k){ return k.toLowerCase().includes('id') || k==='cod_interno'; }).join(',') : 'none';
-  var sampleId = sample ? (sample.id+' / '+sample.cod_interno) : 'none';
-  notify('Sample product id fields: '+sampleKeys+' = '+sampleId, 'ok');
+  // Build set of OBJECT REFERENCES to eliminate (most reliable)
+  var objsAEliminar = new Set();
+  _dupGrupos.forEach(function(g){
+    g.items.forEach(function(p, pi){
+      if(pi !== g.keepIdx) objsAEliminar.add(p);
+    });
+  });
+  
   var totalAntes = products.length;
-  // Try filtering by multiple possible id fields
   products = products.filter(function(p){
-    var pid = p.id; var spid = String(p.id);
-    return !idsAEliminar.has(pid) && !idsAEliminar.has(spid);
+    // Try by object reference first, then by id
+    if(objsAEliminar.has(p)) return false;
+    if(idsAEliminar.has(p.id)) return false;
+    if(idsAEliminar.has(String(p.id))) return false;
+    return true;
   });
   var eliminados = totalAntes - products.length;
   if(eliminados === 0){
