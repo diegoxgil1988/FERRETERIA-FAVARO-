@@ -9056,20 +9056,24 @@ function dupEjecutarLimpieza(){
       }
     });
   });
-  // Build set of OBJECT REFERENCES to eliminate (most reliable)
+  // Build set of cod_interno keys to eliminate (most reliable unique key)
+  var codsAEliminar = new Set();
   var objsAEliminar = new Set();
   _dupGrupos.forEach(function(g){
     g.items.forEach(function(p, pi){
-      if(pi !== g.keepIdx) objsAEliminar.add(p);
+      if(pi !== g.keepIdx){
+        objsAEliminar.add(p);
+        if(p.cod_interno) codsAEliminar.add(p.cod_interno);
+        if(p.id !== undefined){ idsAEliminar.add(p.id); idsAEliminar.add(String(p.id)); }
+      }
     });
   });
   
   var totalAntes = products.length;
   products = products.filter(function(p){
-    // Try by object reference first, then by id
     if(objsAEliminar.has(p)) return false;
-    if(idsAEliminar.has(p.id)) return false;
-    if(idsAEliminar.has(String(p.id))) return false;
+    if(p.cod_interno && codsAEliminar.has(p.cod_interno)) return false;
+    if(idsAEliminar.has(p.id) || idsAEliminar.has(String(p.id))) return false;
     return true;
   });
   var eliminados = totalAntes - products.length;
@@ -9087,7 +9091,7 @@ function dupEjecutarLimpieza(){
   }
 
   // Refresh UI
-  renderTable();
+  renderCat();
   var body = document.getElementById('dup-body');
   body.innerHTML =
     '<div style="text-align:center;padding:32px 20px;">'+
