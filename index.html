@@ -9082,12 +9082,28 @@ function dupEjecutarLimpieza(){
     return;
   }
 
-  // Save to Supabase
+  // Delete from Supabase products table (correct table)
   if(sbUser){
-    sb.from('user_config').upsert(
-      {user_id:sbUser.id, key:'products', value:JSON.stringify(products)},
-      {onConflict:'user_id,key'}
-    ).then(function(){}).catch(function(){});
+    var idsArr = Array.from(idsAEliminar).filter(function(x){ return typeof x === 'number' || (typeof x === 'string' && x.length > 0 && !isNaN(Number(x))); }).map(Number);
+    // Also collect numeric ids from codsAEliminar via the removed products
+    var numIds = [];
+    _dupGrupos.forEach(function(g){
+      g.items.forEach(function(p, pi){
+        if(pi !== g.keepIdx && p.id !== undefined){
+          var nid = Number(p.id);
+          if(!isNaN(nid)) numIds.push(nid);
+        }
+      });
+    });
+    if(numIds.length > 0){
+      // Delete in batches of 100
+      var batches = [];
+      for(var bi=0; bi<numIds.length; bi+=100) batches.push(numIds.slice(bi,bi+100));
+      batches.forEach(function(batch){
+        sb.from('products').delete().in('id', batch).eq('user_id', sbUser.id)
+          .then(function(){}).catch(function(e){ console.error('delete error',e); });
+      });
+    }
   }
 
   // Refresh UI
