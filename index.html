@@ -8581,7 +8581,16 @@ function ctaSelect(prov) {
   var ahorroTotal = 0;
   var hoyMs = new Date().setHours(0,0,0,0);
 
-  var movsHTML = movs.length ? movs.map(function(m) {
+  // Sort movimientos
+  var _ctaOrden = window._ctaOrden || 'reciente';
+  var movsOrdenados = movs.slice().sort(function(a, b){
+    var fa = parseDateAR(a.fecha||'01/01/2000').getTime();
+    var fb = parseDateAR(b.fecha||'01/01/2000').getTime();
+    return _ctaOrden === 'antiguo' ? fa - fb : fb - fa;
+  });
+
+  var movsHTML = movsOrdenados.length ? movsOrdenados.map(function(m) {
+    var movIdx = movs.indexOf(m); // keep real index for edit/delete
     var isCompra = m.tipo==='compra';
     var descHTML = '';
     if (isCompra && m.desc_pct && m.desc_pct > 0 && m.desc_fecha_limite) {
@@ -8599,7 +8608,6 @@ function ctaSelect(prov) {
       }
     }
     var borderLeft = (isCompra && m.desc_pct > 0 && m.desc_fecha_limite && !m.desc_aplicado && Math.round((parseDateAR(m.desc_fecha_limite).getTime()-hoyMs)/86400000)>0) ? '3px solid var(--green)' : 'none';
-    var movIdx = movs.indexOf(m);
     var tieneItemsProv=(m.items&&m.items.length)||(m.detalle&&m.detalle.length);
     var progressHTML='';
     if(isCompra){
@@ -8614,15 +8622,21 @@ function ctaSelect(prov) {
       aplicHTML='<div style="font-size:10px;margin-top:4px;">'+m.aplicaciones.map(function(a){var aOk=a.aplicado>=(a.monto_fact-1);return '<div>→ '+esc(a.desc||'')+' $'+formatNum(a.aplicado)+(aOk?' OK':' parcial')+'</div>';}).join('')+'</div>';
     }
     var signo=isCompra?'-':'+';
+    var tipoBadge = isCompra
+      ? '<span style="background:rgba(239,68,68,.12);color:var(--red);font-size:9px;font-weight:800;padding:3px 8px;border-radius:4px;">🧾 Factura</span>'
+      : '<span style="background:rgba(34,197,94,.12);color:var(--green);font-size:9px;font-weight:800;padding:3px 8px;border-radius:4px;">💸 Pago</span>';
+    var editBtn = isCompra
+      ? '<button onclick="ctaEditarFactura(decodeURIComponent(\''+encodeURIComponent(prov)+'\'),'+movIdx+')" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:12px;padding:3px 6px;color:var(--acc);" title="Editar">✏️</button>'
+      : '<button onclick="ctaEditarPago(decodeURIComponent(\''+encodeURIComponent(prov)+'\'),'+movIdx+')" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:12px;padding:3px 6px;color:var(--acc);" title="Editar">✏️</button>';
     return '<div style="border-left:'+borderLeft+';background:var(--s3);border-radius:7px;padding:9px 12px;margin-bottom:6px;">'
-      +'<div style="display:grid;grid-template-columns:90px 1fr auto 80px 28px 28px 28px;gap:8px;align-items:start;">'
+      +'<div style="display:grid;grid-template-columns:90px 1fr auto 90px 30px 30px 30px;gap:8px;align-items:start;">'
       +'<div style="font-size:11px;color:var(--muted);">'+m.fecha+'</div>'
       +'<div><div style="font-size:12px;font-weight:600;">'+(m.descripcion||'')+'</div>'+descHTML+aplicHTML+'</div>'
-      +'<div style="font-size:13px;font-weight:800;color:'+(isCompra?'var(--red)':'var(--green)')+';">'+signo+'$'+Math.abs(m.monto).toLocaleString('es-AR')+'</div>'
-      +'<span style="background:'+(isCompra?'rgba(239,68,68,.12)':'rgba(34,197,94,.12)')+';color:'+(isCompra?'var(--red)':'var(--green)')+';font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-align:center;">'+(isCompra?'COMPRA':'PAGO')+'</span>'
-      +'<button data-detprov="'+encodeURIComponent(prov)+'" data-detidx="'+movIdx+'" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:11px;padding:3px 5px;color:var(--acc);">📋</button>'
-      +(isCompra?'<button onclick="ctaEditarFactura(decodeURIComponent(\''+encodeURIComponent(prov)+'\'),'+movIdx+')" style="background:none;border:none;color:var(--acc);cursor:pointer;font-size:13px;padding:2px;" title="Editar">✏️</button>':'')
-      +'<button onclick="ctaEliminarMov(decodeURIComponent(\''+encodeURIComponent(prov)+'\'),'+movIdx+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px;">🗑</button>'
+      +'<div style="font-size:13px;font-weight:800;color:'+(isCompra?'var(--red)':'var(--green)')+';">'+(isCompra?'-':'+')+' $'+Math.abs(m.monto).toLocaleString('es-AR')+'</div>'
+      +tipoBadge
+      +'<button data-detprov="'+encodeURIComponent(prov)+'" data-detidx="'+movIdx+'" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:12px;padding:3px 6px;color:var(--muted);" title="Detalle">🔍</button>'
+      +editBtn
+      +'<button onclick="ctaEliminarMov(decodeURIComponent(\''+encodeURIComponent(prov)+'\'),'+movIdx+')" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:12px;padding:3px 6px;color:var(--red);" title="Eliminar">🗑</button>'
       +'</div>'+progressHTML+'</div>';
   }).join('') : '<div style="font-size:12px;color:var(--muted);padding:12px 0;">Sin movimientos aún</div>';
 
@@ -8632,6 +8646,8 @@ function ctaSelect(prov) {
       '<div style="flex:1;"><div style="font-size:12px;font-weight:800;color:var(--green);">' + descuentosDisponibles.length + ' factura' + (descuentosDisponibles.length>1?'s':'') + ' con descuento disponible</div>' +
       '<div style="font-size:11px;color:var(--muted);">Ahorrás $' + ahorroTotal.toLocaleString('es-AR') + ' si pagás antes del vencimiento</div></div>' +
     '</div>' : '';
+
+  var _ctaOrden = window._ctaOrden || 'reciente';
 
   detail.innerHTML =
     '<div style="display:flex;flex-direction:column;gap:12px;">' +
@@ -8800,6 +8816,39 @@ function pagoDistribuir(){
 }
 
 function savePago() {
+  var modal = document.getElementById('modal-pago');
+  var editIdx = modal ? modal.getAttribute('data-edit-idx') : null;
+  var editProv = modal ? modal.getAttribute('data-edit-prov') : null;
+  if(editIdx !== null && editIdx !== ''){
+    // EDIT MODE
+    var prov = document.getElementById('pago-prov-nombre').value;
+    var monto = parseFloat(document.getElementById('pago-monto').value);
+    if(!monto||monto<=0){ notify('Ingresá un monto válido','err'); return; }
+    var forma = document.getElementById('pago-forma').value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜ ]/g,'').trim();
+    var pagoFechaInput = document.getElementById('pago-fecha').value;
+    var fecha = pagoFechaInput ? (function(){ var p=pagoFechaInput.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; })() : new Date().toLocaleDateString('es-AR');
+    var movs = ctaData[prov] && ctaData[prov].movimientos;
+    if(movs && movs[parseInt(editIdx)]){
+      var m = movs[parseInt(editIdx)];
+      m.monto = Math.abs(monto);
+      m.forma = forma;
+      m.fecha = fecha;
+      m.descripcion = document.getElementById('pago-desc').value.trim() || forma;
+    }
+    if(modal){ modal.removeAttribute('data-edit-idx'); modal.removeAttribute('data-edit-prov'); }
+    var fl = document.getElementById('pago-facturas-list');
+    if(fl) fl.style.display='';
+    saveCta();
+    modal.style.display='none';
+    ctaRenderProvList();
+    ctaSelect(prov);
+    notify('✓ Pago actualizado','ok');
+    return;
+  }
+  // Restore facturas list if hidden
+  var fl2 = document.getElementById('pago-facturas-list');
+  if(fl2) fl2.style.display='';
+  if(modal){ modal.removeAttribute('data-edit-idx'); modal.removeAttribute('data-edit-prov'); }
   var prov = document.getElementById('pago-prov-nombre').value;
   var monto = parseFloat(document.getElementById('pago-monto').value);
   if (!monto || monto <= 0) { notify('Ingresá un monto válido', 'err'); return; }
@@ -13409,6 +13458,38 @@ function mfactCalcDesc() {
 }
 
 
+
+function ctaEditarPago(prov, movIdx){
+  var movs = ctaData[prov] && ctaData[prov].movimientos;
+  if(!movs) return;
+  var m = movs[movIdx];
+  if(!m || m.tipo !== 'pago') return;
+  // Fill pago modal with existing data
+  document.getElementById('pago-prov-nombre').value = prov;
+  document.getElementById('pago-monto').value = Math.abs(m.monto||0);
+  // Set forma
+  var formaEl = document.getElementById('pago-forma');
+  if(formaEl && m.forma){
+    for(var i=0;i<formaEl.options.length;i++){
+      if(formaEl.options[i].text.includes(m.forma)||formaEl.options[i].value===m.forma){ formaEl.selectedIndex=i; break; }
+    }
+  }
+  // Set fecha
+  var fechaEl = document.getElementById('pago-fecha');
+  if(fechaEl && m.fecha){
+    var p=m.fecha.split('/');
+    if(p.length===3) fechaEl.value=p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+  }
+  document.getElementById('pago-desc').value = m.descripcion||'';
+  // Store edit context
+  document.getElementById('modal-pago').setAttribute('data-edit-idx', movIdx);
+  document.getElementById('modal-pago').setAttribute('data-edit-prov', prov);
+  document.getElementById('modal-pago').style.display = 'flex';
+  // Hide facturas list in edit mode
+  var fl = document.getElementById('pago-facturas-list');
+  if(fl) fl.style.display='none';
+  var ft = document.querySelector('#modal-pago [style*="FACTURAS PENDIENTES"]');
+}
 function ctaEditarFactura(prov, movIdx){
   var movs = ctaData[prov] && ctaData[prov].movimientos;
   if(!movs) return;
@@ -16461,7 +16542,7 @@ function ctaCliMostrarDetalle(nombre){
     '</div>'+
     '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
-        '<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;">MOVIMIENTOS</div>'+
+        '<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">MOVIMIENTOS</div>'+
         '<div style="display:flex;gap:8px;">'+
           '<button id="ctacli-btn-sinprecio" style="background:rgba(245,158,11,.1);border:1.5px solid var(--acc);border-radius:6px;padding:6px 12px;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer;">📦 Cargar sin precio</button>'+
         '</div>'+
