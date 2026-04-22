@@ -7978,8 +7978,15 @@ function agendaAbrirSeleccionFactura(nombre, monto){
           var ico2 = diasRest<=3?'🔴':'⏰';
           urgente = diasRest<=7;
           vencHTML = '<div style="margin-top:6px;background:rgba(34,197,94,.07);border-radius:5px;padding:4px 8px;font-size:10px;font-weight:700;color:'+col+';">'+ico2+' Desc. '+f.desc_pct+'% antes del '+f.desc_fecha_limite+' · quedan '+diasRest+' día'+(diasRest!==1?'s':'')+' · ahorrás '+agendaFmt(ahorro)+'</div>';
-        } else if(diasRest<=0){
-          vencHTML = '<div style="margin-top:6px;font-size:10px;color:var(--muted);">✗ Desc. '+f.desc_pct+'% vencido el '+f.desc_fecha_limite+'</div>';
+        } else {
+          var diasVenc = Math.abs(diasRest);
+          var idxF = i;
+          var forzado = f._desc_forzar;
+          vencHTML = '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;">'+
+            '<span style="font-size:10px;font-weight:700;color:var(--red);">❌ Desc. '+f.desc_pct+'% vencido — '+diasVenc+' día'+(diasVenc!==1?'s':'')+' atrasado</span>'+
+            '<button onclick="pagoForzarDesc('+idxF+');event.stopPropagation();" style="background:'+(forzado?'var(--green)':'var(--s4)')+';border:1px solid '+(forzado?'var(--green)':'var(--border2)')+';border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;color:'+(forzado?'#000':'var(--muted)')+';cursor:pointer;">'+
+            (forzado?'✓ Aplicado':'Aplicar igual')+'</button>'+
+          '</div>';
         }
       }
       var borderU = urgente?'var(--acc)':'var(--border2)';
@@ -8741,6 +8748,21 @@ function openPagoModal(prov) {
 }
 
 function pagoSaldoPendiente(mov){
+  var base = mov.saldo_pendiente !== undefined ? mov.saldo_pendiente : Math.abs(mov.monto||0);
+  if(mov.desc_pct && mov.desc_fecha_limite && !mov.desc_aplicado && base > 0){
+    var limMs = parseDateAR(mov.desc_fecha_limite).getTime();
+    var hoyMs = new Date().setHours(0,0,0,0);
+    // Apply if within deadline OR if manually overridden
+    if(limMs >= hoyMs || mov._desc_forzar){
+      var ahorro = Math.round(Math.abs(mov.monto||0) * mov.desc_pct / 100);
+      return Math.max(0, base - ahorro);
+    }
+  }
+  return base;
+}
+
+// Raw saldo sin descuento (para cálculos internos)
+function pagoSaldoBase(mov){
   if(mov.saldo_pendiente !== undefined) return mov.saldo_pendiente;
   return Math.abs(mov.monto||0);
 }
@@ -8751,6 +8773,17 @@ var _pagoFactMap = {};
 // Tracks selection ORDER (array of movidx in click order)
 var _pagoSelOrder = [];
 
+
+function pagoForzarDesc(factIdx){
+  var prov = document.getElementById('pago-prov-nombre').value;
+  var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
+  var facturas = movs.filter(function(m){ return m.tipo==='compra' && pagoSaldoBase(m)>0; }).slice().reverse();
+  var f = facturas[factIdx];
+  if(!f) return;
+  f._desc_forzar = !f._desc_forzar;
+  // Re-open modal to refresh display
+  openPagoModal(prov);
+}
 function pagoToggleFact(row){
   var movidx = row.getAttribute('data-movidx');
   var sel = row.classList.contains('pago-sel');
@@ -8891,6 +8924,11 @@ function savePago() {
     if(fact.saldo_pendiente===undefined) fact.saldo_pendiente = Math.abs(fact.monto||0);
     fact.saldo_pendiente = Math.max(0, fact.saldo_pendiente - aplica);
     fact.pagos_aplicados = (fact.pagos_aplicados||0) + aplica;
+    // Mark discount as applied if used
+    if(fact.desc_pct && fact.desc_fecha_limite && !fact.desc_aplicado){
+      var limMs2 = parseDateAR(fact.desc_fecha_limite).getTime();
+      if(new Date().setHours(0,0,0,0) <= limMs2) fact.desc_aplicado = true;
+    }
     aplicaciones.push({
       fact_id: fact.id,
       desc: fact.descripcion||'Factura',
