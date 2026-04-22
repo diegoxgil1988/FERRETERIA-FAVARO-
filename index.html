@@ -8609,19 +8609,33 @@ function ctaSelect(prov) {
         descuentosDisponibles.push({mov: m, diasRest, ahorro});
         ahorroTotal += ahorro;
       } else if (diasRest <= 0 && !m.desc_aplicado) {
-        descHTML = '<div style="font-size:10px;color:var(--muted);margin-top:3px;">✗ Desc. ' + m.desc_pct + '% vencido el ' + m.desc_fecha_limite + '</div>';
+        var diasVenc = Math.abs(diasRest);
+        descHTML = '<div style="font-size:10px;font-weight:700;color:var(--red);margin-top:3px;display:flex;align-items:center;gap:5px;"><span style="background:rgba(239,68,68,.15);border-radius:3px;padding:1px 6px;">❌ DESCUENTO VENCIDO</span> <span style="color:var(--muted);font-weight:400;">hace ' + diasVenc + ' día' + (diasVenc!==1?'s':'') + ' · perdés $' + ahorro.toLocaleString('es-AR') + '</span></div>';
       } else if (m.desc_aplicado) {
         descHTML = '<div style="font-size:10px;color:var(--green);margin-top:3px;">✓ Desc. ' + m.desc_pct + '% aplicado</div>';
       }
     }
     var borderLeft = (isCompra && m.desc_pct > 0 && m.desc_fecha_limite && !m.desc_aplicado && Math.round((parseDateAR(m.desc_fecha_limite).getTime()-hoyMs)/86400000)>0) ? '3px solid var(--green)' : 'none';
+    // Override border to red if invoice is overdue (calculated later in progressHTML)
+    var _eVencidaCheck = false;
+    if(isCompra && pagoSaldoPendiente(m)>0 && m.desc_dias && m.fecha){ try{ _eVencidaCheck = (parseDateAR(m.fecha).getTime()+(m.desc_dias*86400000)) < hoyMs; }catch(e){} }
+    if(_eVencidaCheck) borderLeft = '3px solid var(--red)';
     var tieneItemsProv=(m.items&&m.items.length)||(m.detalle&&m.detalle.length);
     var progressHTML='';
     if(isCompra){
       var montoFact=Math.abs(m.monto||0),pagadoFact=m.pagos_aplicados||0,pendienteFact=pagoSaldoPendiente(m);
       var pct=montoFact>0?Math.round(pagadoFact/montoFact*100):0;
-      var eColor=pendienteFact<=0?'var(--green)':pagadoFact>0?'var(--acc)':'var(--red)';
-      var eTxt=pendienteFact<=0?'PAGADA':pagadoFact>0?'PARCIAL $'+formatNum(pendienteFact)+' pend.':'PENDIENTE';
+      // Check if invoice is overdue (past payment term)
+      var eVencida = false;
+      if(pendienteFact > 0 && m.desc_dias && m.fecha){
+        try {
+          var fechaFactMs = parseDateAR(m.fecha).getTime();
+          var plazoMs = fechaFactMs + (m.desc_dias * 86400000);
+          eVencida = plazoMs < hoyMs;
+        } catch(e){}
+      }
+      var eColor = pendienteFact<=0 ? 'var(--green)' : eVencida ? 'var(--red)' : pagadoFact>0 ? 'var(--acc)' : 'var(--muted)';
+      var eTxt = pendienteFact<=0 ? 'PAGADA' : eVencida ? ('⚠ VENCIDA $'+formatNum(pendienteFact)+' pend.') : pagadoFact>0 ? ('PARCIAL $'+formatNum(pendienteFact)+' pend.') : 'PENDIENTE';
       progressHTML='<div style="margin-top:6px;"><span style="color:'+eColor+';font-size:9px;font-weight:800;">'+eTxt+'</span> <span style="font-size:9px;color:var(--muted);">$'+formatNum(pagadoFact)+'/'+formatNum(montoFact)+'</span><div style="height:4px;background:var(--s4);border-radius:2px;margin-top:3px;"><div style="height:100%;background:'+eColor+';width:'+pct+'%;"></div></div></div>';
     }
     var aplicHTML='';
