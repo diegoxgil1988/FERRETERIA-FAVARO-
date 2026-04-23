@@ -8572,9 +8572,33 @@ function ctaRegistrarCompra(provNombre, monto, nroFactura, fecha) {
 function ctaSaldo(prov) {
   if (!ctaData[prov]) return 0;
   return ctaData[prov].movimientos.reduce(function(sum, m) {
-    var monto = Math.abs(m.monto||0);
-    // compra = negativo (le debemos), pago = positivo (pagamos)
-    return sum + (m.tipo==='compra' ? -monto : monto);
+    if(m.tipo === 'compra'){
+      // Use effective amount: if fully paid use 0, if pending use pagoSaldoPendiente
+      // This respects applied discounts correctly
+      var efectivo;
+      if(m.saldo_pendiente !== undefined){
+        // saldo_pendiente already accounts for discount absorption
+        efectivo = m.saldo_pendiente + (m.pagos_aplicados || 0);
+      } else if(m.desc_pct && m.desc_aplicado){
+        var ahorro = Math.round(Math.abs(m.monto||0) * m.desc_pct / 100);
+        efectivo = Math.abs(m.monto||0) - ahorro;
+      } else if(m.desc_pct && m.desc_fecha_limite && !m.desc_aplicado){
+        // Descuento activo o forzado: usar monto con descuento
+        var limMs = parseDateAR(m.desc_fecha_limite).getTime();
+        var hoyMs = new Date().setHours(0,0,0,0);
+        if(limMs >= hoyMs || m._desc_forzar){
+          var ahorro2 = Math.round(Math.abs(m.monto||0) * m.desc_pct / 100);
+          efectivo = Math.abs(m.monto||0) - ahorro2;
+        } else {
+          efectivo = Math.abs(m.monto||0);
+        }
+      } else {
+        efectivo = Math.abs(m.monto||0);
+      }
+      return sum - efectivo;
+    } else {
+      return sum + Math.abs(m.monto||0);
+    }
   }, 0);
 }
 
