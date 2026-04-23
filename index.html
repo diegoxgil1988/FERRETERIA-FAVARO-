@@ -2827,89 +2827,57 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 
 <!-- ═══════════ PAGE: FINANZAS ═══════════ -->
-<div class="page" id="page-finanzas" style="padding:0;">
-  <!-- Tabs internos -->
-  <div style="display:flex;gap:0;background:var(--s2);border-bottom:1px solid var(--border);">
-    <button class="fin-tab active" onclick="finTab(this,'dashboard')" style="padding:12px 20px;border:none;border-bottom:2px solid var(--acc);background:transparent;color:var(--text);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">📊 Dashboard</button>
-    <button class="fin-tab" onclick="finTab(this,'gastos')" style="padding:12px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">💸 Gastos</button>
+<div class="page" id="page-finanzas" style="padding:0;display:flex;flex-direction:column;">
+  <!-- Header con breadcrumb y tabs -->
+  <div style="background:var(--s2);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:0;flex-shrink:0;">
+    <button id="fin-back-btn" onclick="finGoBack()" style="display:none;background:var(--s3);border:1px solid var(--border2);border-radius:7px;padding:6px 12px;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;font-family:inherit;margin-right:12px;align-items:center;gap:5px;">← Volver</button>
+    <button class="fin-tab active" onclick="finTab(this,'dashboard')" style="padding:13px 18px;border:none;border-bottom:2px solid var(--acc);background:transparent;color:var(--text);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">📊 Dashboard</button>
+    <button class="fin-tab" onclick="finTab(this,'gastos')" style="padding:13px 18px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">💸 Gastos</button>
+    <div id="fin-bread" style="margin-left:auto;font-size:10px;color:var(--muted);"></div>
   </div>
-  <!-- Dashboard panel -->
-  <div id="fin-panel-dashboard" style="padding:20px;overflow-y:auto;max-height:calc(100vh - 110px);">
-    <!-- KPIs -->
-    <div id="fin-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
-    <!-- Row 1: Compras vs Pagos + Torta -->
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;">
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">COMPRAS VS PAGOS — Últimos 12 meses</div>
-        <canvas id="fin-chart-barras" height="180"></canvas>
-      </div>
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">ESTADO DE FACTURAS</div>
-        <canvas id="fin-chart-donut" height="180"></canvas>
-        <div id="fin-donut-legend" style="margin-top:10px;font-size:10px;"></div>
-      </div>
+  <!-- Content area -->
+  <div style="flex:1;overflow-y:auto;" id="fin-content">
+    <!-- Dashboard view -->
+    <div id="fin-view-dashboard" style="padding:18px;display:flex;flex-direction:column;gap:12px;">
+      <div id="fin-kpis" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;"></div>
+      <div id="fin-main-cards" style="display:grid;grid-template-columns:2fr 1fr;gap:12px;"></div>
+      <div id="fin-bottom-cards" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;"></div>
     </div>
-    <!-- Row 2: Ranking proveedores + Próximos vencimientos -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">TOP 10 PROVEEDORES POR DEUDA</div>
-        <div id="fin-ranking-prov"></div>
-      </div>
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">PRÓXIMOS VENCIMIENTOS</div>
-        <div id="fin-vencimientos"></div>
-      </div>
-    </div>
-    <!-- Row 3: Gastos operativos del mes -->
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">GASTOS OPERATIVOS — Resumen mensual</div>
-      <div id="fin-gastos-resumen" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;"></div>
-    </div>
-  </div>
-  <!-- Gastos panel -->
-  <div id="fin-panel-gastos" style="display:none;padding:20px;overflow-y:auto;max-height:calc(100vh - 110px);">
-    <!-- Agregar gasto -->
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:800;margin-bottom:14px;">+ Registrar gasto operativo</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;">
-        <div>
-          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">CATEGORÍA</div>
-          <select id="fg-cat" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;">
-            <option>🔌 Servicios (luz, gas, agua)</option>
-            <option>🔧 Mantenimiento</option>
-            <option>🚚 Flete / Envíos</option>
-            <option>💼 Sueldos / Personal</option>
-            <option>📦 Insumos</option>
-            <option>🏠 Alquiler</option>
-            <option>📱 Telefonía / Internet</option>
-            <option>🧾 Impuestos / Tasas</option>
-            <option>🛡 Seguros</option>
-            <option>➕ Otro</option>
-          </select>
+    <!-- Detail views -->
+    <div id="fin-view-detail" style="display:none;padding:18px;display:none;flex-direction:column;gap:12px;"></div>
+    <!-- Gastos view -->
+    <div id="fin-panel-gastos" style="display:none;padding:20px;">
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:14px;">+ Registrar gasto operativo</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;">
+          <div>
+            <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">CATEGORÍA</div>
+            <select id="fg-cat" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;">
+              <option>🔌 Servicios (luz, gas, agua)</option><option>🔧 Mantenimiento</option><option>🚚 Flete / Envíos</option><option>💼 Sueldos / Personal</option><option>📦 Insumos</option><option>🏠 Alquiler</option><option>📱 Telefonía / Internet</option><option>🧾 Impuestos / Tasas</option><option>🛡 Seguros</option><option>➕ Otro</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">DESCRIPCIÓN</div>
+            <input id="fg-desc" type="text" placeholder="Ej: Factura luz Abril" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MONTO</div>
+            <input id="fg-monto" type="number" placeholder="0" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">FECHA</div>
+            <input id="fg-fecha" type="date" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <button onclick="finAgregarGasto()" style="background:var(--acc);border:none;border-radius:7px;padding:9px 16px;font-size:12px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;">+ Agregar</button>
         </div>
-        <div>
-          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">DESCRIPCIÓN</div>
-          <input id="fg-desc" type="text" placeholder="Ej: Factura luz Abril" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
-        </div>
-        <div>
-          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">MONTO</div>
-          <input id="fg-monto" type="number" placeholder="0" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
-        </div>
-        <div>
-          <div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">FECHA</div>
-          <input id="fg-fecha" type="date" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;">
-        </div>
-        <button onclick="finAgregarGasto()" style="background:var(--acc);border:none;border-radius:7px;padding:9px 16px;font-size:12px;font-weight:800;color:#000;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Agregar</button>
       </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);">Mes:</span>
+        <input id="fg-filtro-mes" type="month" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit;" oninput="finRenderGastos()">
+        <div id="fg-total-mes" style="margin-left:auto;font-size:13px;font-weight:800;color:var(--red);"></div>
+      </div>
+      <div id="fin-gastos-lista"></div>
     </div>
-    <!-- Filtro mes -->
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);">Mes:</div>
-      <input id="fg-filtro-mes" type="month" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit;" oninput="finRenderGastos()">
-      <div id="fg-total-mes" style="margin-left:auto;font-size:13px;font-weight:800;color:var(--red);"></div>
-    </div>
-    <!-- Lista gastos -->
-    <div id="fin-gastos-lista"></div>
   </div>
 </div>
 <!-- /page-finanzas -->
@@ -9333,26 +9301,30 @@ function dupEjecutarLimpieza(){
 ════════════════════════════════════════ */
 var finGastos = [];
 var finGastosKey = 'fin_gastos_v1';
+var _finHistory = [];
+var _finCurrentView = 'dashboard';
 
 function finTab(el, panel){
   document.querySelectorAll('.fin-tab').forEach(function(b){
     b.style.borderBottomColor='transparent'; b.style.color='var(--muted)';
   });
   el.style.borderBottomColor='var(--acc)'; el.style.color='var(--text)';
-  document.getElementById('fin-panel-dashboard').style.display = panel==='dashboard'?'block':'none';
+  document.getElementById('fin-view-dashboard').style.display = panel==='dashboard'?'flex':'none';
+  document.getElementById('fin-view-detail').style.display = 'none';
   document.getElementById('fin-panel-gastos').style.display = panel==='gastos'?'block':'none';
+  document.getElementById('fin-back-btn').style.display = 'none';
+  document.getElementById('fin-bread').textContent = '';
+  _finHistory = []; _finCurrentView = 'dashboard';
   if(panel==='dashboard') finRenderDashboard();
   if(panel==='gastos') finRenderGastos();
 }
 
 function finInit(){
-  // Load gastos from Supabase
   if(sbUser){
     sb.from('user_config').select('value').eq('user_id',sbUser.id).eq('key',finGastosKey).maybeSingle()
       .then(function(r){ try{ if(r.data) finGastos=JSON.parse(r.data.value); }catch(e){} finRenderDashboard(); })
       .catch(function(){ finRenderDashboard(); });
   } else { finRenderDashboard(); }
-  // Set default month filter
   var hoy = new Date();
   var mes = hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0');
   var fgm = document.getElementById('fg-filtro-mes');
@@ -9363,336 +9335,487 @@ function finInit(){
 
 function finSaveGastos(){
   if(!sbUser) return;
-  sb.from('user_config').upsert(
-    {user_id:sbUser.id, key:finGastosKey, value:JSON.stringify(finGastos)},
-    {onConflict:'user_id,key'}
-  ).then(function(){}).catch(function(){});
+  sb.from('user_config').upsert({user_id:sbUser.id,key:finGastosKey,value:JSON.stringify(finGastos)},{onConflict:'user_id,key'})
+    .then(function(){}).catch(function(){});
 }
 
 function finAgregarGasto(){
-  var cat = document.getElementById('fg-cat').value;
-  var desc = document.getElementById('fg-desc').value.trim();
-  var monto = parseFloat(document.getElementById('fg-monto').value);
-  var fecha = document.getElementById('fg-fecha').value;
-  if(!monto||monto<=0){ notify('Ingresá un monto','err'); return; }
-  if(!fecha){ notify('Ingresá una fecha','err'); return; }
-  finGastos.unshift({ id:String(genId()), cat:cat, desc:desc||cat, monto:monto, fecha:fecha });
+  var cat=document.getElementById('fg-cat').value;
+  var desc=document.getElementById('fg-desc').value.trim();
+  var monto=parseFloat(document.getElementById('fg-monto').value);
+  var fecha=document.getElementById('fg-fecha').value;
+  if(!monto||monto<=0){notify('Ingresá un monto','err');return;}
+  if(!fecha){notify('Ingresá una fecha','err');return;}
+  finGastos.unshift({id:String(genId()),cat:cat,desc:desc||cat,monto:monto,fecha:fecha});
   finSaveGastos();
   document.getElementById('fg-desc').value='';
   document.getElementById('fg-monto').value='';
   finRenderGastos();
-  finRenderDashboard();
   notify('✓ Gasto registrado','ok');
 }
 
 function finEliminarGasto(id){
   if(!confirm('¿Eliminar este gasto?')) return;
-  finGastos = finGastos.filter(function(g){ return g.id!==id; });
+  finGastos=finGastos.filter(function(g){return g.id!==id;});
   finSaveGastos();
   finRenderGastos();
-  finRenderDashboard();
 }
 
 function finRenderGastos(){
-  var filtroMes = document.getElementById('fg-filtro-mes');
-  var mes = filtroMes ? filtroMes.value : '';
-  var lista = finGastos.filter(function(g){
-    if(!mes) return true;
-    return g.fecha && g.fecha.startsWith(mes);
-  });
-  var total = lista.reduce(function(s,g){ return s+(g.monto||0); }, 0);
-  var totEl = document.getElementById('fg-total-mes');
-  if(totEl) totEl.textContent = 'Total: -$'+total.toLocaleString('es-AR');
-  var el = document.getElementById('fin-gastos-lista');
-  if(!el) return;
-  if(!lista.length){
-    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px;">Sin gastos en este período</div>';
-    return;
-  }
-  el.innerHTML = lista.map(function(g){
-    var d = g.fecha ? g.fecha.split('-') : [];
-    var fechaStr = d.length===3 ? d[2]+'/'+d[1]+'/'+d[0] : g.fecha;
+  var filtroMes=document.getElementById('fg-filtro-mes');
+  var mes=filtroMes?filtroMes.value:'';
+  var lista=finGastos.filter(function(g){return !mes||(g.fecha&&g.fecha.startsWith(mes));});
+  var total=lista.reduce(function(s,g){return s+(g.monto||0);},0);
+  var totEl=document.getElementById('fg-total-mes');
+  if(totEl) totEl.textContent='Total: -$'+total.toLocaleString('es-AR');
+  var el=document.getElementById('fin-gastos-lista'); if(!el) return;
+  if(!lista.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px;">Sin gastos en este período</div>';return;}
+  el.innerHTML=lista.map(function(g){
+    var d=g.fecha?g.fecha.split('-'):[];
+    var fechaStr=d.length===3?d[2]+'/'+d[1]+'/'+d[0]:g.fecha;
     return '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;margin-bottom:7px;display:flex;align-items:center;gap:10px;">'+
-      '<div style="flex:1;">'+
-        '<div style="font-size:12px;font-weight:700;">'+esc(g.cat)+'</div>'+
-        (g.desc!==g.cat?'<div style="font-size:11px;color:var(--muted);margin-top:1px;">'+esc(g.desc)+'</div>':'')+
-        '<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+fechaStr+'</div>'+
-      '</div>'+
+      '<div style="flex:1;"><div style="font-size:12px;font-weight:700;">'+esc(g.cat)+'</div>'+
+      (g.desc!==g.cat?'<div style="font-size:11px;color:var(--muted);">'+esc(g.desc)+'</div>':'')+
+      '<div style="font-size:10px;color:var(--muted);">'+fechaStr+'</div></div>'+
       '<div style="font-size:14px;font-weight:900;color:var(--red);">-$'+(g.monto||0).toLocaleString('es-AR')+'</div>'+
-      '<button onclick="finEliminarGasto(\''+g.id+'\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px;">🗑</button>'+
+      '<button data-gid="'+g.id+'" onclick="finEliminarGasto(this.getAttribute(\'data-gid\'))" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;">🗑</button>'+
     '</div>';
   }).join('');
 }
 
-function finRenderDashboard(){
-  finRenderKPIs();
-  finRenderBarras();
-  finRenderDonut();
-  finRenderRanking();
-  finRenderVencimientos();
-  finRenderGastosResumen();
-}
-
+// ── HELPERS ──
 function finGetMeses(n){
-  var meses = [];
-  var d = new Date();
+  var meses=[]; var d=new Date();
   for(var i=n-1;i>=0;i--){
-    var m = new Date(d.getFullYear(), d.getMonth()-i, 1);
-    meses.push({ year:m.getFullYear(), month:m.getMonth(), label:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][m.getMonth()]+' '+String(m.getFullYear()).slice(2) });
+    var m=new Date(d.getFullYear(),d.getMonth()-i,1);
+    meses.push({year:m.getFullYear(),month:m.getMonth(),label:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][m.getMonth()]+' '+String(m.getFullYear()).slice(2)});
   }
   return meses;
 }
 
-function finMovsAllProvs(){
-  var all = [];
+function finMovsAll(){
+  var all=[];
   Object.keys(ctaData||{}).forEach(function(prov){
-    (ctaData[prov].movimientos||[]).forEach(function(m){ all.push(Object.assign({},m,{prov:prov})); });
+    (ctaData[prov].movimientos||[]).forEach(function(m){all.push(Object.assign({},m,{prov:prov}));});
   });
   return all;
 }
 
-function finRenderKPIs(){
-  var el = document.getElementById('fin-kpis');
-  if(!el) return;
-  var movs = finMovsAllProvs();
-  var hoy = new Date();
-  var mesActual = hoy.getMonth()+'/'+hoy.getFullYear();
-
-  // Total deuda
-  var deudaTotal = 0;
-  Object.keys(ctaData||{}).forEach(function(p){ var s=ctaSaldo(p); if(s<0) deudaTotal+=Math.abs(s); });
-
-  // Compras y pagos del mes
-  var comprasMes=0, pagosMes=0;
-  movs.forEach(function(m){
+function finMovMes(movs, mes){
+  return movs.filter(function(m){
     var p=(m.fecha||'').split('/');
-    if(p.length===3 && (parseInt(p[1])-1)+'/'+p[2]===mesActual){
-      if(m.tipo==='compra') comprasMes+=Math.abs(m.monto||0);
-      if(m.tipo==='pago') pagosMes+=Math.abs(m.monto||0);
-    }
+    return p.length===3&&parseInt(p[1])-1===mes.month&&parseInt(p[2])===mes.year;
   });
-
-  // Facturas vencidas
-  var hoyMs = new Date().setHours(0,0,0,0);
-  var factsVencidas = 0;
-  movs.forEach(function(m){
-    if(m.tipo==='compra' && pagoSaldoPendiente(m)>0 && m.desc_dias && m.fecha){
-      try{ if((parseDateAR(m.fecha).getTime()+(m.desc_dias*86400000))<hoyMs) factsVencidas++; }catch(e){}
-    }
-  });
-
-  // Gastos mes
-  var gastosMes = finGastos.filter(function(g){ return g.fecha && g.fecha.startsWith(hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')); })
-    .reduce(function(s,g){ return s+(g.monto||0); },0);
-
-  var kpis = [
-    {l:'DEUDA TOTAL PROVEED.', v:'-$'+deudaTotal.toLocaleString('es-AR'), c:'var(--red)', b:'rgba(239,68,68,.06)'},
-    {l:'COMPRAS DEL MES', v:'$'+comprasMes.toLocaleString('es-AR'), c:'var(--text)', b:'var(--s3)'},
-    {l:'PAGADO DEL MES', v:'$'+pagosMes.toLocaleString('es-AR'), c:'var(--green)', b:'rgba(34,197,94,.06)'},
-    {l:'GASTOS OPERATIVOS MES', v:'$'+gastosMes.toLocaleString('es-AR'), c:'var(--acc)', b:'rgba(245,158,11,.06)'},
-    {l:'FACTURAS VENCIDAS', v:String(factsVencidas), c:factsVencidas>0?'var(--red)':'var(--green)', b:'var(--s3)'},
-  ];
-  el.style.gridTemplateColumns = 'repeat('+kpis.length+',1fr)';
-  el.innerHTML = kpis.map(function(k){
-    return '<div style="background:'+k.b+';border:1px solid var(--border);border-radius:9px;padding:12px 14px;">'+
-      '<div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">'+k.l+'</div>'+
-      '<div style="font-size:18px;font-weight:900;color:'+k.c+';">'+k.v+'</div>'+
-    '</div>';
-  }).join('');
 }
 
-function finRenderBarras(){
-  var canvas = document.getElementById('fin-chart-barras');
-  if(!canvas) return;
-  var meses = finGetMeses(12);
-  var movs = finMovsAllProvs();
-  var compras = meses.map(function(mes){
-    return movs.filter(function(m){ if(m.tipo!=='compra') return false; var p=(m.fecha||'').split('/'); return p.length===3&&parseInt(p[1])-1===mes.month&&parseInt(p[2])===mes.year; }).reduce(function(s,m){ return s+Math.abs(m.monto||0); },0);
-  });
-  var pagos = meses.map(function(mes){
-    return movs.filter(function(m){ if(m.tipo!=='pago') return false; var p=(m.fecha||'').split('/'); return p.length===3&&parseInt(p[1])-1===mes.month&&parseInt(p[2])===mes.year; }).reduce(function(s,m){ return s+Math.abs(m.monto||0); },0);
-  });
-  var dpr = window.devicePixelRatio||1;
-  var W = canvas.offsetWidth||600, H = 180;
-  canvas.width = W*dpr; canvas.height = H*dpr;
-  canvas.style.width = W+'px'; canvas.style.height = H+'px';
-  var ctx = canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  var maxVal = Math.max.apply(null, compras.concat(pagos).concat([1]));
-  var pad = {t:10,r:10,b:30,l:50};
-  var cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
-  var bW = cW/meses.length, gap = bW*0.15, bW2 = (bW-gap*3)/2;
-  ctx.clearRect(0,0,W,H);
-  // Grid lines
-  ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
-  for(var gi=0;gi<=4;gi++){
-    var gy = pad.t + cH - (cH*gi/4);
-    ctx.beginPath(); ctx.moveTo(pad.l,gy); ctx.lineTo(pad.l+cW,gy); ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='9px sans-serif'; ctx.textAlign='right';
-    ctx.fillText('$'+(maxVal*gi/4/1000).toFixed(0)+'k', pad.l-4, gy+3);
-  }
-  meses.forEach(function(mes,i){
-    var x = pad.l + i*bW + gap;
-    // Compra bar (blue)
-    var hC = cH*(compras[i]/maxVal);
-    ctx.fillStyle='rgba(59,130,246,.7)';
-    ctx.fillRect(x, pad.t+cH-hC, bW2, hC);
-    // Pago bar (green)
-    var hP = cH*(pagos[i]/maxVal);
-    ctx.fillStyle='rgba(34,197,94,.7)';
-    ctx.fillRect(x+bW2+gap, pad.t+cH-hP, bW2, hP);
-    // Label
-    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='9px sans-serif'; ctx.textAlign='center';
-    ctx.fillText(mes.label, x+bW/2-gap/2, H-8);
-  });
-  // Legend
-  ctx.fillStyle='rgba(59,130,246,.9)'; ctx.fillRect(pad.l,3,10,8);
-  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='9px sans-serif'; ctx.textAlign='left';
-  ctx.fillText('Compras', pad.l+13,11);
-  ctx.fillStyle='rgba(34,197,94,.9)'; ctx.fillRect(pad.l+70,3,10,8);
-  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.fillText('Pagos', pad.l+83,11);
-}
+function finSumTipo(movs, tipo){ return movs.filter(function(m){return m.tipo===tipo;}).reduce(function(s,m){return s+Math.abs(m.monto||0);},0); }
 
-function finRenderDonut(){
-  var canvas = document.getElementById('fin-chart-donut');
-  if(!canvas) return;
-  var movs = finMovsAllProvs();
-  var hoyMs = new Date().setHours(0,0,0,0);
-  var pagada=0,parcial=0,pendiente=0,vencida=0;
-  movs.forEach(function(m){
-    if(m.tipo!=='compra') return;
-    var saldo = pagoSaldoPendiente(m);
-    var base = pagoSaldoBase(m);
-    if(saldo<=0){ pagada++; return; }
-    var esVencida = m.desc_dias && m.fecha && (parseDateAR(m.fecha).getTime()+(m.desc_dias*86400000))<hoyMs;
-    if(esVencida) vencida++;
-    else if(m.pagos_aplicados>0) parcial++;
-    else pendiente++;
-  });
-  var total = pagada+parcial+pendiente+vencida||1;
-  var slices = [
-    {v:pagada,c:'#22c55e',l:'Pagadas'},
-    {v:parcial,c:'#f59e0b',l:'Parcial'},
-    {v:pendiente,c:'#6b7280',l:'Pendientes'},
-    {v:vencida,c:'#ef4444',l:'Vencidas'},
-  ];
+function finDrawBars(id,meses,compras,pagos,H){
+  var canvas=document.getElementById(id); if(!canvas) return;
+  var W=canvas.offsetWidth||400;
   var dpr=window.devicePixelRatio||1;
-  var S=Math.min(canvas.offsetWidth||180, 180);
-  canvas.width=S*dpr; canvas.height=S*dpr;
-  canvas.style.width=S+'px'; canvas.style.height=S+'px';
+  canvas.width=W*dpr; canvas.height=H*dpr; canvas.style.width=W+'px'; canvas.style.height=H+'px';
   var ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
-  var cx=S/2, cy=S/2, r=S/2-8, ri=r*0.55;
-  var start=-Math.PI/2;
-  slices.forEach(function(s){
-    if(!s.v) return;
-    var angle = 2*Math.PI*s.v/total;
-    ctx.beginPath(); ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,r,start,start+angle);
-    ctx.closePath(); ctx.fillStyle=s.c; ctx.fill();
-    start+=angle;
-  });
-  // Hole
-  ctx.beginPath(); ctx.arc(cx,cy,ri,0,2*Math.PI);
-  ctx.fillStyle='#1c2235'; ctx.fill();
-  // Center text
-  ctx.fillStyle='#e2e6f0'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
-  ctx.fillText(total, cx, cy+4);
-  ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='9px sans-serif';
-  ctx.fillText('facturas', cx, cy+16);
-  // Legend
-  var leg = document.getElementById('fin-donut-legend');
-  if(leg) leg.innerHTML = slices.map(function(s){ return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><div style="width:10px;height:10px;border-radius:2px;background:'+s.c+';flex-shrink:0;"></div><span style="color:var(--muted);">'+s.l+'</span><span style="margin-left:auto;font-weight:700;">'+s.v+'</span></div>'; }).join('');
-}
-
-function finRenderRanking(){
-  var el = document.getElementById('fin-ranking-prov');
-  if(!el) return;
-  var provs = Object.keys(ctaData||{}).map(function(p){ return {prov:p, deuda:Math.abs(Math.min(0,ctaSaldo(p)))}; })
-    .filter(function(x){ return x.deuda>0; })
-    .sort(function(a,b){ return b.deuda-a.deuda; })
-    .slice(0,10);
-  if(!provs.length){ el.innerHTML='<div style="color:var(--muted);font-size:12px;">Sin deudas pendientes 🎉</div>'; return; }
-  var maxD = provs[0].deuda||1;
-  el.innerHTML = provs.map(function(x,i){
-    var pct = Math.round(x.deuda/maxD*100);
-    return '<div style="margin-bottom:10px;">'+
-      '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">'+
-        '<span style="font-size:11px;font-weight:700;">'+esc(x.prov)+'</span>'+
-        '<span style="font-size:11px;color:var(--red);font-weight:800;">-$'+x.deuda.toLocaleString('es-AR')+'</span>'+
-      '</div>'+
-      '<div style="height:5px;background:var(--s4);border-radius:3px;overflow:hidden;">'+
-        '<div style="height:100%;background:var(--red);width:'+pct+'%;border-radius:3px;transition:width .4s;"></div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-}
-
-function finRenderVencimientos(){
-  var el = document.getElementById('fin-vencimientos');
-  if(!el) return;
-  var movs = finMovsAllProvs();
-  var hoyMs = new Date().setHours(0,0,0,0);
-  var items = [];
-  movs.forEach(function(m){
-    if(m.tipo!=='compra'||!m.desc_dias||!m.fecha) return;
-    var saldo = pagoSaldoPendiente(m);
-    if(saldo<=0) return;
-    try{
-      var vencMs = parseDateAR(m.fecha).getTime()+(m.desc_dias*86400000);
-      var diasRest = Math.round((vencMs-hoyMs)/86400000);
-      items.push({prov:m.prov, desc:m.descripcion, saldo:saldo, diasRest:diasRest, vencMs:vencMs});
-    }catch(e){}
-  });
-  items.sort(function(a,b){ return a.vencMs-b.vencMs; });
-  var show = items.slice(0,8);
-  if(!show.length){ el.innerHTML='<div style="color:var(--muted);font-size:12px;">Sin vencimientos próximos ✓</div>'; return; }
-  el.innerHTML = show.map(function(x){
-    var isVenc = x.diasRest < 0;
-    var col = isVenc?'var(--red)':x.diasRest<=7?'var(--acc)':'var(--muted)';
-    var tag = isVenc?('⚠ Vencida hace '+Math.abs(x.diasRest)+'d'):(x.diasRest===0?'Vence HOY':'En '+x.diasRest+' días');
-    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">'+
-      '<div style="flex:1;min-width:0;">'+
-        '<div style="font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(x.prov)+'</div>'+
-        '<div style="font-size:10px;color:var(--muted);">'+esc(x.desc)+'</div>'+
-      '</div>'+
-      '<div style="text-align:right;flex-shrink:0;">'+
-        '<div style="font-size:11px;font-weight:800;color:var(--red);">-$'+x.saldo.toLocaleString('es-AR')+'</div>'+
-        '<div style="font-size:9px;font-weight:700;color:'+col+';">'+tag+'</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-}
-
-function finRenderGastosResumen(){
-  var el = document.getElementById('fin-gastos-resumen');
-  if(!el) return;
-  var hoy = new Date();
-  var mes = hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0');
-  var gastasMes = finGastos.filter(function(g){ return g.fecha && g.fecha.startsWith(mes); });
-  // Group by category emoji
-  var cats = {};
-  gastasMes.forEach(function(g){
-    var ico = (g.cat||'').split(' ')[0]||'➕';
-    var nombre = (g.cat||'').split(' ').slice(1).join(' ')||g.cat;
-    if(!cats[ico]) cats[ico]={ico:ico,nombre:nombre,total:0};
-    cats[ico].total+=g.monto||0;
-  });
-  var catArr = Object.values(cats).sort(function(a,b){ return b.total-a.total; });
-  var totalGastos = catArr.reduce(function(s,c){ return s+c.total; },0);
-  if(!catArr.length){
-    el.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:12px;text-align:center;padding:12px;">Sin gastos este mes — registralos en la pestaña 💸 Gastos</div>';
-    return;
+  var max=Math.max.apply(null,compras.concat(pagos).concat([1]));
+  var pad={t:8,r:8,b:24,l:50};
+  var cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  var bW=cW/meses.length, gap=bW*.1, bW2=(bW-gap*3)/2;
+  ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){
+    var gy=pad.t+cH*(1-i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(pad.l+cW,gy);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='9px sans-serif';ctx.textAlign='right';
+    ctx.fillText('$'+(max*i/4/1000).toFixed(0)+'k',pad.l-4,gy+3);
   }
-  el.innerHTML = catArr.map(function(c){
-    return '<div style="background:var(--s3);border-radius:8px;padding:10px 12px;text-align:center;">'+
-      '<div style="font-size:22px;margin-bottom:4px;">'+c.ico+'</div>'+
-      '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;">'+esc(c.nombre)+'</div>'+
-      '<div style="font-size:14px;font-weight:900;color:var(--acc);">$'+c.total.toLocaleString('es-AR')+'</div>'+
-      '<div style="font-size:9px;color:var(--muted);">'+Math.round(c.total/totalGastos*100)+'% del total</div>'+
-    '</div>';
-  }).join('');
+  meses.forEach(function(m,i){
+    var x=pad.l+i*bW+gap;
+    var hC=cH*(compras[i]/max); ctx.fillStyle='rgba(59,130,246,.75)'; ctx.fillRect(x,pad.t+cH-hC,bW2,hC);
+    var hP=cH*(pagos[i]/max); ctx.fillStyle='rgba(34,197,94,.75)'; ctx.fillRect(x+bW2+gap,pad.t+cH-hP,bW2,hP);
+    ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(m,x+bW/2-gap/2,H-6);
+  });
 }
+
+function finDrawLine(id,vals,meses,H,color){
+  var canvas=document.getElementById(id); if(!canvas) return;
+  var W=canvas.offsetWidth||400;
+  var dpr=window.devicePixelRatio||1;
+  canvas.width=W*dpr; canvas.height=H*dpr; canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  if(vals.length<2) return;
+  var max=Math.max.apply(null,vals)*1.05, min=Math.min.apply(null,vals)*.95;
+  var pad={t:14,r:14,b:24,l:52};
+  var cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  var pts=vals.map(function(v,i){return {x:pad.l+i*cW/(vals.length-1),y:pad.t+cH-(cH*(v-min)/(max-min))};});
+  var grad=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  grad.addColorStop(0,color.replace(')',', 0.25)').replace('rgb','rgba'));
+  grad.addColorStop(1,color.replace(')',', 0.01)').replace('rgb','rgba'));
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pad.t+cH);
+  pts.forEach(function(p){ctx.lineTo(p.x,p.y);}); ctx.lineTo(pts[pts.length-1].x,pad.t+cH);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  pts.forEach(function(p){ctx.lineTo(p.x,p.y);}); ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+  pts.forEach(function(p,i){
+    ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('$'+(vals[i]/1000000).toFixed(1)+'M',p.x,p.y-8);
+    ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='9px sans-serif';ctx.fillText(meses[i],p.x,H-6);
+  });
+}
+
+// ── NAVIGATION ──
+function finOpenDetail(view, title, bread){
+  document.getElementById('fin-view-dashboard').style.display='none';
+  document.getElementById('fin-panel-gastos').style.display='none';
+  var det=document.getElementById('fin-view-detail');
+  det.style.display='flex';
+  det.innerHTML = finBuildDetail(view);
+  document.getElementById('fin-back-btn').style.display='flex';
+  document.getElementById('fin-bread').textContent = bread||'';
+  _finHistory.push(_finCurrentView);
+  _finCurrentView = view;
+  // Draw charts after render
+  setTimeout(function(){ finInitDetailCharts(view); }, 80);
+}
+
+function finGoBack(){
+  var prev=_finHistory.pop()||'dashboard';
+  _finCurrentView=prev;
+  document.getElementById('fin-view-detail').style.display='none';
+  if(prev==='dashboard'){
+    document.getElementById('fin-view-dashboard').style.display='flex';
+    document.getElementById('fin-back-btn').style.display='none';
+    document.getElementById('fin-bread').textContent='';
+  } else {
+    finOpenDetail(prev,'','');
+  }
+}
+
+// ── DASHBOARD ──
+function finRenderDashboard(){
+  var movs=finMovsAll();
+  var meses6=finGetMeses(6);
+  var compras6=meses6.map(function(mes){return finSumTipo(finMovMes(movs,mes),'compra');});
+  var pagos6=meses6.map(function(mes){return finSumTipo(finMovMes(movs,mes),'pago');});
+  var hoy=new Date();
+  var mesActual={year:hoy.getFullYear(),month:hoy.getMonth(),label:''};
+  var cMes=compras6[5]||0, pMes=pagos6[5]||0;
+  var ratio=cMes>0?Math.round(pMes/cMes*100):0;
+  var deudaTotal=0;
+  Object.keys(ctaData||{}).forEach(function(p){var s=ctaSaldo(p);if(s<0)deudaTotal+=Math.abs(s);});
+  var hoyMs=new Date().setHours(0,0,0,0);
+  var factsVenc=0;
+  movs.forEach(function(m){
+    if(m.tipo==='compra'&&pagoSaldoPendiente(m)>0&&m.desc_dias&&m.fecha){
+      try{if((parseDateAR(m.fecha).getTime()+(m.desc_dias*86400000))<hoyMs)factsVenc++;}catch(e){}
+    }
+  });
+  var gastosMes=finGastos.filter(function(g){return g.fecha&&g.fecha.startsWith(hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0'));}).reduce(function(s,g){return s+(g.monto||0);},0);
+  var cMesPrev=compras6[4]||1, pMesPrev=pagos6[4]||1;
+  var varC=cMesPrev>0?Math.round((cMes-cMesPrev)/cMesPrev*100):0;
+  var varP=pMesPrev>0?Math.round((pMes-pMesPrev)/pMesPrev*100):0;
+  var balance=pMes-cMes;
+  var proy3=deudaTotal+Math.abs(Math.min(0,balance))*3;
+
+  // KPIs
+  function kpi(lbl,val,color,sub,view,bread){
+    return '<div data-v="'+view+'" data-b="'+bread+'" onclick="var t=this;finOpenDetail(t.getAttribute(\'data-v\'),\'\',t.getAttribute(\'data-b\'))" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px 14px;cursor:pointer;">'+
+      '<div style="font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;">'+lbl+'</div>'+
+      '<div style="font-size:18px;font-weight:900;color:'+color+';">'+val+'</div>'+
+      '<div style="font-size:10px;color:var(--muted);margin-top:3px;">'+sub+'</div>'+
+      '<div style="font-size:9px;color:var(--acc);margin-top:5px;font-weight:700;">→ Ver detalle</div>'+
+    '</div>';
+  }
+  var kEl=document.getElementById('fin-kpis');
+  if(kEl) kEl.innerHTML=
+    kpi('COMPRAS DEL MES','$'+cMes.toLocaleString('es-AR'),'var(--text)',(varC>=0?'↑ +':'')+varC+'% vs mes anterior','detalle-compras','Análisis Compras vs Pagos')+
+    kpi('PAGADO DEL MES','$'+pMes.toLocaleString('es-AR'),'var(--green)',(varP>=0?'↑ +':'')+varP+'% vs mes anterior','detalle-compras','Análisis Compras vs Pagos')+
+    kpi('RATIO PAGO/COMPRA',ratio+'%',ratio>=90?'var(--green)':ratio>=80?'var(--acc)':'var(--red)','Cobertura de compras','detalle-ratio','Ratio y Simulador')+
+    kpi('BALANCE NETO MES',(balance>=0?'+':'')+' $'+Math.abs(balance).toLocaleString('es-AR'),balance>=0?'var(--green)':'var(--red)',balance>=0?'Sin nueva deuda ✓':'Nueva deuda este mes','detalle-compras','Análisis Compras vs Pagos')+
+    kpi('DEUDA TOTAL','-$'+deudaTotal.toLocaleString('es-AR'),'var(--red)',factsVenc+' facturas vencidas','detalle-deuda','Evolución de Deuda');
+
+  // Main cards
+  var mEl=document.getElementById('fin-main-cards');
+  if(mEl) mEl.innerHTML=
+    '<div data-v="detalle-compras" data-b="x" onclick="var t=this;finOpenDetail(t.getAttribute(\'data-v\'),\'\',t.getAttribute(\'data-b\'))" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>📈 COMPRAS VS PAGOS — Últimos 6 meses</span><span style="color:var(--acc);font-size:9px;">→ Ver tabla completa</span></div>'+
+      '<canvas id="fin-chart-barras" height="150"></canvas>'+
+    '</div>'+
+    '<div data-v="detalle-ratio" data-b="x" onclick="var t=this;finOpenDetail(t.getAttribute(\'data-v\'),\'\',t.getAttribute(\'data-b\'))" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>📊 RATIO MENSUAL</span><span style="color:var(--acc);font-size:9px;">→ Tendencia y simulador</span></div>'+
+      '<div id="fin-mini-ratios"></div>'+
+    '</div>';
+
+  // Bottom cards
+  var bEl=document.getElementById('fin-bottom-cards');
+  if(bEl) bEl.innerHTML=
+    '<div data-v="detalle-prov" data-b="x" onclick="var t=this;finOpenDetail(t.getAttribute(\'data-v\'),\'\',t.getAttribute(\'data-b\'))" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>🏭 TOP PROVEEDORES</span><span style="color:var(--acc);font-size:9px;">→ Ver todos</span></div>'+
+      '<div id="fin-mini-provs"></div>'+
+    '</div>'+
+    '<div data-v="detalle-deuda" data-b="x" onclick="var t=this;finOpenDetail(t.getAttribute(\'data-v\'),\'\',t.getAttribute(\'data-b\'))" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>📉 EVOLUCIÓN DEUDA</span><span style="color:var(--acc);font-size:9px;">→ Historial completo</span></div>'+
+      '<canvas id="fin-chart-deuda" height="130"></canvas>'+
+    '</div>'+
+    '<div data-v="detalle-proy" data-b="x" onclick="var t=this;finOpenDetail(t.getAttribute(\'data-v\'),\'\',t.getAttribute(\'data-b\'))" style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>🔮 PROYECCIÓN</span><span style="color:var(--acc);font-size:9px;">→ Escenarios y simulador</span></div>'+
+      finBuildMiniProy(balance,deudaTotal)+
+    '</div>';
+
+  // Render mini charts
+  setTimeout(function(){
+    var movs2=finMovsAll(); var meses6b=finGetMeses(6);
+    var c6=meses6b.map(function(m){return finSumTipo(finMovMes(movs2,m),'compra');});
+    var p6=meses6b.map(function(m){return finSumTipo(finMovMes(movs2,m),'pago');});
+    finDrawBars('fin-chart-barras',meses6b.map(function(m){return m.label;}),c6,p6,150);
+    // Deuda acumulada line (simulate from movimientos)
+    var deudaAcum=[]; var running=0;
+    meses6b.forEach(function(mes){
+      var mc=finSumTipo(finMovMes(movs2,mes),'compra');
+      var mp=finSumTipo(finMovMes(movs2,mes),'pago');
+      running+=mc-mp;
+      deudaAcum.push(running>0?running:0);
+    });
+    if(deudaAcum.some(function(v){return v>0;}))
+      finDrawLine('fin-chart-deuda',deudaAcum,meses6b.map(function(m){return m.label;}),130,'rgb(239,68,68)');
+    // Mini ratios
+    var mrEl=document.getElementById('fin-mini-ratios');
+    if(mrEl) mrEl.innerHTML=meses6b.map(function(mes,i){
+      var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0;
+      var col=r>=90?'var(--green)':r>=80?'var(--acc)':'var(--red)';
+      return '<div style="margin-bottom:7px;"><div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:10px;color:var(--muted);">'+mes.label+'</span><span style="font-size:10px;font-weight:800;color:'+col+';">'+r+'%</span></div><div style="height:5px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(r,100)+'%;background:'+col+';border-radius:3px;"></div></div></div>';
+    }).join('');
+    // Mini provs
+    var mpEl=document.getElementById('fin-mini-provs');
+    if(mpEl){
+      var provs=Object.keys(ctaData||{}).map(function(p){ return {p:p,d:Math.abs(Math.min(0,ctaSaldo(p)))}; }).filter(function(x){return x.d>0;}).sort(function(a,b){return b.d-a.d;}).slice(0,5);
+      var maxD=provs.length?provs[0].d:1;
+      mpEl.innerHTML=provs.map(function(x){return '<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:10px;font-weight:700;">'+esc(x.p)+'</span><span style="font-size:10px;font-weight:800;color:var(--red);">-$'+x.d.toLocaleString('es-AR')+'</span></div><div style="height:5px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.round(x.d/maxD*100)+'%;background:var(--red);border-radius:3px;"></div></div></div>';}).join('');
+    }
+  },100);
+}
+
+function finBuildMiniProy(balance,deudaTotal){
+  var html='';
+  var delta=Math.abs(Math.min(0,balance));
+  for(var i=1;i<=3;i++){
+    var proy=deudaTotal+delta*i;
+    var meses=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var d=new Date(); d.setMonth(d.getMonth()+i);
+    html+='<div style="background:var(--s3);border-radius:7px;padding:8px 11px;margin-bottom:6px;display:flex;justify-content:space-between;"><span style="font-size:11px;color:var(--muted);">'+meses[d.getMonth()+1]+' '+d.getFullYear()+'</span><span style="font-size:13px;font-weight:800;color:var(--red);">-$'+(proy/1000).toFixed(0)+'k</span></div>';
+  }
+  return html;
+}
+
+// ── BUILD DETAIL VIEWS ──
+function finBuildDetail(view){
+  var movs=finMovsAll(); var meses6=finGetMeses(6);
+  var c6=meses6.map(function(m){return finSumTipo(finMovMes(movs,m),'compra');});
+  var p6=meses6.map(function(m){return finSumTipo(finMovMes(movs,m),'pago');});
+  var hoy=new Date(); var hoyMs=new Date().setHours(0,0,0,0);
+  var deudaTotal=0; Object.keys(ctaData||{}).forEach(function(p){var s=ctaSaldo(p);if(s<0)deudaTotal+=Math.abs(s);});
+
+  if(view==='detalle-compras'){
+    var totalC=c6.reduce(function(s,v){return s+v;},0);
+    var totalP=p6.reduce(function(s,v){return s+v;},0);
+    var mejorRatio=0,mejorMes='';
+    meses6.forEach(function(m,i){var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0;if(r>mejorRatio){mejorRatio=r;mejorMes=m.label;}});
+    var rows=meses6.map(function(m,i){
+      var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0;
+      var diff=p6[i]-c6[i];
+      var col=r>=90?'var(--green)':r>=80?'var(--acc)':'var(--red)';
+      var acum=c6.slice(0,i+1).reduce(function(s,v){return s+v;},0)-p6.slice(0,i+1).reduce(function(s,v){return s+v;},0);
+      return '<tr><td style="font-weight:700;">'+m.label+'</td><td style="text-align:right;">$'+c6[i].toLocaleString('es-AR')+'</td><td style="text-align:right;color:var(--green);">$'+p6[i].toLocaleString('es-AR')+'</td><td style="text-align:right;color:'+(diff<0?'var(--red)':'var(--green)')+';">'+(diff>=0?'+':'')+' $'+diff.toLocaleString('es-AR')+'</td><td><div style="display:flex;align-items:center;gap:5px;"><div style="width:50px;height:5px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(r,100)+'%;background:'+col+';border-radius:3px;"></div></div><span style="font-size:10px;font-weight:800;color:'+col+';">'+r+'%</span></div></td><td style="color:'+(acum>0?'var(--red)':'var(--green)')+';">$'+Math.abs(acum).toLocaleString('es-AR')+'</td></tr>';
+    }).join('');
+    var avgC=totalC/meses6.length, avgP=totalP/meses6.length;
+    var obs=avgP/avgC>=0.9?'✅ Estás pagando bien en promedio — ratio saludable.':'⚠️ El ratio promedio está por debajo del 90%. Necesitás pagar más para no acumular deuda.';
+    return '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">TOTAL COMPRADO (6m)</div><div style="font-size:18px;font-weight:900;">$'+totalC.toLocaleString('es-AR')+'</div></div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">TOTAL PAGADO (6m)</div><div style="font-size:18px;font-weight:900;color:var(--green);">$'+totalP.toLocaleString('es-AR')+'</div></div>'+
+      '<div style="background:var(--s2);border:1px solid rgba(239,68,68,.2);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">DIFERENCIA ACUMULADA</div><div style="font-size:18px;font-weight:900;color:var(--red);">-$'+(totalC-totalP).toLocaleString('es-AR')+'</div></div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">MEJOR RATIO</div><div style="font-size:16px;font-weight:900;color:var(--green);">'+mejorMes+' — '+mejorRatio+'%</div></div>'+
+    '</div>'+
+    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">GRÁFICO COMPRAS VS PAGOS</div>'+
+      '<canvas id="det-chart-barras" height="160"></canvas>'+
+    '</div>'+
+    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">DETALLE MES A MES</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr>'+
+        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);">MES</th>'+
+        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">COMPRAS</th>'+
+        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">PAGOS</th>'+
+        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">DIFERENCIA</th>'+
+        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);">RATIO</th>'+
+        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);">ACUM.</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div style="margin-top:12px;padding:10px 12px;background:rgba(245,158,11,.06);border-radius:8px;font-size:11px;">💡 '+obs+'</div>'+
+    '</div>';
+  }
+
+  if(view==='detalle-ratio'){
+    var avgRatio=meses6.reduce(function(s,m,i){return s+(c6[i]>0?p6[i]/c6[i]:0);},0)/meses6.length*100;
+    var trend=meses6.slice(-3).reduce(function(s,m,i){return s+(c6[i+3]>0?p6[i+3]/c6[i+3]:0);},0)/3*100;
+    var ratioBars=meses6.map(function(m,i){
+      var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0;
+      var col=r>=90?'var(--green)':r>=80?'var(--acc)':'var(--red)';
+      return '<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:11px;font-weight:700;">'+m.label+'</span><span style="font-size:11px;font-weight:900;color:'+col+';">'+r+'%</span></div><div style="height:6px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(r,100)+'%;background:'+col+';border-radius:3px;"></div></div><div style="font-size:9px;color:var(--muted);margin-top:2px;">Pagaste $'+p6[i].toLocaleString('es-AR')+' de $'+c6[i].toLocaleString('es-AR')+'</div></div>';
+    }).join('');
+    return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:5px;">RATIO PROMEDIO (6m)</div><div style="font-size:22px;font-weight:900;color:var(--acc);">'+Math.round(avgRatio)+'%</div></div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:5px;">TENDENCIA (últ. 3m)</div><div style="font-size:18px;font-weight:900;color:'+(trend>avgRatio?'var(--green)':'var(--red)')+'">'+(trend>avgRatio?'↑ Mejorando':'↓ Bajando')+'</div><div style="font-size:10px;color:var(--muted);">'+Math.round(trend)+'% promedio</div></div>'+
+      '<div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:9px;padding:14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:5px;">PARA CUBRIR DEUDA</div><div style="font-size:16px;font-weight:900;color:var(--green);">Pagar 100%+</div><div style="font-size:10px;color:var(--muted);">más la cuota de deuda vieja</div></div>'+
+    '</div>'+
+    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">HISTORIAL DE RATIO</div>'+ratioBars+
+    '</div>'+
+    '<div style="background:var(--s2);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:16px;">'+
+      '<div style="font-size:13px;font-weight:800;margin-bottom:5px;">🧮 Simulador de cobertura</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:14px;">¿Cuánto necesitás pagar para un ratio objetivo?</div>'+
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">'+
+        '<div><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">COMPRAS ESTIMADAS</div><input id="sim-c" type="number" value="'+(c6[5]||900000)+'" oninput="finCalcSim()" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-size:13px;font-weight:700;width:150px;font-family:inherit;"></div>'+
+        '<div><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">RATIO OBJETIVO</div><select id="sim-r" oninput="finCalcSim()" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;"><option value="80">80%</option><option value="90">90%</option><option value="100" selected>100%</option><option value="110">110%</option><option value="120">120%</option></select></div>'+
+        '<div id="sim-res" style="background:var(--s3);border-radius:8px;padding:10px 14px;flex:1;min-width:160px;"></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  if(view==='detalle-deuda'){
+    var meses12=finGetMeses(12);
+    var deudaAcum=[]; var running=0;
+    meses12.forEach(function(m){
+      var mc=finSumTipo(finMovMes(movs,m),'compra');
+      var mp=finSumTipo(finMovMes(movs,m),'pago');
+      running+=mc-mp; deudaAcum.push(Math.max(0,running));
+    });
+    var provDeudas=Object.keys(ctaData||{}).map(function(p){ return {p:p,d:Math.abs(Math.min(0,ctaSaldo(p)))}; }).filter(function(x){return x.d>0;}).sort(function(a,b){return b.d-a.d;});
+    var maxD=provDeudas.length?provDeudas[0].d:1;
+    var avgGrowth=deudaAcum.length>1?(deudaAcum[deudaAcum.length-1]-deudaAcum[0])/deudaAcum.length:0;
+    return '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'+
+      '<div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">DEUDA ACTUAL</div><div style="font-size:18px;font-weight:900;color:var(--red);">-$'+deudaTotal.toLocaleString('es-AR')+'</div></div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">CRECIMIENTO PROM./MES</div><div style="font-size:18px;font-weight:900;color:var(--red);">+$'+Math.abs(Math.round(avgGrowth)).toLocaleString('es-AR')+'</div></div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">MAYOR DEUDOR</div><div style="font-size:13px;font-weight:900;">'+(provDeudas.length?esc(provDeudas[0].p):'—')+'</div><div style="font-size:11px;color:var(--red);">'+(provDeudas.length?'-$'+provDeudas[0].d.toLocaleString('es-AR'):'')+'</div></div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">PROVEEDORES CON DEUDA</div><div style="font-size:22px;font-weight:900;color:var(--acc);">'+provDeudas.length+'</div></div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">EVOLUCIÓN DEUDA — 12 meses</div>'+
+        '<canvas id="det-chart-deuda" height="160"></canvas>'+
+      '</div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">DEUDA POR PROVEEDOR</div>'+
+        provDeudas.slice(0,8).map(function(x){return '<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:10px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">'+esc(x.p)+'</span><span style="font-size:10px;font-weight:800;color:var(--red);">-$'+(x.d/1000).toFixed(0)+'k</span></div><div style="height:5px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.round(x.d/maxD*100)+'%;background:var(--red);border-radius:3px;"></div></div></div>';}).join('')+
+      '</div>'+
+    '</div>';
+  }
+
+  if(view==='detalle-proy'){
+    var cMes=c6[5]||0, pMes=p6[5]||0, bal=pMes-cMes;
+    var delta=Math.abs(Math.min(0,bal));
+    var mNombres=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    function escenario(label,ratio,color,cls){
+      var html='<div style="background:var(--s3);border-radius:9px;padding:14px;border-left:3px solid '+color+';">'+
+        '<div style="font-size:11px;font-weight:800;color:'+color+';margin-bottom:8px;">'+label+'</div>';
+      for(var i=1;i<=3;i++){
+        var delt=cMes*(1-ratio/100); var proy=deudaTotal+delt*i;
+        var d=new Date(); d.setMonth(d.getMonth()+i);
+        html+='<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span style="color:var(--muted);">'+mNombres[d.getMonth()]+' '+d.getFullYear()+'</span><span style="font-weight:800;color:'+(proy>deudaTotal?'var(--red)':'var(--green)')+';">-$'+(proy/1000).toFixed(0)+'k</span></div>';
+      }
+      html+='</div>';
+      return html;
+    }
+    return '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Basado en compras del último mes ($'+cMes.toLocaleString('es-AR')+').</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'+
+        escenario('📉 Pesimista — Ratio 75%',75,'var(--red)')+
+        escenario('📊 Realista — Ratio actual ('+(c6[5]>0?Math.round(p6[5]/c6[5]*100):0)+'%)',c6[5]>0?Math.round(p6[5]/c6[5]*100):80,'var(--acc)')+
+        escenario('📈 Optimista — Ratio 100%',100,'var(--green)')+
+      '</div>'+
+      '<div style="background:var(--s2);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:16px;">'+
+        '<div style="font-size:13px;font-weight:800;margin-bottom:12px;">🧮 ¿Cuándo limpiás la deuda?</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:end;">'+
+          '<div><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">COMPRAS MENSUALES EST.</div><input id="proj-c" type="number" value="'+cMes+'" oninput="finCalcProj()" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;"></div>'+
+          '<div><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">PAGOS MENSUALES EST.</div><input id="proj-p" type="number" value="'+(Math.round(cMes*1.05))+'" oninput="finCalcProj()" style="width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box;"></div>'+
+          '<div id="proj-months" style="background:var(--s3);border-radius:8px;padding:10px 14px;text-align:center;"></div>'+
+          '<div id="proj-date" style="font-size:10px;color:var(--muted);"></div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  if(view==='detalle-prov'){
+    var provList=Object.keys(ctaData||{}).map(function(p){
+      var deuda=Math.abs(Math.min(0,ctaSaldo(p)));
+      var provMovs=ctaData[p].movimientos||[];
+      var totalC=provMovs.filter(function(m){return m.tipo==='compra';}).reduce(function(s,m){return s+Math.abs(m.monto||0);},0);
+      var totalP=provMovs.filter(function(m){return m.tipo==='pago';}).reduce(function(s,m){return s+Math.abs(m.monto||0);},0);
+      var ratio=totalC>0?Math.round(totalP/totalC*100):0;
+      return {p:p,deuda:deuda,totalC:totalC,totalP:totalP,ratio:ratio};
+    }).sort(function(a,b){return b.deuda-a.deuda;});
+    return '<div style="display:flex;flex-direction:column;gap:7px;">'+
+      provList.map(function(x){
+        var col=x.ratio>=90?'var(--green)':x.ratio>=70?'var(--acc)':'var(--red)';
+        return '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:11px 14px;display:flex;align-items:center;gap:10px;">'+
+          '<div style="flex:1;">'+
+            '<div style="font-size:12px;font-weight:800;">'+esc(x.p)+'</div>'+
+            '<div style="font-size:10px;color:var(--muted);margin-top:2px;">Comprado: $'+x.totalC.toLocaleString('es-AR')+' · Pagado: $'+x.totalP.toLocaleString('es-AR')+'</div>'+
+          '</div>'+
+          '<div style="text-align:right;">'+
+            '<div style="font-size:13px;font-weight:900;color:'+(x.deuda>0?'var(--red)':'var(--green)')+';">'+(x.deuda>0?'-$'+x.deuda.toLocaleString('es-AR'):'Al dia')+'</div>'+
+            '<div style="font-size:10px;font-weight:800;color:'+col+';">Ratio: '+x.ratio+'%</div>'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }
+
+  return '<div style="padding:20px;color:var(--muted);">Vista no encontrada</div>';
+}
+
+function finInitDetailCharts(view){
+  var movs=finMovsAll(); var meses6=finGetMeses(6);
+  var c6=meses6.map(function(m){return finSumTipo(finMovMes(movs,m),'compra');});
+  var p6=meses6.map(function(m){return finSumTipo(finMovMes(movs,m),'pago');});
+  var labels=meses6.map(function(m){return m.label;});
+  if(view==='detalle-compras') finDrawBars('det-chart-barras',labels,c6,p6,160);
+  if(view==='detalle-deuda'){
+    var meses12=finGetMeses(12);
+    var running=0;
+    var deudaAcum=meses12.map(function(m){var mc=finSumTipo(finMovMes(movs,m),'compra');var mp=finSumTipo(finMovMes(movs,m),'pago');running+=mc-mp;return Math.max(0,running);});
+    if(deudaAcum.some(function(v){return v>0;}))
+      finDrawLine('det-chart-deuda',deudaAcum,meses12.map(function(m){return m.label;}),160,'rgb(239,68,68)');
+  }
+  if(view==='detalle-ratio') finCalcSim();
+  if(view==='detalle-proy') finCalcProj();
+}
+
+function finCalcSim(){
+  var c=parseFloat(document.getElementById('sim-c')&&document.getElementById('sim-c').value)||900000;
+  var r=parseFloat(document.getElementById('sim-r')&&document.getElementById('sim-r').value)||100;
+  var needed=Math.round(c*r/100);
+  var el=document.getElementById('sim-res'); if(!el) return;
+  var col=r>=100?'var(--green)':r>=90?'var(--acc)':'var(--red)';
+  el.innerHTML='<div style="font-size:9px;color:var(--muted);margin-bottom:3px;">NECESITÁS PAGAR</div>'+
+    '<div style="font-size:20px;font-weight:900;color:'+col+';">$'+needed.toLocaleString('es-AR')+'</div>'+
+    '<div style="font-size:10px;color:var(--muted);margin-top:3px;">'+(r>=100?'Sin generar nueva deuda ✓':'Generás $'+Math.round(c*(1-r/100)).toLocaleString('es-AR')+' de nueva deuda')+'</div>';
+}
+
+function finCalcProj(){
+  var c=parseFloat(document.getElementById('proj-c')&&document.getElementById('proj-c').value)||900000;
+  var p=parseFloat(document.getElementById('proj-p')&&document.getElementById('proj-p').value)||950000;
+  var deudaTotal=0; Object.keys(ctaData||{}).forEach(function(pr){var s=ctaSaldo(pr);if(s<0)deudaTotal+=Math.abs(s);});
+  var el=document.getElementById('proj-months'); if(!el) return;
+  var diff=p-c;
+  if(diff<=0){el.innerHTML='<div style="font-size:9px;color:var(--muted);margin-bottom:2px;">NUNCA</div><div style="font-size:14px;font-weight:900;color:var(--red);">Deuda crece</div>';return;}
+  var meses=Math.ceil(deudaTotal/diff);
+  var col=meses<12?'var(--green)':meses<24?'var(--acc)':'var(--red)';
+  el.innerHTML='<div style="font-size:9px;color:var(--muted);margin-bottom:2px;">SE LIMPIA EN</div><div style="font-size:16px;font-weight:900;color:'+col+';">~'+meses+' meses</div>';
+  var fecha=new Date(); fecha.setMonth(fecha.getMonth()+meses);
+  var m=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  var dEl=document.getElementById('proj-date'); if(dEl) dEl.textContent=m[fecha.getMonth()]+' '+fecha.getFullYear();
+}
+
 /* ════════════════════════════════════════
+   MÓDULO REPORTES PDF
+════════════════════════════════════════ *//* ════════════════════════════════════════
    MÓDULO REPORTES PDF
 ════════════════════════════════════════ */
 var repTipoActual = 'cta_prov';
