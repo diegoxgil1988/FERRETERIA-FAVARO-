@@ -9032,10 +9032,15 @@ function savePago() {
     if(fact.saldo_pendiente===undefined) fact.saldo_pendiente = Math.abs(fact.monto||0);
     fact.saldo_pendiente = Math.max(0, fact.saldo_pendiente - aplica);
     fact.pagos_aplicados = (fact.pagos_aplicados||0) + aplica;
-    // Mark discount as applied if used
+    // Mark discount as applied if used AND absorb the discount from saldo_pendiente
     if(fact.desc_pct && fact.desc_fecha_limite && !fact.desc_aplicado){
       var limMs2 = parseDateAR(fact.desc_fecha_limite).getTime();
-      if(new Date().setHours(0,0,0,0) <= limMs2 || fact._desc_forzar) fact.desc_aplicado = true;
+      if(new Date().setHours(0,0,0,0) <= limMs2 || fact._desc_forzar){
+        fact.desc_aplicado = true;
+        // Absorb the discount amount from saldo_pendiente so it doesn't show as debt
+        var ahorroAbs = Math.round(Math.abs(fact.monto||0) * fact.desc_pct / 100);
+        fact.saldo_pendiente = Math.max(0, fact.saldo_pendiente - ahorroAbs);
+      }
     }
     aplicaciones.push({
       fact_id: fact.id,
