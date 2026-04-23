@@ -8804,12 +8804,35 @@ function openPagoModal(prov) {
       var pendiente = pagoSaldoPendiente(f);
       // Store the real array index in ctaData so we can access directly
       var movidx = movs.indexOf(f);
-      return '<div class="pago-fact-row" data-movidx="'+movidx+'" data-pendiente="'+pendiente+'" style="background:var(--s3);border:1.5px solid var(--border2);border-radius:9px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .15s;" onclick="pagoToggleFact(this)">'+
+      // Descuento badge
+      var descHTML2 = '';
+      if(f.desc_pct && f.desc_fecha_limite && !f.desc_aplicado){
+        var limMs3 = parseDateAR(f.desc_fecha_limite).getTime();
+        var hoyMs3 = new Date().setHours(0,0,0,0);
+        var diasRest3 = Math.round((limMs3 - hoyMs3)/86400000);
+        var ahorro3 = Math.round(Math.abs(f.monto)*f.desc_pct/100);
+        if(diasRest3 > 0){
+          var col3 = diasRest3<=3?'var(--red)':diasRest3<=7?'var(--acc)':'var(--green)';
+          descHTML2 = '<div style="margin-top:5px;background:rgba(34,197,94,.07);border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;color:'+col3+';">'+
+            '\u23f0 Desc. '+f.desc_pct+'% antes del '+f.desc_fecha_limite+' \u00b7 quedan '+diasRest3+' d\u00eda'+(diasRest3!==1?'s':'')+' \u00b7 ahorr\u00e1s $'+ahorro3.toLocaleString('es-AR')+'</div>';
+        } else {
+          var diasVenc3 = Math.abs(diasRest3);
+          var forzado3 = f._desc_forzar;
+          descHTML2 = '<div style="margin-top:5px;display:flex;align-items:center;gap:8px;" onclick="event.stopPropagation()">'+
+            '<span style="font-size:10px;font-weight:700;color:var(--red);">\u274c Desc. '+f.desc_pct+'% vencido hace '+diasVenc3+' d\u00eda'+(diasVenc3!==1?'s':'')+' \u00b7 perd\u00e9s $'+ahorro3.toLocaleString('es-AR')+'</span>'+
+            '<button data-movidx="'+movidx+'" onclick="pagoForzarDescMov(this)" style="background:'+(forzado3?'var(--green)':'var(--s4)')+';border:1px solid '+(forzado3?'var(--green)':'var(--border2)')+';border-radius:4px;padding:2px 8px;font-size:9px;font-weight:800;color:'+(forzado3?'#000':'var(--muted)')+';cursor:pointer;">'+
+            (forzado3?'\u2713 Aplicado':'Aplicar igual')+'</button>'+
+          '</div>';
+        }
+      }
+      var borderFact2 = (f.desc_pct && f.desc_fecha_limite && !f.desc_aplicado && Math.round((parseDateAR(f.desc_fecha_limite).getTime()-new Date().setHours(0,0,0,0))/86400000)>0)?'var(--green)':'var(--border2)';
+      return '<div class="pago-fact-row" data-movidx="'+movidx+'" data-pendiente="'+pendiente+'" style="background:var(--s3);border:1.5px solid '+borderFact2+';border-radius:9px;padding:11px 14px;margin-bottom:7px;cursor:pointer;transition:all .15s;" onclick="pagoToggleFact(this)">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;">'+
           '<div><div style="font-size:12px;font-weight:800;">'+esc(f.descripcion||'Compra')+'</div>'+
           '<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+f.fecha+'</div></div>'+
           '<div style="font-size:14px;font-weight:900;color:var(--red);">-'+formatNum(pendiente)+'</div>'+
         '</div>'+
+        descHTML2+
         '<div style="position:relative;">'+
         '<div class="pago-fact-aplicado" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);justify-content:space-between;align-items:center;">'+
           '<span style="font-size:10px;color:var(--muted);">SE APLICA</span>'+
@@ -8858,6 +8881,15 @@ function pagoForzarDesc(factIdx){
   if(!f) return;
   f._desc_forzar = !f._desc_forzar;
   // Re-open modal to refresh display
+  openPagoModal(prov);
+}
+function pagoForzarDescMov(btn){
+  var prov = document.getElementById('pago-prov-nombre').value;
+  var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
+  var movidx = parseInt(btn.getAttribute('data-movidx'));
+  var f = movs[movidx];
+  if(!f) return;
+  f._desc_forzar = !f._desc_forzar;
   openPagoModal(prov);
 }
 function pagoToggleFact(row){
