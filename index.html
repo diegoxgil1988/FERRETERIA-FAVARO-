@@ -9992,17 +9992,17 @@ function ctaMigrarDescuentos(){
   modal.innerHTML=
     '<div style="background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:24px;width:92%;max-width:820px;max-height:90vh;overflow-y:auto;">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">'+
-        '<div><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;">🔧 Corregir saldos con descuento</div>'+
+        '<div><div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;">🔧 Corregir saldos con descuento</div>'+
         '<div style="font-size:11px;color:var(--muted);margin-top:3px;">Revisá los cambios antes de confirmar. Esta acción guarda en Supabase.</div></div>'+
-        '<button onclick="document.getElementById('modal-migrar-preview').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">✕</button>'+
+        '<button onclick="document.getElementById(\'modal-migrar-preview\').style.display=\'none\'" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">✕</button>'+
       '</div>'+
       resumenHTML+rowsHTML+
       (items.length?
         '<div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">'+
-          '<button onclick="document.getElementById('modal-migrar-preview').style.display='none'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 20px;color:var(--muted);font-size:12px;cursor:pointer;">Cancelar</button>'+
+          '<button onclick="document.getElementById(\'modal-migrar-preview\').style.display=\'none\'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 20px;color:var(--muted);font-size:12px;cursor:pointer;">Cancelar</button>'+
           '<button onclick="ctaMigrarConfirmar()" style="background:var(--acc);border:none;border-radius:8px;padding:10px 24px;color:#000;font-size:12px;font-weight:800;cursor:pointer;">✓ Confirmar y corregir '+items.length+' factura'+(items.length!==1?'s':'')+'</button>'+
         '</div>':
-        '<div style="display:flex;justify-content:flex-end;margin-top:16px;"><button onclick="document.getElementById('modal-migrar-preview').style.display='none'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 20px;color:var(--muted);font-size:12px;cursor:pointer;">Cerrar</button></div>'
+        '<div style="display:flex;justify-content:flex-end;margin-top:16px;"><button onclick="document.getElementById(\'modal-migrar-preview\').style.display=\'none\'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 20px;color:var(--muted);font-size:12px;cursor:pointer;">Cerrar</button></div>'
       )+
     '</div>';
   modal.style.display='flex';
