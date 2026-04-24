@@ -3098,6 +3098,22 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 <!-- ═══════════ PAGE: CONFIG PAGOS ═══════════ -->
 <div class="page" id="page-configpagos">
   <div style="max-width:700px;margin:0 auto;">
+
+    <!-- Mantenimiento — arriba para visibilidad inmediata -->
+    <div style="margin-bottom:24px;background:rgba(245,158,11,.06);border:1.5px solid rgba(245,158,11,.3);border-radius:12px;padding:14px 16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:15px;">🔧</span>
+        <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--acc);">Mantenimiento de datos</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Corregir saldos con descuento</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Recalcula el <code>saldo_pendiente</code> de facturas con descuento ya aplicado. Corrige facturas cargadas antes de la actualización del sistema de descuentos.</div>
+        </div>
+        <button onclick="ctaMigrarDescuentos()" style="flex-shrink:0;background:var(--acc);border:none;border-radius:8px;padding:10px 18px;color:#000;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">▶ Ejecutar migración</button>
+      </div>
+    </div>
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div>
         <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;">⚙️ Medios de pago</div>
@@ -3110,19 +3126,6 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     </div>
     <div id="cfgpagos-list"></div>
     <button onclick="guardarConfigPagosGlobal()" style="width:100%;background:var(--acc);border:none;border-radius:10px;padding:14px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;margin-top:14px;letter-spacing:.5px;cursor:pointer;">💾 Guardar y sincronizar en todo el sistema</button>
-
-    <!-- Mantenimiento -->
-    <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:4px;">🔧 Mantenimiento de datos</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Acciones de corrección y migración. Ejecutar una sola vez si actualizaste el sistema.</div>
-      <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
-        <div>
-          <div style="font-size:12px;font-weight:800;color:var(--acc);">Corregir saldos con descuento</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Recalcula el <code>saldo_pendiente</code> de facturas con descuento ya aplicado. Corrige facturas cargadas antes de la actualización del sistema de descuentos.</div>
-        </div>
-        <button onclick="ctaMigrarDescuentos()" style="flex-shrink:0;background:var(--acc);border:none;border-radius:8px;padding:10px 18px;color:#000;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">▶ Ejecutar migración</button>
-      </div>
-    </div>
   </div>
 </div><!-- /page-configpagos -->
 
@@ -17188,22 +17191,71 @@ function verDetalleMov(tipo, entidad, movIdx) {
   var isVenta   = m.tipo === 'venta'  || m.tipo === 'compra';
   var isPago    = m.tipo === 'pago';
   var items     = m.items || m.detalle || [];
-  var montoFmt  = '$' + formatNum(Math.abs(m.monto || 0));
+
+  // Calcular monto efectivo (con descuento si aplica)
+  var montoAbs = Math.abs(m.monto || 0);
+  var montoEfectivo = montoAbs;
+  var descAplicadoModal = false;
+  var descPctModal = 0;
+  var ahorroModal = 0;
+  if (!isPago && m.desc_pct) {
+    descPctModal = m.desc_pct;
+    ahorroModal = Math.round(montoAbs * m.desc_pct / 100);
+    if (m.desc_aplicado) {
+      montoEfectivo = montoAbs - ahorroModal;
+      descAplicadoModal = true;
+    } else if (m.desc_fecha_limite || m._desc_forzar) {
+      var limMs = m.desc_fecha_limite ? parseDateAR(m.desc_fecha_limite).getTime() : 0;
+      var hoyMs = new Date().setHours(0,0,0,0);
+      if (m._desc_forzar || limMs >= hoyMs) {
+        montoEfectivo = montoAbs - ahorroModal;
+      }
+    }
+  }
+  var montoFmt    = '$' + formatNum(montoEfectivo);
+  var montoFmtOrig = '$' + formatNum(montoAbs);
+
   var titulo    = tipo === 'cli'
     ? (isPago ? '💰 Pago de ' + entidad : '🛒 Venta a ' + entidad)
     : (isPago ? '💳 Pago a ' + entidad  : '🧾 Factura de ' + entidad);
 
   document.getElementById('modal-mov-title').textContent = titulo;
 
+  // Badge de descuento para el header
+  var descBadgeModal = '';
+  if (!isPago && descPctModal > 0) {
+    if (descAplicadoModal) {
+      descBadgeModal =
+        '<div style="margin-top:6px;display:flex;justify-content:flex-end;">' +
+          '<span style="background:rgba(16,185,129,.13);border:1px solid rgba(16,185,129,.35);color:var(--green);font-size:9px;font-weight:800;padding:3px 8px;border-radius:5px;letter-spacing:.3px;">' +
+            '✓ DESC. ' + descPctModal + '% (−$' + formatNum(ahorroModal) + ')' +
+          '</span>' +
+        '</div>';
+    } else if (montoEfectivo < montoAbs) {
+      descBadgeModal =
+        '<div style="margin-top:6px;display:flex;justify-content:flex-end;">' +
+          '<span style="background:rgba(245,158,11,.13);border:1px solid rgba(245,158,11,.35);color:var(--acc);font-size:9px;font-weight:800;padding:3px 8px;border-radius:5px;letter-spacing:.3px;">' +
+            '⏰ DESC. ' + descPctModal + '% (−$' + formatNum(ahorroModal) + ')' +
+          '</span>' +
+        '</div>';
+    }
+  }
+
+  var montoDisplayHTML = (montoEfectivo < montoAbs)
+    ? '<div style="font-size:18px;font-weight:800;color:' + (isPago?'var(--green)':'var(--red)') + ';">' + (isPago?'+':'-') + montoFmt + '</div>' +
+      '<div style="font-size:10px;color:var(--muted);text-decoration:line-through;margin-top:1px;">' + (isPago?'+':'-') + montoFmtOrig + '</div>'
+    : '<div style="font-size:18px;font-weight:800;color:' + (isPago?'var(--green)':'var(--red)') + ';">' + (isPago?'+':'-') + montoFmt + '</div>';
+
   var headerHTML =
-    '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">' +
+    '<div style="background:var(--s3);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-start;">' +
       '<div>' +
         '<div style="font-size:11px;color:var(--muted);">Fecha</div>' +
         '<div style="font-size:13px;font-weight:700;">' + (m.fecha||'—') + '</div>' +
       '</div>' +
       '<div style="text-align:right;">' +
         '<div style="font-size:11px;color:var(--muted);">Monto total</div>' +
-        '<div style="font-size:18px;font-weight:800;color:' + (isPago?'var(--green)':'var(--red)') + ';">' + (isPago?'+':'-') + montoFmt + '</div>' +
+        montoDisplayHTML +
+        descBadgeModal +
       '</div>' +
     '</div>';
 
