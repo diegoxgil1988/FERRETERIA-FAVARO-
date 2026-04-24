@@ -3096,8 +3096,18 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 
 <!-- ═══════════ PAGE: CONFIG PAGOS ═══════════ -->
-<div class="page" id="page-configpagos">
+<div class="page" id="page-configpagos" style="overflow-y:auto;max-height:calc(100vh - 62px);">
   <div style="max-width:700px;margin:0 auto;">
+
+    <!-- Mantenimiento — visible al tope sin scrollear -->
+    <div style="margin-bottom:22px;background:rgba(245,158,11,.06);border:1.5px solid rgba(245,158,11,.35);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--acc);">🔧 Corregir saldos con descuento</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Recalcula el <code>saldo_pendiente</code> de facturas con descuento ya aplicado. Muestra preview antes de confirmar.</div>
+      </div>
+      <button onclick="ctaMigrarDescuentos()" style="flex-shrink:0;background:var(--acc);border:none;border-radius:8px;padding:10px 18px;color:#000;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">▶ Ver preview</button>
+    </div>
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div>
         <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;">⚙️ Medios de pago</div>
@@ -3109,20 +3119,7 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       🔄 Cualquier cambio aquí se sincroniza en todos los módulos del sistema simultáneamente.
     </div>
     <div id="cfgpagos-list"></div>
-    <button onclick="guardarConfigPagosGlobal()" style="width:100%;background:var(--acc);border:none;border-radius:10px;padding:14px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;margin-top:14px;letter-spacing:.5px;cursor:pointer;">💾 Guardar y sincronizar en todo el sistema</button>
-
-    <!-- Mantenimiento -->
-    <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:4px;">🔧 Mantenimiento de datos</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Acciones de corrección y migración. Ejecutar una sola vez si actualizaste el sistema.</div>
-      <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
-        <div>
-          <div style="font-size:12px;font-weight:800;color:var(--acc);">Corregir saldos con descuento</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Recalcula el <code>saldo_pendiente</code> de facturas con descuento ya aplicado. Corrige facturas cargadas antes de la actualización del sistema de descuentos.</div>
-        </div>
-        <button onclick="ctaMigrarDescuentos()" style="flex-shrink:0;background:var(--acc);border:none;border-radius:8px;padding:10px 18px;color:#000;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">▶ Ejecutar migración</button>
-      </div>
-    </div>
+    <button onclick="guardarConfigPagosGlobal()" style="width:100%;background:var(--acc);border:none;border-radius:10px;padding:14px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;margin-top:14px;margin-bottom:32px;letter-spacing:.5px;cursor:pointer;">💾 Guardar y sincronizar en todo el sistema</button>
   </div>
 </div><!-- /page-configpagos -->
 
@@ -8784,7 +8781,7 @@ function ctaSelect(prov) {
       +'<div style="display:grid;grid-template-columns:90px 1fr auto 90px 30px 30px 30px;gap:8px;align-items:start;">'
       +'<div style="font-size:11px;color:var(--muted);">'+m.fecha+'</div>'
       +'<div><div style="font-size:12px;font-weight:600;">'+(m.descripcion||'')+'</div>'+descHTML+aplicHTML+'</div>'
-      +(isCompra ? (function(){ var _mAbs=Math.abs(m.monto||0),_mEf=_mAbs; if(m.desc_pct){var _aho=Math.round(_mAbs*m.desc_pct/100); if(m.desc_aplicado){_mEf=_mAbs-_aho;} else if(m.desc_fecha_limite){var _lm=parseDateAR(m.desc_fecha_limite).getTime(); if(_lm>=hoyMs||m._desc_forzar)_mEf=_mAbs-_aho;}} return '<div style="font-size:13px;font-weight:800;color:var(--red);">- $'+_mEf.toLocaleString('es-AR')+ (_mEf<_mAbs ? '<div style="font-size:9px;color:var(--muted);font-weight:400;text-decoration:line-through;line-height:1.2;">$'+_mAbs.toLocaleString('es-AR')+'</div>' : '') +'</div>'; })() : '<div style="font-size:13px;font-weight:800;color:var(--green);">+ $'+Math.abs(m.monto).toLocaleString('es-AR')+'</div>')
+      +(isCompra?(function(){var _a=Math.abs(m.monto||0),_e=_a;if(m.desc_pct){var _h=Math.round(_a*m.desc_pct/100);if(m.desc_aplicado){_e=_a-_h;}else if(m.desc_fecha_limite){var _l=parseDateAR(m.desc_fecha_limite).getTime();if(_l>=hoyMs||m._desc_forzar)_e=_a-_h;}}return '<div style="font-size:13px;font-weight:800;color:var(--red);">- $'+_e.toLocaleString('es-AR')+(_e<_a?'<div style="font-size:9px;color:var(--muted);font-weight:400;text-decoration:line-through;">$'+_a.toLocaleString('es-AR')+'</div>':'' )+'</div>';})():'<div style="font-size:13px;font-weight:800;color:var(--green);">+ $'+Math.abs(m.monto).toLocaleString('es-AR')+'</div>')
       +tipoBadge
       +'<button data-detprov="'+encodeURIComponent(prov)+'" data-detidx="'+movIdx+'" style="background:var(--s4);border:1px solid var(--border2);border-radius:5px;cursor:pointer;font-size:12px;padding:3px 6px;color:var(--muted);" title="Detalle">🔍</button>'
       +editBtn
@@ -8807,6 +8804,7 @@ function ctaSelect(prov) {
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">' +
         '<div><div style="font-size:16px;font-weight:800;">' + prov + '</div></div>' +
         '<div style="display:flex;gap:8px;">' +
+          '<button id="cta-migrar-btn" title="Corregir saldos con descuento" style="background:rgba(245,158,11,.1);border:1.5px solid rgba(245,158,11,.35);border-radius:7px;padding:9px 12px;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer;">🔧 Corregir saldos</button>' +
           '<button id="cta-fact-btn" style="background:var(--s3);border:1.5px solid var(--border);border-radius:7px;padding:9px 14px;color:var(--text);font-size:11px;font-weight:700;cursor:pointer;">🧾 Nueva factura</button>' +
           '<button id="cta-pago-btn" style="background:var(--acc);border:none;border-radius:7px;padding:9px 18px;color:#000;font-size:11px;font-weight:800;cursor:pointer;">💳 Registrar pago</button>' +
         '</div>' +
@@ -8834,6 +8832,8 @@ function ctaSelect(prov) {
   if (pagoBtn) pagoBtn.addEventListener('click', function(){ openPagoModal(prov); });
   var factBtn = document.getElementById('cta-fact-btn');
   if (factBtn) factBtn.addEventListener('click', function(){ openFacturaModal(prov); });
+  var migrarBtn = document.getElementById('cta-migrar-btn');
+  if (migrarBtn) migrarBtn.addEventListener('click', function(){ ctaMigrarDescuentos(); });
 
   // Bind detalle buttons
   detail.querySelectorAll('[data-detprov]').forEach(function(btn){
@@ -9925,53 +9925,121 @@ function finCalcProj(){
    MIGRACIÓN: DESCUENTOS EN SALDO
 ════════════════════════════════════════ */
 function ctaMigrarDescuentos(){
-  var corregidas = 0, revisadas = 0;
+  var items = [];
   Object.keys(ctaData||{}).forEach(function(prov){
     var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
-    movs.forEach(function(m){
-      if(m.tipo !== 'compra' || !m.desc_pct) return;
-      revisadas++;
-      var montoAbs = Math.abs(m.monto||0);
-      var ahorro = Math.round(montoAbs * m.desc_pct / 100);
-      var pagado = m.pagos_aplicados || 0;
-
-      if(m.desc_aplicado){
-        // Monto efectivo correcto = monto - ahorro
-        var efectivo = montoAbs - ahorro;
-        var saldoCorrecto = Math.max(0, efectivo - pagado);
-        var saldoActual = m.saldo_pendiente !== undefined ? m.saldo_pendiente : montoAbs;
-        // Only fix if the current saldo is "too high" (discount wasn't absorbed)
-        if(Math.abs(saldoActual - saldoCorrecto) > 1){
-          m.saldo_pendiente = saldoCorrecto;
-          corregidas++;
-        }
-      } else {
-        // Not applied yet - ensure saldo_pendiente is at least initialized
-        if(m.saldo_pendiente === undefined){
-          m.saldo_pendiente = montoAbs;
-        }
+    movs.forEach(function(m,idx){
+      if(m.tipo!=='compra'||!m.desc_pct||!m.desc_aplicado) return;
+      var montoAbs=Math.abs(m.monto||0);
+      var ahorro=Math.round(montoAbs*m.desc_pct/100);
+      var efectivo=montoAbs-ahorro;
+      var pagado=m.pagos_aplicados||0;
+      var saldoCorrecto=Math.max(0,efectivo-pagado);
+      var saldoActual=m.saldo_pendiente!==undefined?m.saldo_pendiente:montoAbs;
+      if(Math.abs(saldoActual-saldoCorrecto)>1){
+        items.push({prov:prov,idx:idx,fecha:m.fecha||'—',nro:m.nroFactura||m.descripcion||('Fact. '+idx),
+          montoAbs:montoAbs,desc_pct:m.desc_pct,ahorro:ahorro,efectivo:efectivo,
+          pagado:pagado,saldoActual:saldoActual,saldoCorrecto:saldoCorrecto});
       }
     });
   });
 
-  // Save to Supabase
-  if(sbUser){
-    sb.from('user_config').upsert(
-      {user_id:sbUser.id, key:'cta_cte_proveedores', value:JSON.stringify(ctaData)},
-      {onConflict:'user_id,key'}
-    ).then(function(){
-      notify('✓ Migración completa — '+corregidas+' factura'+(corregidas!==1?'s':'')+' corregida'+(corregidas!==1?'s':'')+' de '+revisadas+' revisadas','ok');
-      // Refresh current view
-      if(document.getElementById('cta-detail').style.display==='block'){
-        var prov = document.getElementById('cta-detail-title') ? document.getElementById('cta-detail-title').textContent : '';
-        if(prov) ctaRenderDetalle(prov);
+  var modal = document.getElementById('modal-migrar-preview');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'modal-migrar-preview';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9200;background:rgba(0,0,0,.78);align-items:center;justify-content:center;';
+    document.body.appendChild(modal);
+  }
+
+  var rowsHTML = '';
+  if(!items.length){
+    rowsHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;">✓ No hay facturas que necesiten corrección.</div>';
+  } else {
+    rowsHTML = '<div style="overflow-y:auto;max-height:340px;border-radius:8px;border:1px solid var(--border);">'+
+      '<table style="width:100%;border-collapse:collapse;">'+
+        '<thead><tr style="background:var(--s4);">'+
+          '<th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--muted);font-weight:700;">PROVEEDOR</th>'+
+          '<th style="padding:8px 8px;text-align:left;font-size:10px;color:var(--muted);font-weight:700;">FACTURA</th>'+
+          '<th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--muted);font-weight:700;">ORIG.</th>'+
+          '<th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--green);font-weight:700;">DESC.</th>'+
+          '<th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--red);font-weight:700;">SALDO HOY</th>'+
+          '<th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--acc);font-weight:700;">CORRECTO</th>'+
+        '</tr></thead><tbody>'+
+        items.map(function(it){
+          var diff=it.saldoActual-it.saldoCorrecto;
+          return '<tr style="border-bottom:1px solid rgba(255,255,255,.05);">'+
+            '<td style="padding:8px 10px;font-size:11px;font-weight:700;">'+esc(it.prov)+'</td>'+
+            '<td style="padding:8px 8px;font-size:11px;color:var(--muted);">'+esc(it.nro)+'<br><span style="font-size:9px;">'+it.fecha+'</span></td>'+
+            '<td style="padding:8px 8px;text-align:right;font-size:11px;">$'+formatNum(it.montoAbs)+'</td>'+
+            '<td style="padding:8px 8px;text-align:right;font-size:11px;color:var(--green);">'+it.desc_pct+'%<br><span style="font-size:9px;">−$'+formatNum(it.ahorro)+'</span></td>'+
+            '<td style="padding:8px 8px;text-align:right;font-size:11px;color:var(--red);">$'+formatNum(it.saldoActual)+'</td>'+
+            '<td style="padding:8px 8px;text-align:right;font-size:12px;color:var(--acc);font-weight:800;">$'+formatNum(it.saldoCorrecto)+'<br><span style="font-size:9px;color:var(--green);">−$'+formatNum(diff)+'</span></td>'+
+          '</tr>';
+        }).join('')+
+        '</tbody></table></div>';
+  }
+
+  var totalDiff=items.reduce(function(s,it){return s+(it.saldoActual-it.saldoCorrecto);},0);
+  var provs=[...new Set(items.map(function(i){return i.prov;}))].length;
+  var resumenHTML=items.length?
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">'+
+      '<div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:3px;">FACTURAS</div><div style="font-size:20px;font-weight:900;color:var(--acc);">'+items.length+'</div></div>'+
+      '<div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:3px;">PROVEEDORES</div><div style="font-size:20px;font-weight:900;">'+provs+'</div></div>'+
+      '<div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:3px;">SALDO A REDUCIR</div><div style="font-size:20px;font-weight:900;color:var(--green);">−$'+formatNum(totalDiff)+'</div></div>'+
+    '</div>':'';
+
+  modal.innerHTML=
+    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:24px;width:92%;max-width:820px;max-height:90vh;overflow-y:auto;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">'+
+        '<div><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;">🔧 Corregir saldos con descuento</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:3px;">Revisá los cambios antes de confirmar. Esta acción guarda en Supabase.</div></div>'+
+        '<button onclick="document.getElementById('modal-migrar-preview').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">✕</button>'+
+      '</div>'+
+      resumenHTML+rowsHTML+
+      (items.length?
+        '<div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">'+
+          '<button onclick="document.getElementById('modal-migrar-preview').style.display='none'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 20px;color:var(--muted);font-size:12px;cursor:pointer;">Cancelar</button>'+
+          '<button onclick="ctaMigrarConfirmar()" style="background:var(--acc);border:none;border-radius:8px;padding:10px 24px;color:#000;font-size:12px;font-weight:800;cursor:pointer;">✓ Confirmar y corregir '+items.length+' factura'+(items.length!==1?'s':'')+'</button>'+
+        '</div>':
+        '<div style="display:flex;justify-content:flex-end;margin-top:16px;"><button onclick="document.getElementById('modal-migrar-preview').style.display='none'" style="background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 20px;color:var(--muted);font-size:12px;cursor:pointer;">Cerrar</button></div>'
+      )+
+    '</div>';
+  modal.style.display='flex';
+}
+
+function ctaMigrarConfirmar(){
+  var corregidas=0,revisadas=0;
+  Object.keys(ctaData||{}).forEach(function(prov){
+    var movs=(ctaData[prov]&&ctaData[prov].movimientos)||[];
+    movs.forEach(function(m){
+      if(m.tipo!=='compra'||!m.desc_pct) return;
+      revisadas++;
+      var montoAbs=Math.abs(m.monto||0);
+      var ahorro=Math.round(montoAbs*m.desc_pct/100);
+      var pagado=m.pagos_aplicados||0;
+      if(m.desc_aplicado){
+        var efectivo=montoAbs-ahorro;
+        var saldoCorrecto=Math.max(0,efectivo-pagado);
+        var saldoActual=m.saldo_pendiente!==undefined?m.saldo_pendiente:montoAbs;
+        if(Math.abs(saldoActual-saldoCorrecto)>1){m.saldo_pendiente=saldoCorrecto;corregidas++;}
+      } else {
+        if(m.saldo_pendiente===undefined) m.saldo_pendiente=montoAbs;
       }
-      ctaRenderProvList();
-    }).catch(function(e){
-      notify('Error al guardar: '+e.message,'err');
     });
+  });
+  document.getElementById('modal-migrar-preview').style.display='none';
+  if(sbUser){
+    sb.from('user_config').upsert({user_id:sbUser.id,key:'cta_cte_proveedores',value:JSON.stringify(ctaData)},{onConflict:'user_id,key'})
+    .then(function(){
+      notify('✓ Migración completa — '+corregidas+' factura'+(corregidas!==1?'s':'')+' corregida'+(corregidas!==1?'s':''),'ok');
+      ctaRenderProvList();
+      if(ctaSelectedProv) ctaSelect(ctaSelectedProv);
+    }).catch(function(e){notify('Error: '+e.message,'err');});
   } else {
     notify('✓ '+corregidas+' factura'+(corregidas!==1?'s':'')+' corregida'+(corregidas!==1?'s':'')+' (sin Supabase)','ok');
+    ctaRenderProvList();
+    if(ctaSelectedProv) ctaSelect(ctaSelectedProv);
   }
 }
 
