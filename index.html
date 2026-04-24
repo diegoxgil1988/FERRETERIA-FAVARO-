@@ -3110,6 +3110,19 @@ td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     </div>
     <div id="cfgpagos-list"></div>
     <button onclick="guardarConfigPagosGlobal()" style="width:100%;background:var(--acc);border:none;border-radius:10px;padding:14px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;margin-top:14px;letter-spacing:.5px;cursor:pointer;">💾 Guardar y sincronizar en todo el sistema</button>
+
+    <!-- Mantenimiento -->
+    <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:4px;">🔧 Mantenimiento de datos</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Acciones de corrección y migración. Ejecutar una sola vez si actualizaste el sistema.</div>
+      <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:800;color:var(--acc);">Corregir saldos con descuento</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Recalcula el <code>saldo_pendiente</code> de facturas con descuento ya aplicado. Corrige facturas cargadas antes de la actualización del sistema de descuentos.</div>
+        </div>
+        <button onclick="ctaMigrarDescuentos()" style="flex-shrink:0;background:var(--acc);border:none;border-radius:8px;padding:10px 18px;color:#000;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">▶ Ejecutar migración</button>
+      </div>
+    </div>
   </div>
 </div><!-- /page-configpagos -->
 
@@ -8709,20 +8722,52 @@ function ctaSelect(prov) {
     var tieneItemsProv=(m.items&&m.items.length)||(m.detalle&&m.detalle.length);
     var progressHTML='';
     if(isCompra){
-      var montoFact=Math.abs(m.monto||0),pagadoFact=m.pagos_aplicados||0,pendienteFact=pagoSaldoPendiente(m);
-      var pct=montoFact>0?Math.round(pagadoFact/montoFact*100):0;
-      // Check if invoice is overdue (past payment term)
+      // Effective amount: apply discount if applicable
+      var montoFact=Math.abs(m.monto||0);
+      var montoEfectivo = montoFact;
+      var descAplicadoHTML = '';
+      if(m.desc_pct){
+        var ahorroProg = Math.round(montoFact * m.desc_pct / 100);
+        if(m.desc_aplicado){
+          montoEfectivo = montoFact - ahorroProg;
+          descAplicadoHTML = '<span style="background:rgba(34,197,94,.12);color:var(--green);font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;margin-left:6px;">✓ DESC. '+m.desc_pct+'% (-$'+formatNum(ahorroProg)+')</span>';
+        } else if(m.desc_fecha_limite){
+          var limMsP = parseDateAR(m.desc_fecha_limite).getTime();
+          if(limMsP >= hoyMs || m._desc_forzar){
+            montoEfectivo = montoFact - ahorroProg;
+            descAplicadoHTML = '<span style="background:rgba(245,158,11,.12);color:var(--acc);font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;margin-left:6px;">⏰ DESC. '+m.desc_pct+'% (-$'+formatNum(ahorroProg)+')</span>';
+          } else if(m._desc_forzar){
+            montoEfectivo = montoFact - ahorroProg;
+            descAplicadoHTML = '<span style="background:rgba(34,197,94,.12);color:var(--green);font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;margin-left:6px;">✓ DESC. FORZADO '+m.desc_pct+'% (-$'+formatNum(ahorroProg)+')</span>';
+          }
+        }
+      }
+      var pagadoFact=m.pagos_aplicados||0, pendienteFact=pagoSaldoPendiente(m);
+      var pct = montoEfectivo > 0 ? Math.min(100, Math.round(pagadoFact / montoEfectivo * 100)) : 0;
+      // Check if invoice is overdue
       var eVencida = false;
       if(pendienteFact > 0 && m.desc_dias && m.fecha){
         try {
-          var fechaFactMs = parseDateAR(m.fecha).getTime();
-          var plazoMs = fechaFactMs + (m.desc_dias * 86400000);
+          var plazoMs = parseDateAR(m.fecha).getTime() + (m.desc_dias * 86400000);
           eVencida = plazoMs < hoyMs;
         } catch(e){}
       }
       var eColor = pendienteFact<=0 ? 'var(--green)' : eVencida ? 'var(--red)' : pagadoFact>0 ? 'var(--acc)' : 'var(--muted)';
       var eTxt = pendienteFact<=0 ? 'PAGADA' : eVencida ? ('⚠ VENCIDA $'+formatNum(pendienteFact)+' pend.') : pagadoFact>0 ? ('PARCIAL $'+formatNum(pendienteFact)+' pend.') : 'PENDIENTE';
-      progressHTML='<div style="margin-top:6px;"><span style="color:'+eColor+';font-size:9px;font-weight:800;">'+eTxt+'</span> <span style="font-size:9px;color:var(--muted);">$'+formatNum(pagadoFact)+'/'+formatNum(montoFact)+'</span><div style="height:4px;background:var(--s4);border-radius:2px;margin-top:3px;"><div style="height:100%;background:'+eColor+';width:'+pct+'%;"></div></div></div>';
+      // Show effective/real amount in bar label
+      var barLabel = montoEfectivo !== montoFact
+        ? '$'+formatNum(pagadoFact)+' / $'+formatNum(montoEfectivo)+' <span style="color:var(--muted);text-decoration:line-through;font-size:8px;">$'+formatNum(montoFact)+'</span>'
+        : '$'+formatNum(pagadoFact)+'/'+formatNum(montoFact);
+      progressHTML='<div style="margin-top:6px;">'+
+        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin-bottom:3px;">'+
+          '<span style="color:'+eColor+';font-size:9px;font-weight:800;">'+eTxt+'</span>'+
+          '<span style="font-size:9px;color:var(--muted);">'+barLabel+'</span>'+
+          descAplicadoHTML+
+        '</div>'+
+        '<div style="height:5px;background:var(--s4);border-radius:3px;overflow:hidden;">'+
+          '<div style="height:100%;background:'+eColor+';width:'+pct+'%;border-radius:3px;transition:width .4s;"></div>'+
+        '</div>'+
+      '</div>';
     }
     var aplicHTML='';
     if(!isCompra&&m.aplicaciones&&m.aplicaciones.length){
@@ -9874,6 +9919,60 @@ function finCalcProj(){
   var fecha=new Date(); fecha.setMonth(fecha.getMonth()+meses);
   var m=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   var dEl=document.getElementById('proj-date'); if(dEl) dEl.textContent=m[fecha.getMonth()]+' '+fecha.getFullYear();
+}
+
+/* ════════════════════════════════════════
+   MIGRACIÓN: DESCUENTOS EN SALDO
+════════════════════════════════════════ */
+function ctaMigrarDescuentos(){
+  var corregidas = 0, revisadas = 0;
+  Object.keys(ctaData||{}).forEach(function(prov){
+    var movs = (ctaData[prov]&&ctaData[prov].movimientos)||[];
+    movs.forEach(function(m){
+      if(m.tipo !== 'compra' || !m.desc_pct) return;
+      revisadas++;
+      var montoAbs = Math.abs(m.monto||0);
+      var ahorro = Math.round(montoAbs * m.desc_pct / 100);
+      var pagado = m.pagos_aplicados || 0;
+
+      if(m.desc_aplicado){
+        // Monto efectivo correcto = monto - ahorro
+        var efectivo = montoAbs - ahorro;
+        var saldoCorrecto = Math.max(0, efectivo - pagado);
+        var saldoActual = m.saldo_pendiente !== undefined ? m.saldo_pendiente : montoAbs;
+        // Only fix if the current saldo is "too high" (discount wasn't absorbed)
+        if(Math.abs(saldoActual - saldoCorrecto) > 1){
+          m.saldo_pendiente = saldoCorrecto;
+          corregidas++;
+        }
+      } else {
+        // Not applied yet - ensure saldo_pendiente is at least initialized
+        if(m.saldo_pendiente === undefined){
+          m.saldo_pendiente = montoAbs;
+        }
+      }
+    });
+  });
+
+  // Save to Supabase
+  if(sbUser){
+    sb.from('user_config').upsert(
+      {user_id:sbUser.id, key:'cta_cte_proveedores', value:JSON.stringify(ctaData)},
+      {onConflict:'user_id,key'}
+    ).then(function(){
+      notify('✓ Migración completa — '+corregidas+' factura'+(corregidas!==1?'s':'')+' corregida'+(corregidas!==1?'s':'')+' de '+revisadas+' revisadas','ok');
+      // Refresh current view
+      if(document.getElementById('cta-detail').style.display==='block'){
+        var prov = document.getElementById('cta-detail-title') ? document.getElementById('cta-detail-title').textContent : '';
+        if(prov) ctaRenderDetalle(prov);
+      }
+      ctaRenderProvList();
+    }).catch(function(e){
+      notify('Error al guardar: '+e.message,'err');
+    });
+  } else {
+    notify('✓ '+corregidas+' factura'+(corregidas!==1?'s':'')+' corregida'+(corregidas!==1?'s':'')+' (sin Supabase)','ok');
+  }
 }
 
 /* ════════════════════════════════════════
