@@ -9627,9 +9627,9 @@ function finRenderDashboard(){
   var proy3=deudaTotal+Math.abs(Math.min(0,balance))*3;
 
   // ── Bienvenida con frase motivacional ──
-  var _frases = [
+  var _frases=[
     {t:'El éxito es la suma de pequeños esfuerzos repetidos cada día.',a:'R. Collier'},
-    {t:'No importa lo lento que vayas, siempre y cuando no te detengas.',a:'Confucio'},
+    {t:'No importa lo lento que vayas, siempre que no te detengas.',a:'Confucio'},
     {t:'El negocio que no crece, decrece. Cada venta es un paso adelante.',a:''},
     {t:'La constancia es el arma más poderosa de cualquier negocio.',a:''},
     {t:'Los grandes resultados requieren grandes ambiciones.',a:'Heráclito'},
@@ -9641,43 +9641,42 @@ function finRenderDashboard(){
     {t:'Cada peso pagado a tiempo es un proveedor ganado.',a:''},
     {t:'El que controla sus números, controla su futuro.',a:''},
   ];
-  var _frase = _frases[new Date().getDate() % _frases.length];
-  var _hora = new Date().getHours();
-  var _saludo = _hora < 12 ? 'Buenos días' : _hora < 19 ? 'Buenas tardes' : 'Buenas noches';
-  var _dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  var _meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  var _hoyD = new Date();
-  var _fechaStr = _dias[_hoyD.getDay()]+' '+_hoyD.getDate()+' de '+_meses[_hoyD.getMonth()]+' '+_hoyD.getFullYear();
-  var _deudaColor = deudaTotal > 5000000 ? 'var(--red)' : deudaTotal > 1000000 ? 'var(--acc)' : 'var(--green)';
-  var _ratioColor = ratio >= 90 ? 'var(--green)' : ratio >= 60 ? 'var(--acc)' : 'var(--red)';
-  var _provOk = Object.keys(ctaData||{}).filter(function(p){ return ctaSaldo(p) >= 0; }).length;
-  var _welcomeEl = document.getElementById('fin-welcome-block');
-  if(_welcomeEl) _welcomeEl.innerHTML =
-    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">'+
+  var _frase=_frases[new Date().getDate()%_frases.length];
+  var _hora=new Date().getHours();
+  var _saludo=_hora<12?'Buenos días':_hora<19?'Buenas tardes':'Buenas noches';
+  var _dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var _meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var _hoyD=new Date();
+  var _fechaStr=_dias[_hoyD.getDay()]+' '+_hoyD.getDate()+' de '+_meses[_hoyD.getMonth()]+' '+_hoyD.getFullYear();
+  var _ratioCol=ratio>=90?'var(--green)':ratio>=60?'var(--acc)':'var(--red)';
+  var _provOk=Object.keys(ctaData||{}).filter(function(p){return ctaSaldo(p)>=0;}).length;
+  var _wEl=document.getElementById('fin-welcome-block');
+  if(_wEl) _wEl.innerHTML=
+    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">'+
       '<div style="flex:1;">'+
         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
           '<div style="width:36px;height:36px;background:var(--acc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🔧</div>'+
           '<div>'+
-            '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;">Ferretería Favaro</div>'+
+            '<div style="font-family:inherit;font-size:16px;font-weight:900;letter-spacing:.3px;">Ferretería Favaro</div>'+
             '<div style="font-size:10px;color:var(--muted);margin-top:1px;">Guaymallén, Mendoza · Sistema de Gestión</div>'+
           '</div>'+
         '</div>'+
         '<div style="font-size:11px;color:var(--muted2);line-height:1.7;">'+
           _saludo+', <b style="color:var(--text);">Diego</b>. '+
-          (factsVenc > 0 ? 'Tenés <b style="color:var(--red);">'+factsVenc+' factura'+(factsVenc!==1?'s':'')+' vencida'+(factsVenc!==1?'s':'')+' </b>pendientes de pago. ' : 'Sin facturas vencidas hoy ✓. ')+
-          'La deuda acumulada es <b style="color:'+_deudaColor+';">−$'+deudaTotal.toLocaleString('es-AR')+'</b>. '+
-          'Este mes pagaste el <b style="color:'+_ratioColor+';">'+ratio+'%</b> de tus compras'+
-          (_provOk > 0 ? ' y tenés <b style="color:var(--green);">'+_provOk+' proveedor'+(+_provOk!==1?'es':'')+' al día</b>.' : '.')+
+          (factsVenc>0?'Tenés <b style="color:var(--red);">'+factsVenc+' factura'+(factsVenc!==1?'s':'')+' vencida'+(factsVenc!==1?'s':'')+'</b> pendientes de pago. ':'Sin facturas vencidas hoy ✓. ')+
+          'Deuda acumulada <b style="color:var(--red);">−$'+deudaTotal.toLocaleString('es-AR')+'</b>. '+
+          'Este mes pagaste el <b style="color:'+_ratioCol+';">'+ratio+'%</b> de tus compras'+
+          (_provOk>0?' y tenés <b style="color:var(--green);">'+_provOk+' proveedor'+(_provOk!==1?'es':'')+' al día</b>.':'.')+
         '</div>'+
         '<div style="margin-top:12px;background:var(--s3);border-left:3px solid var(--acc);border-radius:0 6px 6px 0;padding:8px 12px;">'+
           '<div style="font-size:10px;color:var(--muted2);font-style:italic;line-height:1.6;">"'+_frase.t+'"</div>'+
-          (_frase.a ? '<div style="font-size:9px;color:var(--muted);margin-top:3px;font-weight:700;">— '+_frase.a+'</div>' : '')+
+          (_frase.a?'<div style="font-size:9px;color:var(--muted);margin-top:3px;font-weight:700;">— '+_frase.a+'</div>':'')+
         '</div>'+
       '</div>'+
       '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">'+
         '<div style="background:var(--s3);border:1px solid var(--border2);border-radius:5px;padding:4px 10px;font-size:9px;color:var(--muted2);">'+_fechaStr+'</div>'+
-        (factsVenc > 0 ? '<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:5px;padding:4px 10px;font-size:9px;color:var(--red);font-weight:700;">⚠ '+factsVenc+' vencida'+(factsVenc!==1?'s':'')+'</div>' : '<div style="background:var(--green-d);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:4px 10px;font-size:9px;color:var(--green);font-weight:700;">✓ Sin vencidas</div>')+
-        (_provOk > 0 ? '<div style="background:var(--green-d);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:4px 10px;font-size:9px;color:var(--green);font-weight:700;">✓ '+_provOk+' proveedor'+(+_provOk!==1?'es':'')+' al día</div>' : '')+
+        (factsVenc>0?'<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:5px;padding:4px 10px;font-size:9px;color:var(--red);font-weight:700;">⚠ '+factsVenc+' vencida'+(factsVenc!==1?'s':'')+'</div>':'<div style="background:var(--green-d);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:4px 10px;font-size:9px;color:var(--green);font-weight:700;">✓ Sin vencidas</div>')+
+        (_provOk>0?'<div style="background:var(--green-d);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:4px 10px;font-size:9px;color:var(--green);font-weight:700;">✓ '+_provOk+' proveedor'+(_provOk!==1?'es':'')+' al día</div>':'')+
       '</div>'+
     '</div>';
 
@@ -9697,6 +9696,38 @@ function finRenderDashboard(){
     kpi('RATIO PAGO/COMPRA',ratio+'%',ratio>=90?'var(--green)':ratio>=80?'var(--acc)':'var(--red)','Cobertura de compras','detalle-ratio','Ratio y Simulador')+
     kpi('BALANCE NETO MES',(balance>=0?'+':'')+' $'+Math.abs(balance).toLocaleString('es-AR'),balance>=0?'var(--green)':'var(--red)',balance>=0?'Sin nueva deuda ✓':'Nueva deuda este mes','detalle-compras','Análisis Compras vs Pagos')+
     kpi('DEUDA TOTAL','-$'+deudaTotal.toLocaleString('es-AR'),'var(--red)',factsVenc+' facturas vencidas','detalle-deuda','Evolución de Deuda');
+  // Agregar selectores a KPIs de balance y deuda
+  setTimeout(function(){
+    ['fin-kpi-balance','fin-kpi-deuda'].forEach(function(id){
+      var el=document.getElementById(id); if(!el) return;
+      var sel=document.createElement('select');
+      sel.style.cssText='background:var(--s3);border:1px solid var(--border2);border-radius:4px;padding:3px 6px;font-size:8px;color:var(--muted2);margin-top:5px;width:100%;font-family:inherit;';
+      var ms=finGetMeses(6);
+      ms.slice().reverse().forEach(function(m,i){
+        var o=document.createElement('option'); o.value=m.year+'-'+m.month; o.text=m.label; if(i===0) o.selected=true;
+        sel.appendChild(o);
+      });
+      sel.onchange=function(){
+        var parts=sel.value.split('-'); var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
+        var mv=finMovsAll(); var mes={year:yr,month:mo,label:''};
+        var mc=finSumTipo(finMovMes(mv,mes),'compra');
+        var mp=finSumTipo(finMovMes(mv,mes),'pago');
+        var bal=mp-mc;
+        var valEl=el.querySelector('.fin-kpi-dynamic-val');
+        var subEl=el.querySelector('.fin-kpi-dynamic-sub');
+        if(id==='fin-kpi-balance'&&valEl){
+          valEl.style.color=bal>=0?'var(--green)':'var(--red)';
+          valEl.textContent=(bal>=0?'+ ':'-')+' $'+Math.abs(bal).toLocaleString('es-AR');
+          if(subEl) subEl.textContent=bal>=0?'Sin nueva deuda ✓':'Nueva deuda ese mes';
+        }
+        if(id==='fin-kpi-deuda'&&valEl){
+          valEl.textContent='Compras: $'+mc.toLocaleString('es-AR');
+          if(subEl) subEl.textContent='Pagado: $'+mp.toLocaleString('es-AR');
+        }
+      };
+      el.appendChild(sel);
+    });
+  },200);
 
   // Main cards
   var mEl=document.getElementById('fin-main-cards');
@@ -9772,7 +9803,22 @@ function finBuildMiniProy(balance,deudaTotal){
 }
 
 // ── BUILD DETAIL VIEWS ──
+function finGetMesOptions(selId){
+  var meses6=finGetMeses(6); var opts='';
+  meses6.slice().reverse().forEach(function(m,i){
+    opts+='<option value="'+m.year+'-'+m.month+'"'+(i===0?' selected':'')+'>'+m.label+'</option>';
+  });
+  return '<select id="'+selId+'" onchange="finRefreshDetail()" style="background:var(--s3);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text);font-size:11px;font-family:inherit;margin-bottom:14px;">'+opts+'</select>';
+}
+function finGetSelMes(selId){
+  var el=document.getElementById(selId); if(!el) return null;
+  var parts=el.value.split('-'); return {year:parseInt(parts[0]),month:parseInt(parts[1])};
+}
+var _finDetailView='';
+function finRefreshDetail(){ if(_finDetailView) finOpenDetail(_finDetailView,'',''); }
+
 function finBuildDetail(view){
+  _finDetailView=view;
   var movs=finMovsAll(); var meses6=finGetMeses(6);
   var c6=meses6.map(function(m){return finSumTipo(finMovMes(movs,m),'compra');});
   var p6=meses6.map(function(m){return finSumTipo(finMovMes(movs,m),'pago');});
@@ -9780,58 +9826,100 @@ function finBuildDetail(view){
   var deudaTotal=0; Object.keys(ctaData||{}).forEach(function(p){var s=ctaSaldo(p);if(s<0)deudaTotal+=Math.abs(s);});
 
   if(view==='detalle-compras'){
+    // Filtro mensual seleccionado
+    var selMes=finGetSelMes('fin-sel-compras'); var mesMovs=movs;
+    if(selMes){ mesMovs=finMovMes(movs,selMes); }
+    var selIdx=selMes?meses6.findIndex(function(m){return m.year===selMes.year&&m.month===selMes.month;}):5;
+    var cSel=c6[selIdx]||0, pSel=p6[selIdx]||0;
+    // Proveedores con compras ese mes
+    var provsConCompra=Object.keys(ctaData||{}).filter(function(p){
+      return (ctaData[p].movimientos||[]).some(function(m){
+        if(m.tipo!=='compra') return false;
+        if(!selMes) return true;
+        var d=m.fecha?m.fecha.split('/'):null;
+        if(!d) return false;
+        return parseInt(d[1])===selMes.month+1&&parseInt(d[2])===selMes.year;
+      });
+    }).length;
+    // Factura más grande ese mes
+    var bigFact=mesMovs.filter(function(m){return m.tipo==='compra';}).reduce(function(mx,m){return Math.abs(m.monto||0)>mx?Math.abs(m.monto||0):mx;},0);
+    var rSel=cSel>0?Math.round(pSel/cSel*100):0;
+    var diffSel=pSel-cSel;
     var totalC=c6.reduce(function(s,v){return s+v;},0);
     var totalP=p6.reduce(function(s,v){return s+v;},0);
     var mejorRatio=0,mejorMes='';
     meses6.forEach(function(m,i){var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0;if(r>mejorRatio){mejorRatio=r;mejorMes=m.label;}});
     var rows=meses6.map(function(m,i){
-      var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0;
-      var diff=p6[i]-c6[i];
+      var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0; var diff=p6[i]-c6[i];
       var col=r>=90?'var(--green)':r>=80?'var(--acc)':'var(--red)';
       var acum=c6.slice(0,i+1).reduce(function(s,v){return s+v;},0)-p6.slice(0,i+1).reduce(function(s,v){return s+v;},0);
-      return '<tr><td style="font-weight:700;">'+m.label+'</td><td style="text-align:right;">$'+c6[i].toLocaleString('es-AR')+'</td><td style="text-align:right;color:var(--green);">$'+p6[i].toLocaleString('es-AR')+'</td><td style="text-align:right;color:'+(diff<0?'var(--red)':'var(--green)')+';">'+(diff>=0?'+':'')+' $'+diff.toLocaleString('es-AR')+'</td><td><div style="display:flex;align-items:center;gap:5px;"><div style="width:50px;height:5px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(r,100)+'%;background:'+col+';border-radius:3px;"></div></div><span style="font-size:10px;font-weight:800;color:'+col+';">'+r+'%</span></div></td><td style="color:'+(acum>0?'var(--red)':'var(--green)')+';">$'+Math.abs(acum).toLocaleString('es-AR')+'</td></tr>';
+      var activo=selMes&&m.year===selMes.year&&m.month===selMes.month;
+      return '<tr style="'+(activo?'background:rgba(245,158,11,.06);':'')+'">'+
+        '<td style="font-weight:700;padding:6px 8px;'+(activo?'color:var(--acc);':'')+'">'+m.label+'</td>'+
+        '<td style="text-align:right;padding:6px 8px;">$'+c6[i].toLocaleString('es-AR')+'</td>'+
+        '<td style="text-align:right;padding:6px 8px;color:var(--green);">$'+p6[i].toLocaleString('es-AR')+'</td>'+
+        '<td style="text-align:right;padding:6px 8px;color:'+(diff<0?'var(--red)':'var(--green)')+';">'+(diff>=0?'+':'')+' $'+diff.toLocaleString('es-AR')+'</td>'+
+        '<td style="padding:6px 8px;"><div style="display:flex;align-items:center;gap:5px;"><div style="width:50px;height:5px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(r,100)+'%;background:'+col+';border-radius:3px;"></div></div><span style="font-size:10px;font-weight:800;color:'+col+';">'+r+'%</span></div></td>'+
+        '<td style="color:'+(acum>0?'var(--red)':'var(--green)')+';padding:6px 8px;">$'+Math.abs(acum).toLocaleString('es-AR')+'</td></tr>';
     }).join('');
-    var avgC=totalC/meses6.length, avgP=totalP/meses6.length;
-    var obs=avgP/avgC>=0.9?'✅ Estás pagando bien en promedio — ratio saludable.':'⚠️ El ratio promedio está por debajo del 90%. Necesitás pagar más para no acumular deuda.';
-    return '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'+
-      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">TOTAL COMPRADO (6m)</div><div style="font-size:18px;font-weight:900;">$'+totalC.toLocaleString('es-AR')+'</div></div>'+
-      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">TOTAL PAGADO (6m)</div><div style="font-size:18px;font-weight:900;color:var(--green);">$'+totalP.toLocaleString('es-AR')+'</div></div>'+
-      '<div style="background:var(--s2);border:1px solid rgba(239,68,68,.2);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">DIFERENCIA ACUMULADA</div><div style="font-size:18px;font-weight:900;color:var(--red);">-$'+(totalC-totalP).toLocaleString('es-AR')+'</div></div>'+
-      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">MEJOR RATIO</div><div style="font-size:16px;font-weight:900;color:var(--green);">'+mejorMes+' — '+mejorRatio+'%</div></div>'+
-    '</div>'+
-    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
-      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">GRÁFICO COMPRAS VS PAGOS</div>'+
-      '<canvas id="det-chart-barras" height="160"></canvas>'+
-    '</div>'+
-    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
-      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">DETALLE MES A MES</div>'+
-      '<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr>'+
-        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);">MES</th>'+
-        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">COMPRAS</th>'+
-        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">PAGOS</th>'+
-        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">DIFERENCIA</th>'+
-        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);">RATIO</th>'+
-        '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);">ACUM.</th>'+
-      '</tr></thead><tbody>'+rows+'</tbody></table>'+
-      '<div style="margin-top:12px;padding:10px 12px;background:rgba(245,158,11,.06);border-radius:8px;font-size:11px;">💡 '+obs+'</div>'+
-    '</div>';
+    var obs=rSel>=90?'Ratio saludable ese mes — bien hecho.':'Ratio por debajo del 90%. Cada mes con ratio bajo acumula deuda con proveedores.';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'+
+        '<div style="font-size:10px;color:var(--muted);">Filtrar por mes:</div>'+
+        finGetMesOptions('fin-sel-compras')+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">'+
+        '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">COMPRADO ESE MES</div><div style="font-size:18px;font-weight:900;color:var(--red);">$'+cSel.toLocaleString('es-AR')+'</div></div>'+
+        '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">PAGADO ESE MES</div><div style="font-size:18px;font-weight:900;color:var(--green);">$'+pSel.toLocaleString('es-AR')+'</div></div>'+
+        '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">PROVEEDORES ACTIVOS</div><div style="font-size:22px;font-weight:900;color:var(--acc);">'+provsConCompra+'</div></div>'+
+        '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">FACTURA MÁS GRANDE</div><div style="font-size:15px;font-weight:900;">$'+bigFact.toLocaleString('es-AR')+'</div></div>'+
+      '</div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">GRÁFICO COMPRAS VS PAGOS — 6 meses</div>'+
+        '<canvas id="det-chart-barras" height="150"></canvas>'+
+      '</div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:10px;">DETALLE MES A MES</div>'+
+        '<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr>'+
+          '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);">MES</th>'+
+          '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">COMPRAS</th>'+
+          '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">PAGOS</th>'+
+          '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);">DIF.</th>'+
+          '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);">RATIO</th>'+
+          '<th style="font-size:9px;font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);">ACUM.</th>'+
+        '</tr></thead><tbody>'+rows+'</tbody></table>'+
+        '<div style="margin-top:10px;padding:10px 12px;background:rgba(245,158,11,.06);border-radius:8px;font-size:11px;">💡 '+obs+'</div>'+
+      '</div>';
   }
 
   if(view==='detalle-ratio'){
     var avgRatio=meses6.reduce(function(s,m,i){return s+(c6[i]>0?p6[i]/c6[i]:0);},0)/meses6.length*100;
     var trend=meses6.slice(-3).reduce(function(s,m,i){return s+(c6[i+3]>0?p6[i+3]/c6[i+3]:0);},0)/3*100;
+    var ratioActual=c6[5]>0?Math.round(p6[5]/c6[5]*100):0;
     var ratioBars=meses6.map(function(m,i){
       var r=c6[i]>0?Math.round(p6[i]/c6[i]*100):0;
       var col=r>=90?'var(--green)':r>=80?'var(--acc)':'var(--red)';
       return '<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:11px;font-weight:700;">'+m.label+'</span><span style="font-size:11px;font-weight:900;color:'+col+';">'+r+'%</span></div><div style="height:6px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(r,100)+'%;background:'+col+';border-radius:3px;"></div></div><div style="font-size:9px;color:var(--muted);margin-top:2px;">Pagaste $'+p6[i].toLocaleString('es-AR')+' de $'+c6[i].toLocaleString('es-AR')+'</div></div>';
     }).join('');
-    return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'+
+    return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">'+
       '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:5px;">RATIO PROMEDIO (6m)</div><div style="font-size:22px;font-weight:900;color:var(--acc);">'+Math.round(avgRatio)+'%</div></div>'+
       '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:5px;">TENDENCIA (últ. 3m)</div><div style="font-size:18px;font-weight:900;color:'+(trend>avgRatio?'var(--green)':'var(--red)')+'">'+(trend>avgRatio?'↑ Mejorando':'↓ Bajando')+'</div><div style="font-size:10px;color:var(--muted);">'+Math.round(trend)+'% promedio</div></div>'+
       '<div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:9px;padding:14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:5px;">PARA CUBRIR DEUDA</div><div style="font-size:16px;font-weight:900;color:var(--green);">Pagar 100%+</div><div style="font-size:10px;color:var(--muted);">más la cuota de deuda vieja</div></div>'+
     '</div>'+
-    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
-      '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">HISTORIAL DE RATIO</div>'+ratioBars+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">TORTA PAGADO VS PENDIENTE (mes actual)</div>'+
+        '<div style="display:flex;align-items:center;gap:20px;">'+
+          '<canvas id="det-chart-torta" width="110" height="110"></canvas>'+
+          '<div>'+
+            '<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;"><div style="width:10px;height:10px;border-radius:50%;background:var(--green);"></div><span style="font-size:11px;">Pagado: '+ratioActual+'%</span></div>'+
+            '<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;"><div style="width:10px;height:10px;border-radius:50%;background:var(--red);opacity:.5;"></div><span style="font-size:11px;">Pendiente: '+(100-Math.min(ratioActual,100))+'%</span></div>'+
+            '<div style="background:var(--s3);border-radius:6px;padding:7px 10px;font-size:10px;color:var(--muted);">Meta <b style="color:var(--acc);">90%</b></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">HISTORIAL DE RATIO</div>'+ratioBars+
+      '</div>'+
     '</div>'+
     '<div style="background:var(--s2);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:16px;">'+
       '<div style="font-size:13px;font-weight:800;margin-bottom:5px;">🧮 Simulador de cobertura</div>'+
@@ -9845,6 +9933,7 @@ function finBuildDetail(view){
   }
 
   if(view==='detalle-deuda'){
+    var selDeudaMes=finGetSelMes('fin-sel-deuda');
     var meses12=finGetMeses(12);
     var deudaAcum=[]; var running=0;
     meses12.forEach(function(m){
@@ -9852,15 +9941,26 @@ function finBuildDetail(view){
       var mp=finSumTipo(finMovMes(movs,m),'pago');
       running+=mc-mp; deudaAcum.push(Math.max(0,running));
     });
+    // Deuda generada en el mes seleccionado
+    var selDeudaIdx=selDeudaMes?meses12.findIndex(function(m){return m.year===selDeudaMes.year&&m.month===selDeudaMes.month;}):11;
+    var mcSel=selDeudaIdx>=0?finSumTipo(finMovMes(movs,meses12[selDeudaIdx]||{}),'compra'):0;
+    var mpSel=selDeudaIdx>=0?finSumTipo(finMovMes(movs,meses12[selDeudaIdx]||{}),'pago'):0;
+    var deudaGenMes=mcSel-mpSel;
     var provDeudas=Object.keys(ctaData||{}).map(function(p){ return {p:p,d:Math.abs(Math.min(0,ctaSaldo(p)))}; }).filter(function(x){return x.d>0;}).sort(function(a,b){return b.d-a.d;});
     var maxD=provDeudas.length?provDeudas[0].d:1;
     var avgGrowth=deudaAcum.length>1?(deudaAcum[deudaAcum.length-1]-deudaAcum[0])/deudaAcum.length:0;
-    return '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'+
+    var creciendo=deudaAcum[deudaAcum.length-1]>deudaAcum[deudaAcum.length-2];
+    var explDeuda=creciendo?
+      'La deuda está <b style="color:var(--red);">creciendo</b>. Estás comprando más de lo que pagás. Para frenarla necesitás que tus pagos mensuales superen las compras. En ferretería, una buena estrategia es negociar <b>plazos de 30-60 días</b> con los proveedores de mayor volumen (como '+( provDeudas.length?esc(provDeudas[0].p):'tu principal proveedor')+') y destinás un % fijo de cada venta a cancelar deuda.':
+      'La deuda está <b style="color:var(--green);">bajando</b>. Estás pagando más de lo que comprás — seguí así. Si mantenés un ratio superior al 100% durante 3 meses consecutivos, la deuda se reduce significativamente.';
+    return finGetMesOptions('fin-sel-deuda')+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;">'+
       '<div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">DEUDA ACTUAL</div><div style="font-size:18px;font-weight:900;color:var(--red);">-$'+deudaTotal.toLocaleString('es-AR')+'</div></div>'+
-      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">CRECIMIENTO PROM./MES</div><div style="font-size:18px;font-weight:900;color:var(--red);">+$'+Math.abs(Math.round(avgGrowth)).toLocaleString('es-AR')+'</div></div>'+
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">GENERADA ESE MES</div><div style="font-size:18px;font-weight:900;color:'+(deudaGenMes>0?'var(--red)':'var(--green)')+';">'+(deudaGenMes>0?'+':'')+' $'+Math.abs(deudaGenMes).toLocaleString('es-AR')+'</div></div>'+
       '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">MAYOR DEUDOR</div><div style="font-size:13px;font-weight:900;">'+(provDeudas.length?esc(provDeudas[0].p):'—')+'</div><div style="font-size:11px;color:var(--red);">'+(provDeudas.length?'-$'+provDeudas[0].d.toLocaleString('es-AR'):'')+'</div></div>'+
       '<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;"><div style="font-size:9px;color:var(--muted);font-weight:800;margin-bottom:4px;">PROVEEDORES CON DEUDA</div><div style="font-size:22px;font-weight:900;color:var(--acc);">'+provDeudas.length+'</div></div>'+
     '</div>'+
+    '<div style="background:var(--s3);border-left:3px solid '+(creciendo?'var(--red)':'var(--green)')+';border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:10px;font-size:11px;color:var(--muted2);line-height:1.7;">'+explDeuda+'</div>'+
     '<div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">'+
       '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;">'+
         '<div style="font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">EVOLUCIÓN DEUDA — 12 meses</div>'+
@@ -9888,11 +9988,25 @@ function finBuildDetail(view){
       html+='</div>';
       return html;
     }
-    return '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Basado en compras del último mes ($'+cMes.toLocaleString('es-AR')+').</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'+
-        escenario('📉 Pesimista — Ratio 75%',75,'var(--red)')+
-        escenario('📊 Realista — Ratio actual ('+(c6[5]>0?Math.round(p6[5]/c6[5]*100):0)+'%)',c6[5]>0?Math.round(p6[5]/c6[5]*100):80,'var(--acc)')+
-        escenario('📈 Optimista — Ratio 100%',100,'var(--green)')+
+    var ratioAct=c6[5]>0?Math.round(p6[5]/c6[5]*100):0;
+    var explProy='';
+    if(ratioAct<75) explProy='Estás en zona crítica. Cada mes generás deuda nueva aceleradamente. <b>Acción urgente:</b> negociá plazos más largos con Ciafrelli y otros proveedores principales, y destiná al menos el 20% de tu facturación diaria a pagos.';
+    else if(ratioAct<90) explProy='Estás por debajo del equilibrio. La deuda crece lento pero seguro. <b>Para estabilizarte:</b> necesitás que los pagos superen el 100% de las compras durante al menos 2 meses seguidos. Priorizá pagar las facturas con mayor antigüedad primero.';
+    else if(ratioAct<100) explProy='Casi en equilibrio. La deuda crece muy poco. <b>Para mejorar:</b> con un pequeño esfuerzo adicional del 10-15% en pagos podés empezar a reducir la deuda acumulada. Aprovechá los meses de alta venta (temporada) para hacer pagos extra.';
+    else explProy='Estás generando superávit — pagás más de lo que comprás. <b>Excelente gestión.</b> Mantené este ritmo y la deuda se reducirá mes a mes. Usá el simulador abajo para ver cuándo la limpiás completamente.';
+    return '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Proyección basada en compras del último mes ($'+cMes.toLocaleString('es-AR')+') y deuda actual ($'+deudaTotal.toLocaleString('es-AR')+').</div>'+
+      '<div style="background:var(--s3);border-left:3px solid '+(ratioAct>=100?'var(--green)':ratioAct>=90?'var(--acc)':'var(--red)')+';border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:12px;font-size:11px;color:var(--muted2);line-height:1.7;">'+explProy+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">'+
+        escenario('Pesimista — Ratio 75%',75,'var(--red)')+
+        escenario('Realista — Ratio actual ('+ratioAct+'%)',ratioAct||80,'var(--acc)')+
+        escenario('Optimista — Ratio 100%',100,'var(--green)')+
+      '</div>'+
+      '<div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:10px;color:var(--muted2);line-height:1.7;">'+
+        '<b style="color:var(--acc);">¿Cómo mejorar estos números?</b><br>'+
+        '① <b>Negociá plazos</b> con tus proveedores top — pedí 45-60 días en vez de 30. Eso te da más tiempo para pagar sin generar mora.<br>'+
+        '② <b>Priorizá stock de alta rotación</b> — comprá menos de lo que no rota rápido y usá ese dinero para pagar deuda vieja.<br>'+
+        '③ <b>Separación de cobros</b> — cada vez que recibís un pago grande de cliente, destiná el 30% a cancelar proveedores.<br>'+
+        '④ <b>Revisá tu mix de compras</b> — si un proveedor tiene plazos cortos y márgenes bajos, evaluá si conviene reducir el volumen con él.'+
       '</div>'+
       '<div style="background:var(--s2);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:16px;">'+
         '<div style="font-size:13px;font-weight:800;margin-bottom:12px;">🧮 ¿Cuándo limpiás la deuda?</div>'+
@@ -9947,7 +10061,35 @@ function finInitDetailCharts(view){
     if(deudaAcum.some(function(v){return v>0;}))
       finDrawLine('det-chart-deuda',deudaAcum,meses12.map(function(m){return m.label;}),160,'rgb(239,68,68)');
   }
-  if(view==='detalle-ratio') finCalcSim();
+  if(view==='detalle-ratio'){
+    finCalcSim();
+    // Dibujar torta de ratio
+    var tc=document.getElementById('det-chart-torta');
+    if(tc){
+      var ctx=tc.getContext('2d');
+      var mv2=finMovsAll(); var ms6=finGetMeses(6);
+      var cc=finSumTipo(finMovMes(mv2,ms6[5]),'compra');
+      var pp=finSumTipo(finMovMes(mv2,ms6[5]),'pago');
+      var rat=cc>0?Math.min(pp/cc,1):0;
+      var W=tc.width,H=tc.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-8;
+      ctx.clearRect(0,0,W,H);
+      // pendiente
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2,false);
+      ctx.closePath(); ctx.fillStyle='rgba(239,68,68,0.35)'; ctx.fill();
+      // pagado
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*rat,false);
+      ctx.closePath(); ctx.fillStyle='rgba(16,185,129,0.85)'; ctx.fill();
+      // hueco centro
+      ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,Math.PI*2);
+      ctx.fillStyle='#1a1f2e'; ctx.fill();
+      // texto
+      ctx.fillStyle='#e8eaf0'; ctx.font='bold 14px Syne,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(Math.round(rat*100)+'%',cx,cy);
+    }
+  }
   if(view==='detalle-proy') finCalcProj();
 }
 
@@ -16320,11 +16462,8 @@ sb.auth.onAuthStateChange(function(event, session) {
         loadDevoluciones();
         loadStockMovimientos();
         loadCompConfig();
-        // Abrir en Finanzas al iniciar
         setTimeout(function(){ switchTab('finanzas'); }, 150);
-        // Auto-close caja if day changed
         setTimeout(function(){ cajaCerrarSiCambiodia(); }, 2000);
-        // Auto-backup after 3 seconds (let all async loads finish)
         setTimeout(function(){ autoBackup(); }, 3000);
       }).catch(function(e) {
         _hydrateRunning = false;
